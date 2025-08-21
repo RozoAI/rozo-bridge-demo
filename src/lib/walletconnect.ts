@@ -36,10 +36,10 @@ export const WALLETCONNECT_CONFIG = {
 }
 
 // WalletConnect client instance
-let walletConnectClient: SignClient | null = null
+let walletConnectClient: InstanceType<typeof SignClient> | null = null
 
 // Initialize WalletConnect client
-export const initWalletConnect = async (): Promise<SignClient> => {
+export const initWalletConnect = async (): Promise<InstanceType<typeof SignClient>> => {
   if (walletConnectClient) {
     return walletConnectClient
   }
@@ -58,7 +58,7 @@ export const initWalletConnect = async (): Promise<SignClient> => {
 }
 
 // Get WalletConnect client
-export const getWalletConnectClient = (): SignClient | null => {
+export const getWalletConnectClient = (): InstanceType<typeof SignClient> | null => {
   return walletConnectClient
 }
 

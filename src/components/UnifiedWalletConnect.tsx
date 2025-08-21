@@ -135,7 +135,7 @@ export function UnifiedWalletConnect({
           </DialogDescription>
         </DialogHeader>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'evm' | 'stellar')} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="evm" className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-500" />

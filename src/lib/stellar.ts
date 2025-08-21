@@ -137,13 +137,22 @@ export const checkMemoRequired = async (
 }
 
 // Stellar transaction utilities
+// Local MemoType enum to match component usage
+export enum LocalMemoType {
+  MemoNone = 0,
+  MemoText = 1,
+  MemoId = 2,
+  MemoHash = 3,
+  MemoReturn = 4,
+}
+
 export interface StellarTransactionParams {
   sourceAccount: string
   destinationAddress: string
   amount: string
   asset?: Asset
   memo?: {
-    type: MemoType
+    type: LocalMemoType
     value: string
   }
   network?: StellarNetwork
@@ -187,13 +196,13 @@ export const createStellarPayment = async (
     if (memo) {
       let memoObj: Memo
       switch (memo.type) {
-        case MemoType.MemoText:
+        case LocalMemoType.MemoText:
           memoObj = Memo.text(memo.value)
           break
-        case MemoType.MemoId:
+        case LocalMemoType.MemoId:
           memoObj = Memo.id(memo.value)
           break
-        case MemoType.MemoHash:
+        case LocalMemoType.MemoHash:
           memoObj = Memo.hash(memo.value)
           break
         default:

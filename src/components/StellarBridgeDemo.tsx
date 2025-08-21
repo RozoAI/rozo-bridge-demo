@@ -10,7 +10,14 @@ import { StellarWalletConnect } from './StellarWalletConnect'
 import { StellarAddressInput } from './StellarAddressInput'
 import { StellarMemoInput } from './StellarMemoInput'
 import { useStellarWalletConnection } from '@/store/stellar'
-import { MemoType } from '@stellar/stellar-sdk'
+// Define MemoType enum locally to avoid dependency issues
+enum MemoType {
+  MemoNone = 0,
+  MemoText = 1,
+  MemoId = 2,
+  MemoHash = 3,
+  MemoReturn = 4,
+}
 
 export function StellarBridgeDemo() {
   const [destinationAddress, setDestinationAddress] = useState('')

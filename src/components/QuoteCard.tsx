@@ -11,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-// import { type BridgeQuote } from '@/lib/intentPay' // Using Intent Pay SDK now
+import { type BridgeQuote } from '@/store/bridge'
 import { getChainById } from '@/lib/chains'
 import { formatTokenAmount, formatDuration, formatUsdAmount } from '@/lib/validation'
 import { cn } from '@/lib/utils'
@@ -169,7 +169,7 @@ export function QuoteCard({
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">Estimated Time</span>
             </div>
-            <span className="font-medium">{formatDuration(quote.estimatedTime)}</span>
+            <span className="font-medium">{formatDuration(parseInt(quote.estimatedTime))}</span>
           </div>
 
           {/* Approval Required */}

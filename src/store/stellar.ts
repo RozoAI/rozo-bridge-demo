@@ -79,7 +79,7 @@ export const useStellarWallet = create<StellarWalletStore>()(
             await kit.openModal({
               onWalletSelected: async (option) => {
                 kit.setWallet(option.id)
-                const { publicKey } = await kit.getPublicKey()
+                const { address: publicKey } = await kit.getAddress()
                 
                 set({
                   isConnected: true,

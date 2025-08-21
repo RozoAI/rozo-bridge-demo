@@ -1,7 +1,42 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { type Address } from 'viem'
-// import { type BridgeQuote, type BridgeStatus } from '@/lib/intentPay' // Using Intent Pay SDK now
+
+// Define types for bridge operations (previously from intentPay mock)
+export interface BridgeQuote {
+  id: string
+  route: {
+    name: string
+    provider: string
+  }
+  fees: {
+    bridgeFee: string
+    gasFee: string
+    totalFee: string
+    protocolFee?: string
+  }
+  estimatedTime: string
+  approvalRequired: boolean
+  outputAmount: string
+  minReceive: string
+}
+
+export interface BridgeStatus {
+  intentId: string
+  status: 'pending' | 'processing' | 'completed' | 'failed'
+  steps: Array<{
+    name: string
+    status: 'pending' | 'processing' | 'completed' | 'failed'
+    txHash?: string
+    timestamp?: number
+    chainId?: number
+  }>
+  currentStep: number
+  estimatedCompletion?: number
+  sourceChainTxHash?: string
+  destinationChainTxHash?: string
+  error?: string
+}
 
 export interface BridgeFormData {
   fromChainId: number | null

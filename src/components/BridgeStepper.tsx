@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-// import { type BridgeStatus } from '@/lib/intentPay' // Using Intent Pay SDK now
+import { type BridgeStatus } from '@/store/bridge'
 import { getChainById } from '@/lib/chains'
 
 import { trackRecovery } from '@/lib/analytics'
@@ -38,7 +38,7 @@ export function BridgeStepper({
     switch (stepStatus) {
       case 'completed':
         return <Check className="h-4 w-4 text-green-500" />
-      case 'in_progress':
+      case 'processing':
         return <Clock className="h-4 w-4 text-blue-500 animate-pulse" />
       case 'failed':
         return <AlertCircle className="h-4 w-4 text-red-500" />
@@ -51,7 +51,7 @@ export function BridgeStepper({
     switch (stepStatus) {
       case 'completed':
         return 'bg-green-500'
-      case 'in_progress':
+      case 'processing':
         return 'bg-blue-500'
       case 'failed':
         return 'bg-red-500'
@@ -66,7 +66,7 @@ export function BridgeStepper({
         return 'default' as const
       case 'failed':
         return 'destructive' as const
-      case 'in_progress':
+      case 'processing':
       case 'initiated':
       case 'attested':
         return 'secondary' as const
@@ -181,7 +181,7 @@ export function BridgeStepper({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium">{step.name}</h4>
-                      {step.status === 'in_progress' && (
+                      {step.status === 'processing' && (
                         <Badge variant="secondary" className="text-xs">
                           Processing...
                         </Badge>

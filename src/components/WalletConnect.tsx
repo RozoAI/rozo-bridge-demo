@@ -60,7 +60,7 @@ export function WalletConnect({ className }: WalletConnectProps) {
 
   const handleSwitchChain = (targetChainId: number) => {
     if (targetChainId !== chainId) {
-      switchChain({ chainId: targetChainId as 1 | 137 | 42161 | 10 | 8453 | 43114 })
+      switchChain({ chainId: targetChainId as Parameters<typeof switchChain>[0]['chainId'] })
       trackChainSwitch(chainId, targetChainId)
     }
   }
