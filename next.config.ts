@@ -36,9 +36,6 @@ const nextConfig: NextConfig = {
   
   // Output optimizations
   output: 'standalone',
-  
-  // Reduce build time
-  swcMinify: true,
 };
 
 export default nextConfig;

@@ -5,7 +5,7 @@ import {
   FREIGHTER_ID,
   XBULL_ID
 } from '@creit.tech/stellar-wallets-kit'
-import { Networks, Keypair, Account, TransactionBuilder, Operation, Asset, Memo, MemoType } from '@stellar/stellar-sdk'
+import { Networks, Keypair, Account, TransactionBuilder, Operation, Asset, Memo } from '@stellar/stellar-sdk'
 
 // Stellar network configuration
 export const STELLAR_NETWORKS = {

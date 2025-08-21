@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { getChainLogoUrl, getTokenLogoUrl } from '@/lib/crypto-logos'
+import { getTokenLogoUrl } from '@/lib/crypto-logos'
 import { supportedChains } from '@/lib/chains'
 
 /**
@@ -33,7 +33,7 @@ export function CryptoLogoShowcase() {
                   width={48}
                   height={48}
                   className="w-12 h-12 rounded-full"
-                  onError={(e) => {
+                  onError={() => {
                     console.log(`Failed to load logo for ${chain.name}:`, chain.logo)
                   }}
                 />
@@ -67,7 +67,7 @@ export function CryptoLogoShowcase() {
                   width={40}
                   height={40}
                   className="w-10 h-10 rounded-full"
-                  onError={(e) => {
+                  onError={() => {
                     console.log(`Failed to load logo for ${symbol}:`, getTokenLogoUrl(symbol))
                   }}
                 />

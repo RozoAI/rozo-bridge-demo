@@ -106,7 +106,9 @@ function getChainColors(chainId: number): { from: string; to: string } {
 
 /**
  * Get token colors for gradient
+ * Currently unused but kept for future use
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getTokenColors(symbol: string): { from: string; to: string } {
   const colorMap: Record<string, { from: string; to: string }> = {
     'USDC': { from: '#2775CA', to: '#4F9EEA' }, // USDC blue

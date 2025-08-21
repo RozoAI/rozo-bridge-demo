@@ -56,7 +56,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 Object.getOwnPropertySymbols(arg).length === 0) {
               return
             }
-          } catch (e) {
+          } catch {
             // If we can't check the object, let it through
           }
         }
@@ -96,11 +96,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RozoPayProvider 
-          payApiUrl={process.env.NODE_ENV === 'development' ? '/api/proxy' : 'https://intentapiv2.rozo.ai/'}
-          onError={(error) => {
-            console.warn('[Intent Pay] API Error (expected in development):', error)
-          }}
+                <RozoPayProvider
+          payApiUrl="https://intentapiv2.rozo.ai/"
         >
           {children}
           <Toaster 
