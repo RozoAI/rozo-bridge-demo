@@ -37,6 +37,16 @@ const requiredChains = [
   celo,           // Celo
 ] as const
 
+// Currently supported chains for UI (USDC only)
+// Sepolia, Base, Arbitrum, Optimism, Polygon
+const currentlySupportedChains = [
+  sepolia,        // Sepolia Testnet (11155111)
+  base,           // Base (8453)
+  arbitrum,       // Arbitrum (42161)
+  optimism,       // Optimism (10)
+  polygon,        // Polygon (137)
+] as const
+
 // EVM chains supported by payin service (subset of required chains)
 const payinSupportedChains = [
   mainnet,        // Ethereum Mainnet (1)
@@ -82,6 +92,11 @@ export const config = createConfig({
   transports,
   ssr: true,
 })
+
+// Export currently supported chains for UI (USDC only)
+export const getCurrentlySupportedChainIds = (): number[] => {
+  return currentlySupportedChains.map(chain => chain.id)
+}
 
 // Export payin supported chains for filtering in UI
 export const getPayinSupportedChainIds = (): number[] => {

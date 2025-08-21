@@ -74,7 +74,7 @@ const USDC_ADDRESSES = {
 const getChainLogo = (chainId: number): string => {
   switch (chainId) {
     case mainnet.id: return '/logos/ethereum.png' // Ethereum
-    case base.id: return '/globe.svg' // Base (no logo provided, use globe)
+    case base.id: return '/logos/base.png' // Base
     case arbitrum.id: return '/logos/arbitrum.png' // Arbitrum
     case optimism.id: return '/logos/op.png' // OP Mainnet
     case polygon.id: return '/logos/polygon.png' // Polygon
@@ -89,7 +89,48 @@ const getChainLogo = (chainId: number): string => {
   }
 }
 
+// Currently supported chains for payin/payout (USDC only)
+// Sepolia, Base, Arbitrum, Optimism, Polygon
 export const supportedChains: SupportedChain[] = [
+  {
+    ...sepolia,
+    logo: getChainLogo(sepolia.id),
+    usdcAddress: USDC_ADDRESSES[sepolia.id],
+    explorerUrl: 'https://sepolia.etherscan.io',
+    ecosystem: 'EVM',
+  },
+  {
+    ...base,
+    logo: getChainLogo(base.id),
+    usdcAddress: USDC_ADDRESSES[base.id],
+    explorerUrl: 'https://basescan.org',
+    ecosystem: 'EVM',
+  },
+  {
+    ...arbitrum,
+    logo: getChainLogo(arbitrum.id),
+    usdcAddress: USDC_ADDRESSES[arbitrum.id],
+    explorerUrl: 'https://arbiscan.io',
+    ecosystem: 'EVM',
+  },
+  {
+    ...optimism,
+    logo: getChainLogo(optimism.id),
+    usdcAddress: USDC_ADDRESSES[optimism.id],
+    explorerUrl: 'https://optimistic.etherscan.io',
+    ecosystem: 'EVM',
+  },
+  {
+    ...polygon,
+    logo: getChainLogo(polygon.id),
+    usdcAddress: USDC_ADDRESSES[polygon.id],
+    explorerUrl: 'https://polygonscan.com',
+    ecosystem: 'EVM',
+  },
+]
+
+// All chains (for future expansion) - currently hidden
+export const allChains: SupportedChain[] = [
   // EVM Chains (payin supported)
   {
     ...mainnet,

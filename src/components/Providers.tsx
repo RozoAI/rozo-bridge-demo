@@ -96,7 +96,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RozoPayProvider>
+        <RozoPayProvider payApiUrl="https://intentapiv2.rozo.ai/">
           {children}
           <Toaster 
             position="top-right"
