@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -57,6 +57,15 @@ export function IntentPayBridge() {
     return !!toAddress
   }
 
+  // Create stable external ID based on payment parameters
+  const externalId = useMemo(() => {
+    if (isDestStellar) {
+      const memoStr = memo ? `${memo.type}-${memo.value}` : 'no-memo'
+      return `stellar-${fromChainId}-${toStellarAddress}-${amount}-${memoStr}-${Date.now()}`
+    }
+    return `bridge-${fromChainId}-${toChainId}-${toAddress}-${amount}-${Date.now()}`
+  }, [fromChainId, toChainId, toAddress, toStellarAddress, amount, memo, isDestStellar])
+
   // Create Intent Pay configuration
   const getIntentConfig = () => {
     if (!isFormValid()) return null
@@ -71,7 +80,7 @@ export function IntentPayBridge() {
                 memo.type === MemoType.MemoId ? 'id' : 'hash',
           value: memo.value
         } : undefined,
-        externalId: `stellar-bridge-${Date.now()}`,
+        externalId,
       })
     }
     return createIntentConfig({
@@ -80,7 +89,7 @@ export function IntentPayBridge() {
       toChainId,
       toAddress: toAddress as `0x${string}`,
       amount,
-      externalId: `bridge-${Date.now()}`,
+      externalId,
     })
   }
 

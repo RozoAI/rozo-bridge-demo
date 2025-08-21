@@ -28,8 +28,25 @@ A production-quality React/Next.js frontend for bridging USDC across chains usin
 ### Prerequisites
 
 - Node.js 18+ and npm
-- A WalletConnect Project ID (get one at [cloud.walletconnect.com](https://cloud.walletconnect.com/))
-- RPC endpoints for supported chains (Alchemy, Infura, etc.)
+
+### Environment Configuration
+
+Create a `.env.local` file in the root directory to configure the Intent Pay API endpoint:
+
+```bash
+# Intent Pay API Configuration
+NEXT_PUBLIC_ENDPOINT=https://intentapiv2.rozo.ai/
+
+# Optional: WalletConnect Project ID
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id_here
+```
+
+**Available Endpoints:**
+- Production: `https://intentapiv2.rozo.ai/`
+- Development: `https://dev-api.rozo.ai/` (if available)
+- Local: `http://localhost:8000/api/` (for local development)
+
+**Note:** The `NEXT_PUBLIC_` prefix is required for environment variables used in client-side code.
 
 ### Installation
 

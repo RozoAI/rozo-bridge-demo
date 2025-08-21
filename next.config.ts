@@ -9,8 +9,6 @@ const nextConfig: NextConfig = {
     workerThreads: false,
     // Optimize bundle size
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    // Enable CSS optimization for Tailwind v4
-    optimizeCss: true,
   },
   
   // Webpack optimizations for large dependencies
