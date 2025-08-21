@@ -93,20 +93,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Get configurable API endpoint
-  const apiEndpoint = process.env.NEXT_PUBLIC_ENDPOINT || "https://intentapiv2.rozo.ai/"
-  
-  // Log the endpoint being used (only in development)
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Intent Pay] Using API endpoint:', apiEndpoint)
-  }
-
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-                <RozoPayProvider
-          payApiUrl={apiEndpoint}
-        >
+        <RozoPayProvider>
           {children}
           <Toaster 
             position="top-right"
