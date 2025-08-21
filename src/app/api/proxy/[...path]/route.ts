@@ -34,13 +34,13 @@ export async function OPTIONS(
   request: NextRequest,
   { params }: { params: { path: string[] } }
 ) {
-  // Handle preflight requests
+  // Handle preflight requests for tRPC
   return new NextResponse(null, {
     status: 200,
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-trpc-source',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-trpc-source, trpc-batch-mode',
       'Access-Control-Max-Age': '86400',
     },
   })
@@ -56,30 +56,44 @@ async function handleRequest(
     const searchParams = request.nextUrl.searchParams.toString()
     const url = `${INTENT_API_BASE}/${path}${searchParams ? `?${searchParams}` : ''}`
 
-    console.log(`[CORS Proxy] ${method} ${url}`)
+    console.log(`[tRPC Proxy] ${method} ${url}`)
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    }
+    // Preserve original headers for tRPC compatibility
+    const headers: Record<string, string> = {}
+    
+    // Copy important headers from the original request
+    const headersToForward = [
+      'content-type',
+      'authorization',
+      'x-trpc-source',
+      'trpc-batch-mode',
+      'user-agent',
+      'accept',
+      'accept-encoding',
+      'accept-language'
+    ]
 
-    // Forward authorization headers if present
-    const authHeader = request.headers.get('authorization')
-    if (authHeader) {
-      headers.authorization = authHeader
-    }
+    headersToForward.forEach(headerName => {
+      const headerValue = request.headers.get(headerName)
+      if (headerValue) {
+        headers[headerName] = headerValue
+      }
+    })
 
-    // Forward other relevant headers
-    const trpcSource = request.headers.get('x-trpc-source')
-    if (trpcSource) {
-      headers['x-trpc-source'] = trpcSource
+    // Ensure content-type for JSON requests
+    if (!headers['content-type'] && (method === 'POST' || method === 'PUT')) {
+      headers['content-type'] = 'application/json'
     }
 
     let body: string | undefined
     if (method !== 'GET' && method !== 'DELETE') {
       try {
         body = await request.text()
+        if (body) {
+          console.log(`[tRPC Proxy] Request body:`, body.substring(0, 200) + (body.length > 200 ? '...' : ''))
+        }
       } catch (e) {
-        // No body
+        console.log(`[tRPC Proxy] No request body`)
       }
     }
 
@@ -89,33 +103,73 @@ async function handleRequest(
       body,
     })
 
+    console.log(`[tRPC Proxy] Response status: ${response.status}`)
+    console.log(`[tRPC Proxy] Response headers:`, Object.fromEntries(response.headers.entries()))
+
+    // Get response as text first to handle both JSON and non-JSON responses
     const responseText = await response.text()
-    let responseData: any
+    console.log(`[tRPC Proxy] Response body:`, responseText.substring(0, 200) + (responseText.length > 200 ? '...' : ''))
+
+    // Determine if response is JSON
+    let isJson = false
+    let responseData: any = responseText
 
     try {
       responseData = JSON.parse(responseText)
+      isJson = true
     } catch (e) {
-      responseData = responseText
+      // Not JSON, keep as text
+      console.log(`[tRPC Proxy] Response is not JSON`)
     }
 
-    return NextResponse.json(responseData, {
-      status: response.status,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-trpc-source',
-      },
+    // Prepare response headers
+    const responseHeaders: Record<string, string> = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-trpc-source, trpc-batch-mode',
+    }
+
+    // Forward important response headers
+    const responseHeadersToForward = [
+      'content-type',
+      'cache-control',
+      'etag',
+      'last-modified'
+    ]
+
+    responseHeadersToForward.forEach(headerName => {
+      const headerValue = response.headers.get(headerName)
+      if (headerValue) {
+        responseHeaders[headerName] = headerValue
+      }
     })
+
+    // Return appropriate response type
+    if (isJson) {
+      return NextResponse.json(responseData, {
+        status: response.status,
+        headers: responseHeaders,
+      })
+    } else {
+      return new NextResponse(responseText, {
+        status: response.status,
+        headers: responseHeaders,
+      })
+    }
   } catch (error) {
-    console.error('[CORS Proxy] Error:', error)
+    console.error('[tRPC Proxy] Error:', error)
     return NextResponse.json(
-      { error: 'Proxy request failed', details: error instanceof Error ? error.message : 'Unknown error' },
+      { 
+        error: 'Proxy request failed', 
+        details: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      },
       {
         status: 500,
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-trpc-source',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-trpc-source, trpc-batch-mode',
         },
       }
     )
