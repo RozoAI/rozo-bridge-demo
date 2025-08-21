@@ -28,6 +28,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@rozoai/intent-pay": "^0.0.18-beta.9",
     "@stellar/stellar-sdk": "^14.1.0",
+    "@tailwindcss/postcss": "^4.1.12",
     "@tanstack/react-query": "^5.85.5",
     "@walletconnect/sign-client": "^2.21.8",
     "@walletconnect/web3wallet": "^1.16.1",
@@ -42,21 +43,20 @@
     "react-dom": "19.1.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
+    "tw-animate-css": "^1.3.7",
     "viem": "^2.34.0",
     "wagmi": "^2.16.4",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4.1.12",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",
-    "eslint": "^9",
+    "eslint": "^9.33.0",
     "eslint-config-next": "15.5.0",
     "tailwindcss": "^4",
-    "tw-animate-css": "^1.3.7",
     "typescript": "^5"
   }
 }
