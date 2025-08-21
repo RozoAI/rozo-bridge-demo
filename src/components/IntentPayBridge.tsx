@@ -11,15 +11,12 @@ import { ChainSelect } from './ChainSelect'
 import { AddressInput } from './AddressInput'
 import { StellarAddressInput } from './StellarAddressInput'
 import { StellarMemoInput } from './StellarMemoInput'
-import { UnifiedWalletConnect } from './UnifiedWalletConnect'
 import { RozoPayButton } from '@rozoai/intent-pay'
 import { 
   createIntentConfig, 
   isRouteSupported,
   DEFAULT_INTENT_PAY_CONFIG 
 } from '@/lib/intentPay'
-import { useAccount } from 'wagmi'
-import { useStellarWalletConnection } from '@/store/stellar'
 import { isValidStellarAddress } from '@/lib/stellar'
 import { toast } from 'sonner'
 
@@ -43,8 +40,7 @@ export function IntentPayBridge() {
   const [toStellarAddress, setToStellarAddress] = useState('')
   const [memo, setMemo] = useState<{ type: MemoType; value: string } | null>(null)
   
-  const { isConnected: evmConnected, address: evmAddress } = useAccount()
-  const { isConnected: stellarConnected, publicKey: stellarAddress } = useStellarWalletConnection()
+  // Wallet connection is handled by Intent Pay SDK
 
   // Unified selection flags
   const isDestStellar = toChainId === 1500 || toChainId === 1501
@@ -165,20 +161,9 @@ export function IntentPayBridge() {
               onValueChange={(chainId) => chainId && setFromChainId(chainId)}
               placeholder="Select source chain"
             />
-            {evmConnected ? (
-              <div className="text-sm text-green-600">
-                ✓ EVM Connected: {evmAddress?.slice(0, 6)}...{evmAddress?.slice(-4)}
-              </div>
-            ) : (
-              <div className="text-sm text-muted-foreground">
-                You can connect an EVM or Stellar wallet when you proceed
-              </div>
-            )}
-            {stellarConnected && (
-              <div className="text-sm text-green-600">
-                ✓ Stellar Connected: {stellarAddress?.slice(0, 8)}...{stellarAddress?.slice(-8)}
-              </div>
-            )}
+            <div className="text-sm text-muted-foreground">
+              Wallet connection will be handled automatically when you proceed
+            </div>
           </div>
 
           {/* Amount */}
@@ -280,18 +265,7 @@ export function IntentPayBridge() {
                      : (!isFormValid() ? 'Complete Form' : 'Transfer USDC')}
                 </Button>
                 
-                {/* Show wallet connection if not connected */}
-                {!evmConnected && !stellarConnected && (
-                  <div className="text-center p-4 border-2 border-dashed border-muted rounded-lg">
-                    <div className="mb-3">
-                      <div className="text-sm font-medium">Connect Your Wallet</div>
-                      <div className="text-xs text-muted-foreground">
-                        Connect EVM or Stellar wallet to start gasless transfers
-                      </div>
-                    </div>
-                    <UnifiedWalletConnect />
-                  </div>
-                )}
+                {/* Wallet connection is handled by RozoPayButton */}
               </div>
             )}
             

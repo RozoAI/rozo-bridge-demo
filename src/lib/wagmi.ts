@@ -1,6 +1,7 @@
-import { createConfig, http } from 'wagmi'
+// Wagmi configuration using Intent Pay SDK
+import { createConfig } from 'wagmi'
 import { mainnet, polygon, arbitrum, optimism, base, bsc, sepolia, polygonMumbai, linea, celo, mantle } from 'wagmi/chains'
-import { walletConnect, coinbaseWallet, injected } from 'wagmi/connectors'
+import { getDefaultConfig } from '@rozoai/intent-pay'
 
 // Get WalletConnect project ID from environment
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
@@ -59,39 +60,17 @@ const payinSupportedChains = [
   polygonMumbai,  // Mumbai Testnet (80001)
 ] as const
 
-// Configure connectors
-const connectors = [
-  injected(),
-  walletConnect({
-    projectId: projectId || 'dummy-project-id',
-    metadata: {
-      name: 'Rozo Bridge Demo',
-      description: 'Multi-chain USDC bridge powered by Intent Pay',
-      url: 'https://bridge.rozo.ai',
-      icons: ['https://bridge.rozo.ai/icon.png']
-    },
-    showQrModal: true,
-  }),
-  coinbaseWallet({
+// Use Intent Pay SDK's default configuration with Wagmi's createConfig
+export const config = createConfig(
+  getDefaultConfig({
     appName: 'Rozo Bridge Demo',
-    appLogoUrl: 'https://bridge.rozo.ai/icon.png',
-    preference: 'smartWalletOnly',
-  }),
-]
-
-// Configure transports for each chain
-const transports = requiredChains.reduce((acc, chain) => {
-  acc[chain.id] = http()
-  return acc
-}, {} as Record<number, ReturnType<typeof http>>)
-
-// Create wagmi config with all required chains for RozoPayProvider
-export const config = createConfig({
-  chains: requiredChains,
-  connectors,
-  transports,
-  ssr: true,
-})
+    appDescription: 'Multi-chain USDC bridge powered by Intent Pay',
+    appUrl: 'https://bridge.rozo.ai',
+    appIcon: 'https://bridge.rozo.ai/icon.png',
+    chains: requiredChains,
+    ssr: true,
+  })
+)
 
 // Export currently supported chains for UI (USDC only)
 export const getCurrentlySupportedChainIds = (): number[] => {
