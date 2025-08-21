@@ -11,6 +11,7 @@ import { ChainSelect } from './ChainSelect'
 import { AddressInput } from './AddressInput'
 import { StellarAddressInput } from './StellarAddressInput'
 import { StellarMemoInput } from './StellarMemoInput'
+import { UnifiedChainSelector } from './UnifiedChainSelector'
 import { RozoPayButton } from '@rozoai/intent-pay'
 import { 
   createIntentConfig, 
@@ -156,10 +157,15 @@ export function IntentPayBridge() {
       {/* Transfer Form - Always Show */}
       <Card>
         <CardHeader>
-          <CardTitle>Transfer Configuration</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Configure your cross-chain USDC transfer. Connect your wallet when ready to proceed.
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Transfer Configuration</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Configure your cross-chain USDC transfer. Connect your wallet when ready to proceed.
+              </p>
+            </div>
+            <UnifiedChainSelector />
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Source (Payin) */}
