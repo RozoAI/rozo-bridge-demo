@@ -59,9 +59,9 @@ export function IntentPayBridge() {
   const externalId = useMemo(() => {
     if (isDestStellar) {
       const memoStr = memo ? `${memo.type}-${memo.value}` : 'no-memo'
-      return `stellar-${toStellarAddress}-${amount}-${memoStr}-${Date.now()}`
+      return `stellar-${toStellarAddress}-${amount}-${memoStr}`
     }
-    return `bridge-${toChainId}-${toAddress}-${amount}-${Date.now()}`
+    return `bridge-${toChainId}-${toAddress}-${amount}`
   }, [toChainId, toAddress, toStellarAddress, amount, memo, isDestStellar])
 
   // Create Intent Pay configuration
@@ -80,6 +80,7 @@ export function IntentPayBridge() {
         externalId,
       })
     }
+
     return createIntentConfig({
       appId: DEFAULT_INTENT_PAY_CONFIG.appId,
       toChainId,
@@ -106,7 +107,14 @@ export function IntentPayBridge() {
     toast.error('Payment failed and was refunded.')
   }
 
-  const intentConfig = getIntentConfig()
+  const intentConfig = useMemo(() => getIntentConfig(), [
+    toChainId,
+    toAddress,
+    toStellarAddress,
+    amount,
+    memo,
+    isDestStellar
+  ])
 
   return (
     <div className="space-y-6">
