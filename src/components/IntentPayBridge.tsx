@@ -152,14 +152,11 @@ export function IntentPayBridge() {
       {/* Transfer Form - Always Show */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Transfer Configuration</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Configure your cross-chain USDC transfer. Source chain will be selected when you pay.
-              </p>
-            </div>
-            <RozoWalletSelector />
+          <div>
+            <CardTitle>Transfer Configuration</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Configure your cross-chain USDC transfer. Source chain will be selected when you pay.
+            </p>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -225,45 +222,43 @@ export function IntentPayBridge() {
 
           {/* Intent Pay Button */}
           <div className="space-y-4">
-            {intentConfig && isFormValid() ? (
-              !isDestStellar ? (
-                <RozoPayButton
-                  appId={intentConfig.appId}
-                  toChain={intentConfig.toChain!}
-                  toToken={intentConfig.toToken!}
-                  toAddress={intentConfig.toAddress as `0x${string}`}
-                  toUnits={intentConfig.toUnits}
-                  onPaymentStarted={handlePaymentStarted}
-                  onPaymentCompleted={handlePaymentCompleted}
-                  onPaymentBounced={handlePaymentBounced}
-                />
+            <div className="flex justify-center">
+              {intentConfig && isFormValid() ? (
+                !isDestStellar ? (
+                  <RozoPayButton
+                    appId={intentConfig.appId}
+                    toChain={intentConfig.toChain!}
+                    toToken={intentConfig.toToken!}
+                    toAddress={intentConfig.toAddress as `0x${string}`}
+                    toUnits={intentConfig.toUnits}
+                    onPaymentStarted={handlePaymentStarted}
+                    onPaymentCompleted={handlePaymentCompleted}
+                    onPaymentBounced={handlePaymentBounced}
+                  />
+                ) : (
+                  <RozoPayButton
+                    appId={intentConfig.appId}
+                    toChain={BASE_USDC.chainId}
+                    toAddress={getAddress("0x0000000000000000000000000000000000000000")}
+                    toStellarAddress={intentConfig.toStellarAddress}
+                    toUnits={intentConfig.toUnits}
+                    toToken={getAddress(BASE_USDC.token)}
+                    {...(intentConfig.memo ? { memo: intentConfig.memo } : {})}
+                    onPaymentStarted={handlePaymentStarted}
+                    onPaymentCompleted={handlePaymentCompleted}
+                    onPaymentBounced={handlePaymentBounced}
+                  />
+                )
               ) : (
-                <RozoPayButton
-                  appId={intentConfig.appId}
-                  toChain={BASE_USDC.chainId}
-                  toAddress={getAddress("0x0000000000000000000000000000000000000000")}
-                  toStellarAddress={intentConfig.toStellarAddress}
-                  toUnits={intentConfig.toUnits}
-                  toToken={getAddress(BASE_USDC.token)}
-                  {...(intentConfig.memo ? { memo: intentConfig.memo } : {})}
-                  onPaymentStarted={handlePaymentStarted}
-                  onPaymentCompleted={handlePaymentCompleted}
-                  onPaymentBounced={handlePaymentBounced}
-                />
-              )
-            ) : (
-              <div className="space-y-3">
-                <Button disabled className="w-full" size="lg">
+                <Button disabled className="w-64" size="lg">
                   <ArrowRight className="h-4 w-4 mr-2" />
                   {!amount ? 'Enter Amount' :
                    (Number.isFinite(parseFloat(amount)) && parseFloat(amount) > 0 && parseFloat(amount) < MIN_USDC_AMOUNT)
                      ? 'Minimum $0.10'
                      : (!isFormValid() ? 'Complete Form' : 'Transfer USDC')}
                 </Button>
-                
-                {/* Wallet connection is handled by RozoPayButton */}
-              </div>
-            )}
+              )}
+            </div>
             
             <div className="text-xs text-center text-muted-foreground">
               ✨ Powered by Intent Pay - No gas fees, no commission, instant settlement

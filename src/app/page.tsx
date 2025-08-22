@@ -49,7 +49,7 @@ export default function Home() {
             </h2>
             <p className="text-muted-foreground mb-6">
               Experience seamless cross-chain USDC transfers with intent-based execution. 
-              Powered by @rozoai/intent-pay v0.0.18-beta.9 for optimal routing and execution.
+              Powered by @rozoai/intent-pay for optimal routing and execution.
             </p>
             <div className="mt-2 flex justify-center">
               <Link href="/docs">
@@ -101,9 +101,9 @@ export default function Home() {
       <footer className="border-t mt-16">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <div>© 2024 Rozo Intent Pay Demo. Powered by @rozoai/intent-pay v0.0.18-beta.9</div>
+            <div>© 2024 Rozo Intent Pay Demo. Powered by @rozoai/intent-pay</div>
             <div className="flex items-center gap-4">
-              <a href="https://www.npmjs.com/package/@rozoai/intent-pay/v/0.0.18-beta.9" className="hover:text-foreground transition-colors">
+              <a href="https://www.npmjs.com/package/@rozoai/intent-pay" className="hover:text-foreground transition-colors">
                 NPM Package
               </a>
               <Link href="/docs" className="hover:text-foreground transition-colors">

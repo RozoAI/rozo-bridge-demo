@@ -91,7 +91,6 @@ export const createIntentConfig = (params: {
 export const SUPPORTED_INTENT_CHAINS = [
   // EVM chains (payin supported)
   1,        // Ethereum Mainnet
-  11155111, // Sepolia Testnet
   8453,     // Base
   42161,    // Arbitrum
   10,       // Optimism
@@ -102,7 +101,6 @@ export const SUPPORTED_INTENT_CHAINS = [
   900,      // Solana Mainnet
   901,      // Solana Devnet
   1500,     // Stellar Mainnet
-  1501,     // Stellar Testnet
 ]
 
 // Check if a chain is supported by Intent Pay
