@@ -1,7 +1,13 @@
 // Intent Pay SDK integration
 // Real implementation using @rozoai/intent-pay for gasless, commission-free transfers
 
-import { type Address } from 'viem'
+import { Address } from 'viem'
+
+// Base chain configuration for Stellar transfers
+export const BASE_USDC = {
+  chainId: 8453, // Base chain ID
+  token: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' // Base USDC address
+} as const
 
 // Re-export Intent Pay SDK components and types
 export { 
@@ -69,8 +75,8 @@ export const createIntentConfig = (params: {
   
   return {
     appId: params.appId,
-    toChain: params.toChainId || 1, // Use provided chain or default to Ethereum for Stellar
-    toToken: isStellarTransfer ? getUSDCAddress(1) : getUSDCAddress(params.toChainId!),
+    toChain: isStellarTransfer ? BASE_USDC.chainId : params.toChainId!,
+    toToken: isStellarTransfer ? BASE_USDC.token : getUSDCAddress(params.toChainId!),
     toAddress: params.toAddress,
     toStellarAddress: params.toStellarAddress,
     toUnits: params.amount,

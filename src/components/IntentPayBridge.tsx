@@ -13,9 +13,11 @@ import { StellarAddressInput } from './StellarAddressInput'
 import { StellarMemoInput } from './StellarMemoInput'
 import { RozoWalletSelector } from './RozoWalletSelector' // Updated import
 import { RozoPayButton } from '@rozoai/intent-pay'
+import { getAddress } from 'viem'
 import { 
   createIntentConfig, 
-  DEFAULT_INTENT_PAY_CONFIG 
+  DEFAULT_INTENT_PAY_CONFIG,
+  BASE_USDC
 } from '@/lib/intentPay'
 import { isValidStellarAddress } from '@/lib/stellar'
 import { toast } from 'sonner'
@@ -28,8 +30,6 @@ enum MemoType {
   MemoHash = 3,
   MemoReturn = 4,
 }
-
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000' as const
 
 export function IntentPayBridge() {
   const MIN_USDC_AMOUNT = 0.10
@@ -240,11 +240,11 @@ export function IntentPayBridge() {
               ) : (
                 <RozoPayButton
                   appId={intentConfig.appId}
-                  toChain={intentConfig.toChain!}
-                  toToken={intentConfig.toToken!}
-                  toAddress={ZERO_ADDRESS}
+                  toChain={BASE_USDC.chainId}
+                  toAddress={getAddress("0x0000000000000000000000000000000000000000")}
                   toStellarAddress={intentConfig.toStellarAddress}
                   toUnits={intentConfig.toUnits}
+                  toToken={getAddress(BASE_USDC.token)}
                   {...(intentConfig.memo ? { memo: intentConfig.memo } : {})}
                   onPaymentStarted={handlePaymentStarted}
                   onPaymentCompleted={handlePaymentCompleted}
