@@ -234,6 +234,7 @@ export function IntentPayBridge() {
               {intentConfig && isFormValid() ? (
                 !isDestStellar ? (
                   <RozoPayButton
+                    key={`evm-${toChainId}-${toAddress}-${amount}`}
                     appId={intentConfig.appId}
                     toChain={intentConfig.toChain!}
                     toToken={intentConfig.toToken!}
@@ -245,6 +246,7 @@ export function IntentPayBridge() {
                   />
                 ) : (
                   <RozoPayButton
+                    key={`stellar-${toStellarAddress}-${amount}-${memo ? `${memo.type}-${memo.value}` : 'no-memo'}`}
                     appId={intentConfig.appId}
                     toChain={BASE_USDC.chainId}
                     toAddress={getAddress("0x0000000000000000000000000000000000000000")}
