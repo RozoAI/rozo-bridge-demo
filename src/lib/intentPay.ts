@@ -111,5 +111,5 @@ export const isRouteSupported = (fromChainId: number, toChainId: number): boolea
 
 // Default app configuration (you should replace with your actual app ID)
 export const DEFAULT_INTENT_PAY_CONFIG = {
-  appId: process.env.NEXT_PUBLIC_INTENT_PAY_APP_ID || 'rozo-bridge-demo',
+  appId: process.env.NEXT_PUBLIC_INTENT_PAY_APP_ID || 'rozoDemoStellar',
 }
