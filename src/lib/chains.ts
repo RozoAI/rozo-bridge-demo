@@ -90,7 +90,7 @@ const getChainLogo = (chainId: number): string => {
 }
 
 // Currently supported chains for payin/payout (USDC only)
-// Sepolia, Base, Arbitrum, Optimism, Polygon
+// Sepolia, Base, Arbitrum, Optimism, Polygon, Stellar Mainnet, Stellar Testnet
 export const supportedChains: SupportedChain[] = [
   {
     ...sepolia,
@@ -126,6 +126,18 @@ export const supportedChains: SupportedChain[] = [
     usdcAddress: USDC_ADDRESSES[polygon.id],
     explorerUrl: 'https://polygonscan.com',
     ecosystem: 'EVM',
+  },
+  {
+    ...stellarMainnet,
+    logo: getChainLogo(stellarMainnet.id),
+    explorerUrl: 'https://stellar.expert/explorer/public',
+    ecosystem: 'Stellar',
+  },
+  {
+    ...stellarTestnet,
+    logo: getChainLogo(stellarTestnet.id),
+    explorerUrl: 'https://stellar.expert/explorer/testnet',
+    ecosystem: 'Stellar',
   },
 ]
 
