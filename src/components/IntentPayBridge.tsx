@@ -15,7 +15,6 @@ import { RozoWalletSelector } from './RozoWalletSelector' // Updated import
 import { RozoPayButton } from '@rozoai/intent-pay'
 import { 
   createIntentConfig, 
-  isRouteSupported,
   DEFAULT_INTENT_PAY_CONFIG 
 } from '@/lib/intentPay'
 import { isValidStellarAddress } from '@/lib/stellar'
@@ -34,7 +33,6 @@ const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000' as const
 
 export function IntentPayBridge() {
   const MIN_USDC_AMOUNT = 0.10
-  const [fromChainId, setFromChainId] = useState<number>(1) // Ethereum
   const [toChainId, setToChainId] = useState<number>(8453) // Base
   const [amount, setAmount] = useState('')
   const [toAddress, setToAddress] = useState('')
@@ -51,7 +49,6 @@ export function IntentPayBridge() {
     if (!amount || parseFloat(amount) <= 0) return false
     if (!Number.isFinite(parseFloat(amount))) return false
     if (parseFloat(amount) < MIN_USDC_AMOUNT) return false
-    if (!isRouteSupported(fromChainId, toChainId)) return false
     if (isDestStellar) {
       return !!toStellarAddress && isValidStellarAddress(toStellarAddress)
     }
@@ -62,10 +59,10 @@ export function IntentPayBridge() {
   const externalId = useMemo(() => {
     if (isDestStellar) {
       const memoStr = memo ? `${memo.type}-${memo.value}` : 'no-memo'
-      return `stellar-${fromChainId}-${toStellarAddress}-${amount}-${memoStr}-${Date.now()}`
+      return `stellar-${toStellarAddress}-${amount}-${memoStr}-${Date.now()}`
     }
-    return `bridge-${fromChainId}-${toChainId}-${toAddress}-${amount}-${Date.now()}`
-  }, [fromChainId, toChainId, toAddress, toStellarAddress, amount, memo, isDestStellar])
+    return `bridge-${toChainId}-${toAddress}-${amount}-${Date.now()}`
+  }, [toChainId, toAddress, toStellarAddress, amount, memo, isDestStellar])
 
   // Create Intent Pay configuration
   const getIntentConfig = () => {
@@ -73,7 +70,6 @@ export function IntentPayBridge() {
     if (isDestStellar) {
       return createIntentConfig({
         appId: DEFAULT_INTENT_PAY_CONFIG.appId,
-        fromChainId,
         toStellarAddress,
         amount,
         memo: memo ? {
@@ -86,7 +82,6 @@ export function IntentPayBridge() {
     }
     return createIntentConfig({
       appId: DEFAULT_INTENT_PAY_CONFIG.appId,
-      fromChainId,
       toChainId,
       toAddress: toAddress as `0x${string}`,
       amount,
@@ -161,26 +156,13 @@ export function IntentPayBridge() {
             <div>
               <CardTitle>Transfer Configuration</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Configure your cross-chain USDC transfer. Connect your wallet when ready to proceed.
+                Configure your cross-chain USDC transfer. Source chain will be selected when you pay.
               </p>
             </div>
             <RozoWalletSelector />
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Source (Payin) */}
-          <div className="space-y-3">
-            <Label>From Chain</Label>
-            <ChainSelect
-              value={fromChainId}
-              onValueChange={(chainId) => chainId && setFromChainId(chainId)}
-              placeholder="Select source chain"
-            />
-            <div className="text-sm text-muted-foreground">
-              Wallet connection will be handled automatically when you proceed
-            </div>
-          </div>
-
           {/* Amount */}
           <div className="space-y-2">
             <Label htmlFor="amount">Amount (USDC)</Label>
@@ -210,7 +192,6 @@ export function IntentPayBridge() {
                 value={toChainId}
                 onValueChange={(chainId) => chainId && setToChainId(chainId)}
                 placeholder="Select destination chain"
-                excludeChainId={fromChainId}
               />
             </div>
 
