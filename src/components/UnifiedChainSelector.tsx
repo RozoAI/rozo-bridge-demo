@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain } from 'wagmi'
-import { Wallet, ChevronDown, LogOut, Star, Globe, Zap } from 'lucide-react'
+import { Wallet, ChevronDown, LogOut, Star, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -25,7 +25,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { getChainById } from '@/lib/chains'
 import { useStellarWalletConnection, getAvailableStellarWallets } from '@/store/stellar'
-import { STELLAR_WALLETS, StellarNetwork } from '@/lib/stellar'
+import { StellarNetwork } from '@/lib/stellar'
 import { cn } from '@/lib/utils'
 
 interface UnifiedChainSelectorProps {
@@ -47,9 +47,7 @@ export function UnifiedChainSelector({ className }: UnifiedChainSelectorProps) {
   const {
     isConnected: isStellarConnected,
     publicKey,
-    walletId,
     network,
-    error,
     isConnecting: isStellarConnecting,
     connect: connectStellar,
     disconnect: disconnectStellar,
@@ -63,7 +61,7 @@ export function UnifiedChainSelector({ className }: UnifiedChainSelectorProps) {
   const currentWalletType = isEVMConnected ? 'EVM' : isStellarConnected ? 'Stellar' : null
 
   // EVM wallet handlers
-  const handleConnectEVM = async (connector: any) => {
+  const handleConnectEVM = async (connector: ReturnType<typeof useConnect>['connectors'][0]) => {
     try {
       setIsConnecting(true)
       await connect({ connector })
