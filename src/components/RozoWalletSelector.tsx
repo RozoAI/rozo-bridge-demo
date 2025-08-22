@@ -82,7 +82,7 @@ export function RozoWalletSelector({ className }: RozoWalletSelectorProps) {
       <div className="flex gap-2">
         <Button className={cn('flex items-center gap-2', className)}>
           <CreditCard className="h-4 w-4" />
-          Connect Wallet to Pay
+          Connect Wallet
         </Button>
       </div>
     )

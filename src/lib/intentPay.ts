@@ -53,7 +53,7 @@ export const getUSDCAddress = (chainId: number): Address => {
 // Create unified Intent Pay configuration
 export const createIntentConfig = (params: {
   appId: string
-  fromChainId: number
+  fromChainId?: number // Optional - users choose when they pay
   toChainId?: number // Optional for Stellar transfers
   toAddress?: Address // For EVM transfers
   toStellarAddress?: string // For Stellar transfers
@@ -75,7 +75,7 @@ export const createIntentConfig = (params: {
     toStellarAddress: params.toStellarAddress,
     toUnits: params.amount,
     intent: 'Transfer USDC',
-    preferredChains: [params.fromChainId], // Prefer the source chain
+    preferredChains: params.fromChainId ? [params.fromChainId] : undefined, // Only set if provided
     memo: params.memo,
     externalId: params.externalId,
   }
