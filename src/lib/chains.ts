@@ -83,8 +83,8 @@ const getChainLogo = (chainId: number): string => {
     case polygonMumbai.id: return '/logos/polygon.png' // Mumbai (use Polygon logo)
     case solanaMainnet.id: return '/globe.svg' // Solana (no logo provided, use globe)
     case solanaDevnet.id: return '/globe.svg' // Solana Devnet (no logo provided, use globe)
-    case stellarMainnet.id: return '/globe.svg' // Stellar (no logo provided, use globe)
-    case stellarTestnet.id: return '/globe.svg' // Stellar Testnet (no logo provided, use globe)
+    case stellarMainnet.id: return '/logos/stellar.svg' // Stellar logo
+    case stellarTestnet.id: return '/logos/stellar.svg' // Stellar Testnet (use same logo)
     default: return '/globe.svg' // Default fallback
   }
 }
