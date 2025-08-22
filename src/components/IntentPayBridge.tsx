@@ -232,33 +232,33 @@ export function IntentPayBridge() {
           <div className="space-y-4">
             <div className="flex justify-center">
               {intentConfig && isFormValid() ? (
-                !isDestStellar ? (
-                  <RozoPayButton
-                    key={`evm-${toChainId}-${toAddress}-${amount}`}
-                    appId={intentConfig.appId}
-                    toChain={intentConfig.toChain!}
-                    toToken={intentConfig.toToken!}
-                    toAddress={intentConfig.toAddress as `0x${string}`}
-                    toUnits={intentConfig.toUnits}
-                    onPaymentStarted={handlePaymentStarted}
-                    onPaymentCompleted={handlePaymentCompleted}
-                    onPaymentBounced={handlePaymentBounced}
-                  />
-                ) : (
-                  <RozoPayButton
-                    key={`stellar-${toStellarAddress}-${amount}-${memo ? `${memo.type}-${memo.value}` : 'no-memo'}`}
-                    appId={intentConfig.appId}
-                    toChain={BASE_USDC.chainId}
-                    toAddress={getAddress("0x0000000000000000000000000000000000000000")}
-                    toStellarAddress={intentConfig.toStellarAddress}
-                    toUnits={intentConfig.toUnits}
-                    toToken={getAddress(BASE_USDC.token)}
-                    {...(intentConfig.memo ? { memo: intentConfig.memo } : {})}
-                    onPaymentStarted={handlePaymentStarted}
-                    onPaymentCompleted={handlePaymentCompleted}
-                    onPaymentBounced={handlePaymentBounced}
-                  />
-                )
+                <div key={`payment-${toChainId}-${toAddress || toStellarAddress}-${amount}-${memo ? `${memo.type}-${memo.value}` : 'no-memo'}-${Date.now()}`}>
+                  {!isDestStellar ? (
+                    <RozoPayButton
+                      appId={intentConfig.appId}
+                      toChain={intentConfig.toChain!}
+                      toToken={intentConfig.toToken!}
+                      toAddress={intentConfig.toAddress as `0x${string}`}
+                      toUnits={intentConfig.toUnits}
+                      onPaymentStarted={handlePaymentStarted}
+                      onPaymentCompleted={handlePaymentCompleted}
+                      onPaymentBounced={handlePaymentBounced}
+                    />
+                  ) : (
+                    <RozoPayButton
+                      appId={intentConfig.appId}
+                      toChain={BASE_USDC.chainId}
+                      toAddress={getAddress("0x0000000000000000000000000000000000000000")}
+                      toStellarAddress={intentConfig.toStellarAddress}
+                      toUnits={intentConfig.toUnits}
+                      toToken={getAddress(BASE_USDC.token)}
+                      {...(intentConfig.memo ? { memo: intentConfig.memo } : {})}
+                      onPaymentStarted={handlePaymentStarted}
+                      onPaymentCompleted={handlePaymentCompleted}
+                      onPaymentBounced={handlePaymentBounced}
+                    />
+                  )}
+                </div>
               ) : (
                 <Button disabled className="w-64" size="lg">
                   <ArrowRight className="h-4 w-4 mr-2" />
