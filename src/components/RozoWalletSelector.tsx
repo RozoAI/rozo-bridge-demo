@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { useAccount, useDisconnect, useChainId } from 'wagmi'
 import { ChevronDown, LogOut, Star, Globe, CreditCard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -14,30 +13,17 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { getChainById } from '@/lib/chains'
 import { useStellarWalletConnection } from '@/store/stellar'
 import { StellarNetwork } from '@/lib/stellar'
 import { cn } from '@/lib/utils'
-import { RozoPayButton } from '@rozoai/intent-pay'
-import { getAddress } from 'viem'
-import { baseUSDC } from '@rozoai/intent-common'
 
 interface RozoWalletSelectorProps {
   className?: string
 }
 
 export function RozoWalletSelector({ className }: RozoWalletSelectorProps) {
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false)
-  
   // EVM wallet state
   const { address, isConnected: isEVMConnected } = useAccount()
   const { disconnect } = useDisconnect()
@@ -94,36 +80,10 @@ export function RozoWalletSelector({ className }: RozoWalletSelectorProps) {
   if (!isConnected) {
     return (
       <div className="flex gap-2">
-        <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-          <DialogTrigger asChild>
-            <Button className={cn('flex items-center gap-2', className)}>
-              <CreditCard className="h-4 w-4" />
-              Make Payment
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Rozo Payment</DialogTitle>
-              <DialogDescription>
-                Make a payment using Rozo Pay. Your wallet will be connected automatically when you proceed.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              <div className="text-sm text-muted-foreground">
-                This will open the Rozo payment flow where you can connect your wallet and complete the transaction.
-              </div>
-              
-              <RozoPayButton
-                appId="rozo-bridge-demo"
-                toChain={baseUSDC.chainId}
-                toAddress={getAddress("0xe4C726711d012287953DA36D6ea8261404C56b2A")}
-                toUnits={"0.11"}
-                toToken={getAddress(baseUSDC.token)}
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button className={cn('flex items-center gap-2', className)}>
+          <CreditCard className="h-4 w-4" />
+          Connect Wallet to Pay
+        </Button>
       </div>
     )
   }
@@ -183,18 +143,15 @@ export function RozoWalletSelector({ className }: RozoWalletSelectorProps) {
           </div>
         </div>
 
-        {/* Quick Payment */}
+        {/* Quick Actions */}
         <div className="p-2">
           <div className="text-xs font-medium text-muted-foreground mb-2 px-2">
             Quick Actions
           </div>
           
-          <DropdownMenuItem
-            onClick={() => setShowPaymentDialog(true)}
-            className="flex items-center gap-2 px-2 py-2"
-          >
+          <DropdownMenuItem className="flex items-center gap-2 px-2 py-2">
             <CreditCard className="h-4 w-4" />
-            <span>Make Payment</span>
+            <span>Use Bridge Form Below</span>
           </DropdownMenuItem>
         </div>
 
