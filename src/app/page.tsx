@@ -1,4 +1,5 @@
 import { Bridge } from "@/components/Bridge";
+import { UnifiedChainSelector } from "@/components/UnifiedChainSelector";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ export default function Home() {
               <Link href="/docs" className="text-sm hover:text-foreground transition-colors text-muted-foreground">
                 Documentation
               </Link>
+              <UnifiedChainSelector />
               <div className="flex items-center gap-2">
                 <div className="text-xs text-muted-foreground">Powered by</div>
                 <div className="text-sm font-semibold">Intent Pay</div>
