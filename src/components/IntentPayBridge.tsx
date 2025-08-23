@@ -207,12 +207,13 @@ export function IntentPayBridge() {
           <Separator />
 
           {/* Intent Pay Button */}
-          <div className="space-y-4">
+          <div className="space-y-4" key={`payment-section-${amount}-${toChainId}-${toAddress || toStellarAddress}-${Date.now()}`}>
             <div className="flex justify-center">
               {intentConfig && isFormValid() ? (
-                <div key={`payment-${toChainId}-${toAddress || toStellarAddress}-${amount}-${Date.now()}`}>
+                <div>
                   {!isDestStellar ? (
                     <RozoPayButton
+                      key={`pay-button-${amount}-${toChainId}-${toAddress}`}
                       appId={intentConfig.appId}
                       toChain={intentConfig.toChain!}
                       toToken={intentConfig.toToken!}
@@ -224,6 +225,7 @@ export function IntentPayBridge() {
                     />
                   ) : (
                     <RozoPayButton
+                      key={`pay-button-stellar-${amount}-${toStellarAddress}`}
                       appId={intentConfig.appId}
                       toChain={BASE_USDC.chainId}
                       toAddress={getAddress("0x0000000000000000000000000000000000000000")}
