@@ -77,11 +77,16 @@ export function IntentPayBridge() {
     // Wait a moment to ensure old component is destroyed
     await new Promise(resolve => setTimeout(resolve, 100))
     
-    // Save current configuration
+    // Save current configuration - only save the relevant address
     setConfiguredAmount(amount)
     setConfiguredChainId(toChainId)
-    setConfiguredAddress(toAddress)
-    setConfiguredStellarAddress(toStellarAddress)
+    if (isDestStellar) {
+      setConfiguredAddress('') // Clear EVM address
+      setConfiguredStellarAddress(toStellarAddress)
+    } else {
+      setConfiguredAddress(toAddress)
+      setConfiguredStellarAddress('') // Clear Stellar address
+    }
     setPaymentKey(Date.now()) // Use timestamp as unique key
     
     // Wait another moment before showing the button
@@ -252,6 +257,12 @@ export function IntentPayBridge() {
                 onValueChange={(chainId) => {
                   if (chainId) {
                     setToChainId(chainId)
+                    // Clear addresses when switching between EVM and Stellar
+                    const newIsDestStellar = chainId === 1500 || chainId === 1501
+                    if (newIsDestStellar !== isDestStellar) {
+                      setToAddress('')
+                      setToStellarAddress('')
+                    }
                     handleConfigChange()
                   }
                 }}
@@ -339,7 +350,7 @@ export function IntentPayBridge() {
                     <div className="text-sm text-green-700 dark:text-green-300 space-y-1">
                       <div>Amount: {configuredAmount} USDC</div>
                       <div>Destination: {configuredChainId === 1500 || configuredChainId === 1501 ? 'Stellar' : 'Chain ID ' + configuredChainId}</div>
-                      <div className="truncate">To: {configuredAddress || configuredStellarAddress}</div>
+                      <div className="truncate">To: {configuredChainId === 1500 || configuredChainId === 1501 ? configuredStellarAddress : configuredAddress}</div>
                     </div>
                   </div>
                 </div>
