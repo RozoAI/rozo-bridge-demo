@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { ArrowRight, Zap, DollarSign, Clock, CheckCircle, Settings, RefreshCw } from 'lucide-react'
+import { ArrowRight, Zap, DollarSign, Clock, CheckCircle, Settings, RefreshCw, Loader2 } from 'lucide-react'
 import { ChainSelect } from './ChainSelect'
 import { AddressInput } from './AddressInput'
 import { StellarAddressInput } from './StellarAddressInput'
@@ -36,6 +36,7 @@ export function IntentPayBridge() {
   const [configuredAddress, setConfiguredAddress] = useState('')
   const [configuredStellarAddress, setConfiguredStellarAddress] = useState('')
   const [paymentKey, setPaymentKey] = useState(0) // Add a key to force remount
+  const [isGenerating, setIsGenerating] = useState(false) // Add loading state
 
   
   // Wallet connection is handled by Intent Pay SDK
@@ -63,19 +64,31 @@ export function IntentPayBridge() {
   }, [toChainId, toAddress, toStellarAddress, amount, isDestStellar])
 
   // Handle Generate Payment Button
-  const handleGeneratePayment = () => {
+  const handleGeneratePayment = async () => {
     if (!isFormValid()) {
       toast.error('Please complete all required fields')
       return
     }
+    
+    // Show loading state and hide payment button
+    setIsGenerating(true)
+    setShowPayButton(false)
+    
+    // Wait a moment to ensure old component is destroyed
+    await new Promise(resolve => setTimeout(resolve, 100))
     
     // Save current configuration
     setConfiguredAmount(amount)
     setConfiguredChainId(toChainId)
     setConfiguredAddress(toAddress)
     setConfiguredStellarAddress(toStellarAddress)
+    setPaymentKey(Date.now()) // Use timestamp as unique key
+    
+    // Wait another moment before showing the button
+    await new Promise(resolve => setTimeout(resolve, 100))
+    
     setShowPayButton(true)
-    setPaymentKey(prev => prev + 1) // Increment key to force remount
+    setIsGenerating(false)
     
     toast.success('Payment button generated! Click "Pay" to proceed.')
   }
@@ -281,7 +294,7 @@ export function IntentPayBridge() {
             )}
 
             {/* Generate Payment Button */}
-            {!showPayButton || hasConfigChanged() ? (
+            {(!showPayButton || hasConfigChanged()) && !isGenerating ? (
               <div className="flex flex-col items-center gap-4">
                 <Button 
                   onClick={handleGeneratePayment}
@@ -302,7 +315,14 @@ export function IntentPayBridge() {
                   </div>
                 )}
               </div>
-            ) : (
+            ) : isGenerating ? (
+              <div className="flex flex-col items-center gap-4">
+                <Button disabled className="w-64" size="lg">
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating Payment...
+                </Button>
+              </div>
+            ) : showPayButton && !hasConfigChanged() ? (
               <div className="space-y-4">
                 {/* Payment Summary */}
                 <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
@@ -350,7 +370,7 @@ export function IntentPayBridge() {
                   )}
                 </div>
               </div>
-            )}
+            ) : null}
             
             <div className="text-xs text-center text-muted-foreground">
               ✨ Powered by Intent Pay - No gas fees, no commission, instant settlement
