@@ -35,6 +35,7 @@ export function IntentPayBridge() {
   const [configuredChainId, setConfiguredChainId] = useState<number>(0)
   const [configuredAddress, setConfiguredAddress] = useState('')
   const [configuredStellarAddress, setConfiguredStellarAddress] = useState('')
+  const [paymentKey, setPaymentKey] = useState(0) // Add a key to force remount
 
   
   // Wallet connection is handled by Intent Pay SDK
@@ -74,6 +75,7 @@ export function IntentPayBridge() {
     setConfiguredAddress(toAddress)
     setConfiguredStellarAddress(toStellarAddress)
     setShowPayButton(true)
+    setPaymentKey(prev => prev + 1) // Increment key to force remount
     
     toast.success('Payment button generated! Click "Pay" to proceed.')
   }
@@ -315,11 +317,12 @@ export function IntentPayBridge() {
                 </div>
 
                 {/* RozoPayButton */}
-                <div className="flex justify-center">
+                <div className="flex justify-center" key={`payment-button-wrapper-${paymentKey}`}>
                   {intentConfig && (
                     <>
                       {configuredChainId !== 1500 && configuredChainId !== 1501 ? (
                         <RozoPayButton
+                          key={`rozo-pay-button-${paymentKey}-${configuredAmount}-${configuredChainId}-${configuredAddress}`}
                           appId={intentConfig.appId}
                           toChain={intentConfig.toChain!}
                           toToken={intentConfig.toToken!}
@@ -331,6 +334,7 @@ export function IntentPayBridge() {
                         />
                       ) : (
                         <RozoPayButton
+                          key={`rozo-pay-button-stellar-${paymentKey}-${configuredAmount}-${configuredStellarAddress}`}
                           appId={intentConfig.appId}
                           toChain={BASE_USDC.chainId}
                           toAddress={getAddress("0x0000000000000000000000000000000000000000")}
