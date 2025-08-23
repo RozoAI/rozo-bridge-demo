@@ -10,7 +10,7 @@ import { ArrowRight, Zap, DollarSign, Clock, CheckCircle } from 'lucide-react'
 import { ChainSelect } from './ChainSelect'
 import { AddressInput } from './AddressInput'
 import { StellarAddressInput } from './StellarAddressInput'
-import { StellarMemoInput } from './StellarMemoInput'
+
 import { RozoWalletSelector } from './RozoWalletSelector' // Updated import
 import { RozoPayButton } from '@rozoai/intent-pay'
 import { getAddress } from 'viem'
@@ -22,14 +22,7 @@ import {
 import { isValidStellarAddress } from '@/lib/stellar'
 import { toast } from 'sonner'
 
-// Define MemoType enum locally to avoid dependency issues
-enum MemoType {
-  MemoNone = 0,
-  MemoText = 1,
-  MemoId = 2,
-  MemoHash = 3,
-  MemoReturn = 4,
-}
+
 
 export function IntentPayBridge() {
   const MIN_USDC_AMOUNT = 0.10
@@ -37,7 +30,7 @@ export function IntentPayBridge() {
   const [amount, setAmount] = useState('')
   const [toAddress, setToAddress] = useState('')
   const [toStellarAddress, setToStellarAddress] = useState('')
-  const [memo, setMemo] = useState<{ type: MemoType; value: string } | null>(null)
+
   
   // Wallet connection is handled by Intent Pay SDK
 
@@ -58,11 +51,10 @@ export function IntentPayBridge() {
   // Create stable external ID based on payment parameters
   const externalId = useMemo(() => {
     if (isDestStellar) {
-      const memoStr = memo ? `${memo.type}-${memo.value}` : 'no-memo'
-      return `stellar-${toStellarAddress}-${amount}-${memoStr}`
+      return `stellar-${toStellarAddress}-${amount}`
     }
     return `bridge-${toChainId}-${toAddress}-${amount}`
-  }, [toChainId, toAddress, toStellarAddress, amount, memo, isDestStellar])
+  }, [toChainId, toAddress, toStellarAddress, amount, isDestStellar])
 
   // Create Intent Pay configuration
   const getIntentConfig = () => {
@@ -72,11 +64,6 @@ export function IntentPayBridge() {
         appId: DEFAULT_INTENT_PAY_CONFIG.appId,
         toStellarAddress,
         amount,
-        memo: memo ? {
-          type: memo.type === MemoType.MemoText ? 'text' :
-                memo.type === MemoType.MemoId ? 'id' : 'hash',
-          value: memo.value
-        } : undefined,
         externalId,
       })
     }
@@ -100,7 +87,6 @@ export function IntentPayBridge() {
     setAmount('')
     setToAddress('')
     setToStellarAddress('')
-    setMemo(null)
   }
 
   const handlePaymentBounced = () => {
@@ -112,7 +98,6 @@ export function IntentPayBridge() {
     toAddress,
     toStellarAddress,
     amount,
-    memo,
     isDestStellar
   ])
 
@@ -210,19 +195,12 @@ export function IntentPayBridge() {
             )}
 
             {isDestStellar && (
-              <>
-                <StellarAddressInput
-                  value={toStellarAddress}
-                  onChange={setToStellarAddress}
-                  label="Destination Stellar Address"
-                  required
-                />
-                <StellarMemoInput
-                  destinationAddress={toStellarAddress}
-                  memo={memo}
-                  onMemoChange={setMemo}
-                />
-              </>
+              <StellarAddressInput
+                value={toStellarAddress}
+                onChange={setToStellarAddress}
+                label="Destination Stellar Address"
+                required
+              />
             )}
           </div>
 
@@ -232,7 +210,7 @@ export function IntentPayBridge() {
           <div className="space-y-4">
             <div className="flex justify-center">
               {intentConfig && isFormValid() ? (
-                <div key={`payment-${toChainId}-${toAddress || toStellarAddress}-${amount}-${memo ? `${memo.type}-${memo.value}` : 'no-memo'}-${Date.now()}`}>
+                <div key={`payment-${toChainId}-${toAddress || toStellarAddress}-${amount}-${Date.now()}`}>
                   {!isDestStellar ? (
                     <RozoPayButton
                       appId={intentConfig.appId}
@@ -252,7 +230,6 @@ export function IntentPayBridge() {
                       toStellarAddress={intentConfig.toStellarAddress}
                       toUnits={intentConfig.toUnits}
                       toToken={getAddress(BASE_USDC.token)}
-                      {...(intentConfig.memo ? { memo: intentConfig.memo } : {})}
                       onPaymentStarted={handlePaymentStarted}
                       onPaymentCompleted={handlePaymentCompleted}
                       onPaymentBounced={handlePaymentBounced}
