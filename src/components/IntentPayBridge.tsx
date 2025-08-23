@@ -154,10 +154,18 @@ export function IntentPayBridge() {
     toast.error('Payment failed and was refunded.')
   }
 
-  const intentConfig = useMemo(() => {
-    if (!showPayButton) return null
-    return getIntentConfig()
-  }, [showPayButton, configuredAmount, configuredChainId, configuredAddress, configuredStellarAddress])
+  // Remove memoization to ensure fresh config on every render
+  const intentConfig = showPayButton ? getIntentConfig() : null
+  
+  // Debug logging
+  if (intentConfig) {
+    console.log('IntentConfig:', {
+      toUnits: intentConfig.toUnits,
+      configuredAmount,
+      paymentKey,
+      timestamp: new Date().toISOString()
+    })
+  }
 
   return (
     <div className="space-y-6">
