@@ -18,7 +18,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Badge } from '@/components/ui/badge'
-import { supportedChains } from '@/lib/chains'
+import { supportedChains, comingSoonChains } from '@/lib/chains'
 import { SUPPORTED_INTENT_CHAINS } from '@/lib/intentPay'
 import { cn } from '@/lib/utils'
 
@@ -47,16 +47,17 @@ export function ChainSelect({
     setSupportedChainIds(SUPPORTED_INTENT_CHAINS)
   }, [])
 
-  const selectedChain = supportedChains.find(chain => chain.id === value)
+  const selectedChain = [...supportedChains, ...comingSoonChains].find(chain => chain.id === value)
   
-  const availableChains = supportedChains.filter(chain => {
-    // Filter out excluded chain and unsupported chains
+  const availableChains = [...supportedChains, ...comingSoonChains].filter(chain => {
+    // Filter out excluded chain
     if (excludeChainId && chain.id === excludeChainId) return false
-    return supportedChainIds.length === 0 || supportedChainIds.includes(chain.id)
+    return true
   })
 
   const isChainSupported = (chainId: number) => {
-    return supportedChainIds.length === 0 || supportedChainIds.includes(chainId)
+    // Check if the chain is in the supported chains list (not coming soon)
+    return supportedChains.some(chain => chain.id === chainId)
   }
 
   return (
@@ -95,7 +96,7 @@ export function ChainSelect({
               <span className="font-medium">{selectedChain.name}</span>
               {!isChainSupported(selectedChain.id) && (
                 <Badge variant="secondary" className="text-xs">
-                  Unsupported
+                  Coming Soon
                 </Badge>
               )}
             </div>

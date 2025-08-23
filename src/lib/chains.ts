@@ -90,7 +90,7 @@ const getChainLogo = (chainId: number): string => {
 }
 
 // Currently supported chains for payin/payout (USDC only)
-// Base, Arbitrum, Optimism, Polygon, Stellar Mainnet
+// Base, Stellar Mainnet
 export const supportedChains: SupportedChain[] = [
   {
     ...base,
@@ -99,6 +99,16 @@ export const supportedChains: SupportedChain[] = [
     explorerUrl: 'https://basescan.org',
     ecosystem: 'EVM',
   },
+  {
+    ...stellarMainnet,
+    logo: getChainLogo(stellarMainnet.id),
+    explorerUrl: 'https://stellar.expert/explorer/public',
+    ecosystem: 'Stellar',
+  },
+]
+
+// Chains coming soon (not yet supported)
+export const comingSoonChains: SupportedChain[] = [
   {
     ...arbitrum,
     logo: getChainLogo(arbitrum.id),
@@ -119,12 +129,6 @@ export const supportedChains: SupportedChain[] = [
     usdcAddress: USDC_ADDRESSES[polygon.id],
     explorerUrl: 'https://polygonscan.com',
     ecosystem: 'EVM',
-  },
-  {
-    ...stellarMainnet,
-    logo: getChainLogo(stellarMainnet.id),
-    explorerUrl: 'https://stellar.expert/explorer/public',
-    ecosystem: 'Stellar',
   },
 ]
 
