@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -37,6 +37,8 @@ export function IntentPayBridge() {
   const [configuredStellarAddress, setConfiguredStellarAddress] = useState('')
   const [paymentKey, setPaymentKey] = useState(0) // Add a key to force remount
   const [isGenerating, setIsGenerating] = useState(false) // Add loading state
+  const [shouldRenderButton, setShouldRenderButton] = useState(true) // Control button rendering
+  const cleanupTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   
   // Wallet connection is handled by Intent Pay SDK
@@ -70,12 +72,28 @@ export function IntentPayBridge() {
       return
     }
     
-    // Show loading state and hide payment button
+    // Clear any existing timeout
+    if (cleanupTimeoutRef.current) {
+      clearTimeout(cleanupTimeoutRef.current)
+    }
+    
+    // Show loading state and completely unmount payment button
     setIsGenerating(true)
     setShowPayButton(false)
+    setShouldRenderButton(false) // Completely remove from DOM
     
-    // Wait a moment to ensure old component is destroyed
-    await new Promise(resolve => setTimeout(resolve, 100))
+    // Force cleanup of any existing connections
+    if (typeof window !== 'undefined' && (window as any).rozoPayConnection) {
+      try {
+        (window as any).rozoPayConnection.disconnect?.();
+        delete (window as any).rozoPayConnection;
+      } catch (e) {
+        console.log('Error cleaning up connection:', e)
+      }
+    }
+    
+    // Wait longer to ensure complete cleanup
+    await new Promise(resolve => setTimeout(resolve, 300))
     
     // Save current configuration - only save the relevant address
     setConfiguredAmount(amount)
@@ -89,8 +107,11 @@ export function IntentPayBridge() {
     }
     setPaymentKey(Date.now()) // Use timestamp as unique key
     
+    // Re-enable button rendering
+    setShouldRenderButton(true)
+    
     // Wait another moment before showing the button
-    await new Promise(resolve => setTimeout(resolve, 100))
+    await new Promise(resolve => setTimeout(resolve, 200))
     
     setShowPayButton(true)
     setIsGenerating(false)
@@ -171,6 +192,24 @@ export function IntentPayBridge() {
       timestamp: new Date().toISOString()
     })
   }
+  
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (cleanupTimeoutRef.current) {
+        clearTimeout(cleanupTimeoutRef.current)
+      }
+      // Clean up any connections on unmount
+      if (typeof window !== 'undefined' && (window as any).rozoPayConnection) {
+        try {
+          (window as any).rozoPayConnection.disconnect?.();
+          delete (window as any).rozoPayConnection;
+        } catch (e) {
+          console.log('Error cleaning up connection on unmount:', e)
+        }
+      }
+    }
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -356,38 +395,40 @@ export function IntentPayBridge() {
                 </div>
 
                 {/* RozoPayButton */}
-                <div className="flex justify-center" key={`payment-button-wrapper-${paymentKey}`}>
-                  {intentConfig && (
-                    <>
-                      {configuredChainId !== 1500 && configuredChainId !== 1501 ? (
-                        <RozoPayButton
-                          key={`rozo-pay-button-${paymentKey}-${configuredAmount}-${configuredChainId}-${configuredAddress}`}
-                          appId={intentConfig.appId}
-                          toChain={intentConfig.toChain!}
-                          toToken={intentConfig.toToken!}
-                          toAddress={intentConfig.toAddress as `0x${string}`}
-                          toUnits={intentConfig.toUnits}
-                          onPaymentStarted={handlePaymentStarted}
-                          onPaymentCompleted={handlePaymentCompleted}
-                          onPaymentBounced={handlePaymentBounced}
-                        />
-                      ) : (
-                        <RozoPayButton
-                          key={`rozo-pay-button-stellar-${paymentKey}-${configuredAmount}-${configuredStellarAddress}`}
-                          appId={intentConfig.appId}
-                          toChain={BASE_USDC.chainId}
-                          toAddress={getAddress("0x0000000000000000000000000000000000000000")}
-                          toStellarAddress={intentConfig.toStellarAddress}
-                          toUnits={intentConfig.toUnits}
-                          toToken={getAddress(BASE_USDC.token)}
-                          onPaymentStarted={handlePaymentStarted}
-                          onPaymentCompleted={handlePaymentCompleted}
-                          onPaymentBounced={handlePaymentBounced}
-                        />
-                      )}
-                    </>
-                  )}
-                </div>
+                {shouldRenderButton && (
+                  <div className="flex justify-center" key={`payment-button-wrapper-${paymentKey}`}>
+                    {intentConfig && (
+                      <>
+                        {configuredChainId !== 1500 && configuredChainId !== 1501 ? (
+                          <RozoPayButton
+                            key={`rozo-pay-button-${paymentKey}-${configuredAmount}-${configuredChainId}-${configuredAddress}`}
+                            appId={intentConfig.appId}
+                            toChain={intentConfig.toChain!}
+                            toToken={intentConfig.toToken!}
+                            toAddress={intentConfig.toAddress as `0x${string}`}
+                            toUnits={intentConfig.toUnits}
+                            onPaymentStarted={handlePaymentStarted}
+                            onPaymentCompleted={handlePaymentCompleted}
+                            onPaymentBounced={handlePaymentBounced}
+                          />
+                        ) : (
+                          <RozoPayButton
+                            key={`rozo-pay-button-stellar-${paymentKey}-${configuredAmount}-${configuredStellarAddress}`}
+                            appId={intentConfig.appId}
+                            toChain={BASE_USDC.chainId}
+                            toAddress={getAddress("0x0000000000000000000000000000000000000000")}
+                            toStellarAddress={intentConfig.toStellarAddress}
+                            toUnits={intentConfig.toUnits}
+                            toToken={getAddress(BASE_USDC.token)}
+                            onPaymentStarted={handlePaymentStarted}
+                            onPaymentCompleted={handlePaymentCompleted}
+                            onPaymentBounced={handlePaymentBounced}
+                          />
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             ) : null}
             
