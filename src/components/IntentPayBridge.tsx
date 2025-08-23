@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { ArrowRight, Zap, DollarSign, Clock, CheckCircle } from 'lucide-react'
+import { ArrowRight, Zap, DollarSign, Clock, CheckCircle, Settings, RefreshCw } from 'lucide-react'
 import { ChainSelect } from './ChainSelect'
 import { AddressInput } from './AddressInput'
 import { StellarAddressInput } from './StellarAddressInput'
@@ -30,6 +30,11 @@ export function IntentPayBridge() {
   const [amount, setAmount] = useState('')
   const [toAddress, setToAddress] = useState('')
   const [toStellarAddress, setToStellarAddress] = useState('')
+  const [showPayButton, setShowPayButton] = useState(false)
+  const [configuredAmount, setConfiguredAmount] = useState('')
+  const [configuredChainId, setConfiguredChainId] = useState<number>(0)
+  const [configuredAddress, setConfiguredAddress] = useState('')
+  const [configuredStellarAddress, setConfiguredStellarAddress] = useState('')
 
   
   // Wallet connection is handled by Intent Pay SDK
@@ -56,24 +61,61 @@ export function IntentPayBridge() {
     return `bridge-${toChainId}-${toAddress}-${amount}`
   }, [toChainId, toAddress, toStellarAddress, amount, isDestStellar])
 
-  // Create Intent Pay configuration
+  // Handle Generate Payment Button
+  const handleGeneratePayment = () => {
+    if (!isFormValid()) {
+      toast.error('Please complete all required fields')
+      return
+    }
+    
+    // Save current configuration
+    setConfiguredAmount(amount)
+    setConfiguredChainId(toChainId)
+    setConfiguredAddress(toAddress)
+    setConfiguredStellarAddress(toStellarAddress)
+    setShowPayButton(true)
+    
+    toast.success('Payment button generated! Click "Pay" to proceed.')
+  }
+
+  // Handle configuration changes
+  const handleConfigChange = () => {
+    setShowPayButton(false)
+  }
+
+  // Check if configuration has changed
+  const hasConfigChanged = () => {
+    if (!showPayButton) return false
+    return (
+      amount !== configuredAmount ||
+      toChainId !== configuredChainId ||
+      toAddress !== configuredAddress ||
+      toStellarAddress !== configuredStellarAddress
+    )
+  }
+
+  // Create Intent Pay configuration for configured values
   const getIntentConfig = () => {
-    if (!isFormValid()) return null
-    if (isDestStellar) {
+    const isConfiguredStellar = configuredChainId === 1500 || configuredChainId === 1501
+    const configExternalId = isConfiguredStellar 
+      ? `stellar-${configuredStellarAddress}-${configuredAmount}`
+      : `bridge-${configuredChainId}-${configuredAddress}-${configuredAmount}`
+    
+    if (isConfiguredStellar) {
       return createIntentConfig({
         appId: DEFAULT_INTENT_PAY_CONFIG.appId,
-        toStellarAddress,
-        amount,
-        externalId,
+        toStellarAddress: configuredStellarAddress,
+        amount: configuredAmount,
+        externalId: configExternalId,
       })
     }
 
     return createIntentConfig({
       appId: DEFAULT_INTENT_PAY_CONFIG.appId,
-      toChainId,
-      toAddress: toAddress as `0x${string}`,
-      amount,
-      externalId,
+      toChainId: configuredChainId,
+      toAddress: configuredAddress as `0x${string}`,
+      amount: configuredAmount,
+      externalId: configExternalId,
     })
   }
 
@@ -87,19 +129,20 @@ export function IntentPayBridge() {
     setAmount('')
     setToAddress('')
     setToStellarAddress('')
+    setShowPayButton(false)
+    setConfiguredAmount('')
+    setConfiguredAddress('')
+    setConfiguredStellarAddress('')
   }
 
   const handlePaymentBounced = () => {
     toast.error('Payment failed and was refunded.')
   }
 
-  const intentConfig = useMemo(() => getIntentConfig(), [
-    toChainId,
-    toAddress,
-    toStellarAddress,
-    amount,
-    isDestStellar
-  ])
+  const intentConfig = useMemo(() => {
+    if (!showPayButton) return null
+    return getIntentConfig()
+  }, [showPayButton, configuredAmount, configuredChainId, configuredAddress, configuredStellarAddress])
 
   return (
     <div className="space-y-6">
@@ -160,7 +203,10 @@ export function IntentPayBridge() {
               id="amount"
               type="number"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => {
+                setAmount(e.target.value)
+                handleConfigChange()
+              }}
               placeholder="0.00"
               step="0.01"
               min="0"
@@ -180,7 +226,12 @@ export function IntentPayBridge() {
               <Label>To Chain</Label>
               <ChainSelect
                 value={toChainId}
-                onValueChange={(chainId) => chainId && setToChainId(chainId)}
+                onValueChange={(chainId) => {
+                  if (chainId) {
+                    setToChainId(chainId)
+                    handleConfigChange()
+                  }
+                }}
                 placeholder="Select destination chain"
               />
             </div>
@@ -188,7 +239,10 @@ export function IntentPayBridge() {
             {!isDestStellar && (
               <AddressInput
                 value={toAddress}
-                onChange={setToAddress}
+                onChange={(value) => {
+                  setToAddress(value)
+                  handleConfigChange()
+                }}
                 label="Destination Address"
                 placeholder="0x..."
               />
@@ -197,7 +251,10 @@ export function IntentPayBridge() {
             {isDestStellar && (
               <StellarAddressInput
                 value={toStellarAddress}
-                onChange={setToStellarAddress}
+                onChange={(value) => {
+                  setToStellarAddress(value)
+                  handleConfigChange()
+                }}
                 label="Destination Stellar Address"
                 required
               />
@@ -206,48 +263,90 @@ export function IntentPayBridge() {
 
           <Separator />
 
-          {/* Intent Pay Button */}
-          <div className="space-y-4" key={`payment-section-${amount}-${toChainId}-${toAddress || toStellarAddress}-${Date.now()}`}>
-            <div className="flex justify-center">
-              {intentConfig && isFormValid() ? (
-                <div>
-                  {!isDestStellar ? (
-                    <RozoPayButton
-                      key={`pay-button-${amount}-${toChainId}-${toAddress}`}
-                      appId={intentConfig.appId}
-                      toChain={intentConfig.toChain!}
-                      toToken={intentConfig.toToken!}
-                      toAddress={intentConfig.toAddress as `0x${string}`}
-                      toUnits={intentConfig.toUnits}
-                      onPaymentStarted={handlePaymentStarted}
-                      onPaymentCompleted={handlePaymentCompleted}
-                      onPaymentBounced={handlePaymentBounced}
-                    />
-                  ) : (
-                    <RozoPayButton
-                      key={`pay-button-stellar-${amount}-${toStellarAddress}`}
-                      appId={intentConfig.appId}
-                      toChain={BASE_USDC.chainId}
-                      toAddress={getAddress("0x0000000000000000000000000000000000000000")}
-                      toStellarAddress={intentConfig.toStellarAddress}
-                      toUnits={intentConfig.toUnits}
-                      toToken={getAddress(BASE_USDC.token)}
-                      onPaymentStarted={handlePaymentStarted}
-                      onPaymentCompleted={handlePaymentCompleted}
-                      onPaymentBounced={handlePaymentBounced}
-                    />
+          {/* Payment Actions */}
+          <div className="space-y-4">
+            {/* Configuration Status */}
+            {hasConfigChanged() && (
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="h-4 w-4 text-amber-600" />
+                  <div className="text-sm">
+                    <div className="font-medium text-amber-900 dark:text-amber-100">Configuration Changed</div>
+                    <div className="text-amber-700 dark:text-amber-300">Click "Generate Payment" to update the payment button</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Generate Payment Button */}
+            {!showPayButton || hasConfigChanged() ? (
+              <div className="flex flex-col items-center gap-4">
+                <Button 
+                  onClick={handleGeneratePayment}
+                  disabled={!isFormValid()}
+                  className="w-64" 
+                  size="lg"
+                  variant={hasConfigChanged() ? "default" : "default"}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  {hasConfigChanged() ? 'Update Payment' : 'Generate Payment'}
+                </Button>
+                {!isFormValid() && (
+                  <div className="text-xs text-center text-muted-foreground">
+                    {!amount ? 'Enter amount to continue' :
+                     (Number.isFinite(parseFloat(amount)) && parseFloat(amount) > 0 && parseFloat(amount) < MIN_USDC_AMOUNT)
+                       ? 'Minimum amount is $0.10'
+                       : 'Complete all required fields'}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Payment Summary */}
+                <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium text-green-900 dark:text-green-100">Payment Ready</div>
+                    <div className="text-sm text-green-700 dark:text-green-300 space-y-1">
+                      <div>Amount: {configuredAmount} USDC</div>
+                      <div>Destination: {configuredChainId === 1500 || configuredChainId === 1501 ? 'Stellar' : 'Chain ID ' + configuredChainId}</div>
+                      <div className="truncate">To: {configuredAddress || configuredStellarAddress}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* RozoPayButton */}
+                <div className="flex justify-center">
+                  {intentConfig && (
+                    <>
+                      {configuredChainId !== 1500 && configuredChainId !== 1501 ? (
+                        <RozoPayButton
+                          appId={intentConfig.appId}
+                          toChain={intentConfig.toChain!}
+                          toToken={intentConfig.toToken!}
+                          toAddress={intentConfig.toAddress as `0x${string}`}
+                          toUnits={intentConfig.toUnits}
+                          onPaymentStarted={handlePaymentStarted}
+                          onPaymentCompleted={handlePaymentCompleted}
+                          onPaymentBounced={handlePaymentBounced}
+                        />
+                      ) : (
+                        <RozoPayButton
+                          appId={intentConfig.appId}
+                          toChain={BASE_USDC.chainId}
+                          toAddress={getAddress("0x0000000000000000000000000000000000000000")}
+                          toStellarAddress={intentConfig.toStellarAddress}
+                          toUnits={intentConfig.toUnits}
+                          toToken={getAddress(BASE_USDC.token)}
+                          onPaymentStarted={handlePaymentStarted}
+                          onPaymentCompleted={handlePaymentCompleted}
+                          onPaymentBounced={handlePaymentBounced}
+                        />
+                      )}
+                    </>
                   )}
                 </div>
-              ) : (
-                <Button disabled className="w-64" size="lg">
-                  <ArrowRight className="h-4 w-4 mr-2" />
-                  {!amount ? 'Enter Amount' :
-                   (Number.isFinite(parseFloat(amount)) && parseFloat(amount) > 0 && parseFloat(amount) < MIN_USDC_AMOUNT)
-                     ? 'Minimum $0.10'
-                     : (!isFormValid() ? 'Complete Form' : 'Transfer USDC')}
-                </Button>
-              )}
-            </div>
+              </div>
+            )}
             
             <div className="text-xs text-center text-muted-foreground">
               ✨ Powered by Intent Pay - No gas fees, no commission, instant settlement
