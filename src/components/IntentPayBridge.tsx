@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -12,7 +12,7 @@ import { AddressInput } from './AddressInput'
 import { StellarAddressInput } from './StellarAddressInput'
 
 import { RozoWalletSelector } from './RozoWalletSelector' // Updated import
-import { RozoPayButton } from '@rozoai/intent-pay'
+import { RozoPayButton, useRozoPayUI } from '@rozoai/intent-pay'
 import { getAddress } from 'viem'
 import { 
   createIntentConfig, 
@@ -26,6 +26,7 @@ import { toast } from 'sonner'
 
 export function IntentPayBridge() {
   const MIN_USDC_AMOUNT = 0.10
+  const { resetPayment } = useRozoPayUI() // Get resetPayment from hook
   const [toChainId, setToChainId] = useState<number>(8453) // Base
   const [amount, setAmount] = useState('')
   const [toAddress, setToAddress] = useState('')
@@ -57,13 +58,7 @@ export function IntentPayBridge() {
     return !!toAddress
   }
 
-  // Create stable external ID based on payment parameters
-  const externalId = useMemo(() => {
-    if (isDestStellar) {
-      return `stellar-${toStellarAddress}-${amount}`
-    }
-    return `bridge-${toChainId}-${toAddress}-${amount}`
-  }, [toChainId, toAddress, toStellarAddress, amount, isDestStellar])
+  // External ID is now created within handleGeneratePayment function when needed
 
   // Handle Generate Payment Button
   const handleGeneratePayment = async () => {
@@ -106,6 +101,35 @@ export function IntentPayBridge() {
       setConfiguredStellarAddress('') // Clear Stellar address
     }
     setPaymentKey(Date.now()) // Use timestamp as unique key
+    
+    // Reset payment with new configuration
+    try {
+      if (isDestStellar) {
+        resetPayment({
+          toChain: BASE_USDC.chainId,
+          toAddress: getAddress("0x0000000000000000000000000000000000000000"),
+          toStellarAddress: toStellarAddress,
+          toUnits: amount,
+          toToken: getAddress(BASE_USDC.token),
+        })
+      } else {
+        const config = createIntentConfig({
+          appId: DEFAULT_INTENT_PAY_CONFIG.appId,
+          toChainId: toChainId,
+          toAddress: toAddress as `0x${string}`,
+          amount: amount,
+          externalId: `bridge-${toChainId}-${toAddress}-${amount}`,
+        })
+        resetPayment({
+          toChain: config.toChain,
+          toAddress: config.toAddress as `0x${string}`,
+          toUnits: config.toUnits,
+          toToken: config.toToken,
+        })
+      }
+    } catch (error) {
+      console.error('Error resetting payment:', error)
+    }
     
     // Re-enable button rendering
     setShouldRenderButton(true)
