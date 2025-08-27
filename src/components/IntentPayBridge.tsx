@@ -237,44 +237,7 @@ export function IntentPayBridge() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-yellow-500" />
-            Intent Pay Bridge
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Gasless, commission-free USDC transfers powered by Intent Pay
-          </p>
-        </CardHeader>
-        <CardContent>
-          {/* Benefits */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
-              <DollarSign className="h-4 w-4 text-green-600" />
-              <div>
-                <div className="text-sm font-medium">No Gas Fees</div>
-                <div className="text-xs text-muted-foreground">Zero gas costs</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-              <CheckCircle className="h-4 w-4 text-blue-600" />
-              <div>
-                <div className="text-sm font-medium">No Commission</div>
-                <div className="text-xs text-muted-foreground">Zero fees</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
-              <Clock className="h-4 w-4 text-purple-600" />
-              <div>
-                <div className="text-sm font-medium">Fast Transfer</div>
-                <div className="text-xs text-muted-foreground">Under 5 minutes</div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
 
       {/* Transfer Form - Always Show */}
       <Card>
@@ -282,7 +245,6 @@ export function IntentPayBridge() {
           <div>
             <CardTitle>Transfer Configuration</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Configure your cross-chain USDC transfer. Source chain will be selected when you pay.
             </p>
           </div>
         </CardHeader>
@@ -457,11 +419,12 @@ export function IntentPayBridge() {
             ) : null}
             
             <div className="text-xs text-center text-muted-foreground">
-              ✨ Powered by Intent Pay - No gas fees, no commission, instant settlement
+              ✨ Powered by Rozo - Visa for stablecoins
             </div>
           </div>
         </CardContent>
       </Card>
+
     </div>
   )
 }

@@ -25,7 +25,7 @@ const docSections: DocSection[] = [
     icon: Book,
     items: [
       { title: 'Overview', href: '/docs', description: 'Welcome to Rozo Bridge' },
-      { title: 'Quick Start', href: '/docs/quick-start', description: 'Get up and running in 5 minutes' },
+      { title: 'Quick Start', href: '/docs/quick-start', description: 'Bridge in 5 seconds' },
     ]
   },
   {

@@ -10,13 +10,13 @@ export default function QuickStartPage() {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-            5 minutes
+            5 Seconds
           </Badge>
           <Badge variant="outline">Beginner Friendly</Badge>
         </div>
         <h1 className="text-4xl font-bold tracking-tight">Quick Start Guide</h1>
         <p className="text-xl text-muted-foreground">
-          Get up and running with Rozo Bridge in under 5 minutes. This guide will walk you through 
+          Bridge with Rozo within 5 seconds. This guide will walk you through 
           creating your first cross-chain bridge application.
         </p>
       </div>
