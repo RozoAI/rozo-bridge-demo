@@ -29,11 +29,11 @@ export default function Home() {
               <Link href="/docs" className="text-sm hover:text-foreground transition-colors text-muted-foreground">
                 Documentation
               </Link>
-              <RozoWalletSelector />
+{/*              <RozoWalletSelector />
               <div className="flex items-center gap-2">
                 <div className="text-xs text-muted-foreground">Powered by</div>
-                <div className="text-sm font-semibold">Intent Pay</div>
-              </div>
+                <div className="text-sm font-semibold">Rozo</div>
+              </div>*/}
             </div>
           </div>
         </div>
@@ -48,8 +48,6 @@ export default function Home() {
               Intent-Based USDC Transfers
             </h2>
             <p className="text-muted-foreground mb-6">
-              Experience seamless cross-chain USDC transfers with intent-based execution. 
-              Powered by @rozoai/intent-pay for optimal routing and execution.
             </p>
             <div className="mt-2 flex justify-center">
               <Link href="/docs">
@@ -70,27 +68,27 @@ export default function Home() {
               <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center mx-auto mb-3">
                 🎯
               </div>
-              <h3 className="font-semibold mb-2">Intent-Based</h3>
+              <h3 className="font-semibold mb-2">Instant Transfer</h3>
               <p className="text-sm text-muted-foreground">
-                Express your transfer intent and let the system find optimal execution
+                Within 5 seconds
               </p>
             </div>
             <div className="text-center p-4">
               <div className="w-12 h-12 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center mx-auto mb-3">
                 💰
               </div>
-              <h3 className="font-semibold mb-2">No Commission</h3>
+              <h3 className="font-semibold mb-2">Frictionless</h3>
               <p className="text-sm text-muted-foreground">
-                Zero commission fees - only pay for gas and protocol fees
+                Limited-Time Free (0.1% Fee Waived)
               </p>
             </div>
             <div className="text-center p-4">
               <div className="w-12 h-12 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center mx-auto mb-3">
                 🔄
               </div>
-              <h3 className="font-semibold mb-2">Payin/Payout</h3>
+              <h3 className="font-semibold mb-2">Intent-Based</h3>
               <p className="text-sm text-muted-foreground">
-                Clear separation of payin and payout flows for better UX
+                One Tap to Pay
               </p>
             </div>
           </div>

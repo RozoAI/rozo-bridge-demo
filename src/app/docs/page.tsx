@@ -41,7 +41,7 @@ export default function DocsHomePage() {
               <CardTitle>Quick Start</CardTitle>
             </div>
             <CardDescription>
-              Get up and running with Rozo Bridge in under 5 minutes
+              Bridge with Rozo within 5 seconds
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -181,7 +181,7 @@ export default function DocsHomePage() {
           
           <Link href="/docs/quick-start" className="block p-4 border rounded-lg hover:border-primary/50 transition-colors">
             <h3 className="font-semibold mb-2">⚡ Quick Start</h3>
-            <p className="text-sm text-muted-foreground">Get up and running in 5 minutes</p>
+            <p className="text-sm text-muted-foreground">Bridge in 5 seconds</p>
           </Link>
         </div>
       </div>
