@@ -107,7 +107,8 @@ export function IntentPayBridge() {
       if (isDestStellar) {
         resetPayment({
           toChain: BASE_USDC.chainId,
-          toAddress: getAddress("0x0000000000000000000000000000000000000000"),
+          // Use a valid placeholder EVM address for Stellar transfers (required by SDK)
+          toAddress: getAddress("0x0000000000000000000000000000000000000001"),
           toStellarAddress: toStellarAddress,
           toUnits: amount,
           toToken: getAddress(BASE_USDC.token),
@@ -402,7 +403,8 @@ export function IntentPayBridge() {
                             key={`rozo-pay-button-stellar-${paymentKey}-${configuredAmount}-${configuredStellarAddress}`}
                             appId={intentConfig.appId}
                             toChain={BASE_USDC.chainId}
-                            toAddress={getAddress("0x0000000000000000000000000000000000000000")}
+                            // Use a valid placeholder EVM address for Stellar transfers (required by SDK)
+                            toAddress={getAddress("0x0000000000000000000000000000000000000001")}
                             toStellarAddress={intentConfig.toStellarAddress}
                             toUnits={intentConfig.toUnits}
                             toToken={getAddress(BASE_USDC.token)}
