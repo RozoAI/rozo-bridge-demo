@@ -48,6 +48,7 @@ export default function Home() {
               Intent-Based USDC Transfers
             </h2>
             <p className="text-muted-foreground mb-6">
+              Built for real-life micropayments. Fees are waived if a transaction takes longer than 10 seconds. Contact us for production use.
             </p>
             <div className="mt-2 flex justify-center">
               <Link href="/docs">

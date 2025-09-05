@@ -1,11 +1,22 @@
-import Link from 'next/link'
-import Image from 'next/image'
-import { ArrowRight, Zap, Shield, Globe, Code } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ArrowRight, Code, Globe, Shield, Zap } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import packageJson from "../../../package.json";
 
 export default function DocsHomePage() {
+  const intentPayVersion =
+    packageJson.dependencies["@rozoai/intent-pay"]?.replace("^", "") ||
+    "Unknown";
+
   return (
     <div className="space-y-8">
       {/* Hero Section */}
@@ -19,16 +30,23 @@ export default function DocsHomePage() {
             className="rounded-lg"
           />
           <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-              v0.0.18-beta.9
+            <Badge
+              variant="secondary"
+              className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+            >
+              v{intentPayVersion}
             </Badge>
             <Badge variant="outline">Latest</Badge>
           </div>
         </div>
-        <h1 className="text-4xl font-bold tracking-tight">Rozo Bridge Documentation</h1>
+        <h1 className="text-4xl font-bold tracking-tight">
+          Rozo Bridge Documentation
+        </h1>
         <p className="text-xl text-muted-foreground max-w-3xl">
-          Build seamless cross-chain applications with Intent Pay. Bridge USDC across multiple blockchains 
-          with our powerful API and SDK — fast, secure, and developer-friendly. Uses local optimized chain/token logos with a globe fallback for unknown networks.
+          Build seamless cross-chain applications with Intent Pay. Bridge USDC
+          across multiple blockchains with our powerful API and SDK — fast,
+          secure, and developer-friendly. Uses local optimized chain/token logos
+          with a globe fallback for unknown networks.
         </p>
       </div>
 
@@ -40,9 +58,7 @@ export default function DocsHomePage() {
               <Zap className="w-5 h-5 text-primary" />
               <CardTitle>Quick Start</CardTitle>
             </div>
-            <CardDescription>
-              Bridge with Rozo within 5 seconds
-            </CardDescription>
+            <CardDescription>Bridge with Rozo within 5 seconds</CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/docs/quick-start">
@@ -86,7 +102,8 @@ export default function DocsHomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Optimized intent-based bridging with minimal confirmation times and competitive fees.
+                Optimized intent-based bridging with minimal confirmation times
+                and competitive fees.
               </p>
             </CardContent>
           </Card>
@@ -98,7 +115,8 @@ export default function DocsHomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Battle-tested smart contracts with comprehensive security audits and insurance coverage.
+                Battle-tested smart contracts with comprehensive security audits
+                and insurance coverage.
               </p>
             </CardContent>
           </Card>
@@ -110,7 +128,8 @@ export default function DocsHomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Bridge USDC across Ethereum, Polygon, Arbitrum, Optimism, and more chains.
+                Bridge USDC across Ethereum, Polygon, Arbitrum, Optimism, and
+                more chains.
               </p>
             </CardContent>
           </Card>
@@ -127,8 +146,12 @@ export default function DocsHomePage() {
             </div>
             <div>
               <h3 className="font-semibold mb-1">Install the SDK</h3>
-              <p className="text-muted-foreground mb-2">Add @rozoai/intent-pay to your project</p>
-              <code className="text-sm bg-muted px-2 py-1 rounded">npm install @rozoai/intent-pay</code>
+              <p className="text-muted-foreground mb-2">
+                Add @rozoai/intent-pay to your project
+              </p>
+              <code className="text-sm bg-muted px-2 py-1 rounded">
+                npm install @rozoai/intent-pay
+              </code>
             </div>
           </div>
 
@@ -138,8 +161,13 @@ export default function DocsHomePage() {
             </div>
             <div>
               <h3 className="font-semibold mb-1">Configure Your App</h3>
-              <p className="text-muted-foreground mb-2">Set up the Intent Pay client with your configuration</p>
-              <Link href="/docs/sdk/config" className="text-primary hover:underline text-sm">
+              <p className="text-muted-foreground mb-2">
+                Set up the Intent Pay client with your configuration
+              </p>
+              <Link
+                href="/docs/sdk/config"
+                className="text-primary hover:underline text-sm"
+              >
                 View configuration guide →
               </Link>
             </div>
@@ -151,8 +179,13 @@ export default function DocsHomePage() {
             </div>
             <div>
               <h3 className="font-semibold mb-1">Start Bridging</h3>
-              <p className="text-muted-foreground mb-2">Use our simple API to bridge tokens across chains</p>
-              <Link href="/docs/examples" className="text-primary hover:underline text-sm">
+              <p className="text-muted-foreground mb-2">
+                Use our simple API to bridge tokens across chains
+              </p>
+              <Link
+                href="/docs/examples"
+                className="text-primary hover:underline text-sm"
+              >
                 See examples →
               </Link>
             </div>
@@ -164,27 +197,45 @@ export default function DocsHomePage() {
       <div className="space-y-6">
         <h2 className="text-2xl font-semibold">Documentation</h2>
         <div className="grid md:grid-cols-2 gap-4">
-          <Link href="/docs/api" className="block p-4 border rounded-lg hover:border-primary/50 transition-colors">
+          <Link
+            href="/docs/api"
+            className="block p-4 border rounded-lg hover:border-primary/50 transition-colors"
+          >
             <h3 className="font-semibold mb-2">🔌 REST API</h3>
-            <p className="text-sm text-muted-foreground">Complete API documentation with examples</p>
+            <p className="text-sm text-muted-foreground">
+              Complete API documentation with examples
+            </p>
           </Link>
-          
-          <Link href="/docs/sdk" className="block p-4 border rounded-lg hover:border-primary/50 transition-colors">
+
+          <Link
+            href="/docs/sdk"
+            className="block p-4 border rounded-lg hover:border-primary/50 transition-colors"
+          >
             <h3 className="font-semibold mb-2">📦 TypeScript SDK</h3>
-            <p className="text-sm text-muted-foreground">Intent Pay SDK guide and reference</p>
+            <p className="text-sm text-muted-foreground">
+              Intent Pay SDK guide and reference
+            </p>
           </Link>
-          
-          <Link href="/docs/examples" className="block p-4 border rounded-lg hover:border-primary/50 transition-colors">
+
+          <Link
+            href="/docs/examples"
+            className="block p-4 border rounded-lg hover:border-primary/50 transition-colors"
+          >
             <h3 className="font-semibold mb-2">💻 Code Examples</h3>
-            <p className="text-sm text-muted-foreground">Working implementations and tutorials</p>
+            <p className="text-sm text-muted-foreground">
+              Working implementations and tutorials
+            </p>
           </Link>
-          
-          <Link href="/docs/quick-start" className="block p-4 border rounded-lg hover:border-primary/50 transition-colors">
+
+          <Link
+            href="/docs/quick-start"
+            className="block p-4 border rounded-lg hover:border-primary/50 transition-colors"
+          >
             <h3 className="font-semibold mb-2">⚡ Quick Start</h3>
             <p className="text-sm text-muted-foreground">Bridge in 5 seconds</p>
           </Link>
         </div>
       </div>
     </div>
-  )
+  );
 }
