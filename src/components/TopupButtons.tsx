@@ -26,6 +26,8 @@ export function TopupButtons({ onAddressSelected }: TopupButtonsProps) {
   
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [customAmount, setCustomAmount] = useState('')
+  const [manualStellarAddress, setManualStellarAddress] = useState('')
+  const [useManualEntry, setUseManualEntry] = useState(false)
 
   const handleProceedWithTopup = () => {
     const amount = customAmount ? parseFloat(customAmount) : selectedAmount
@@ -35,13 +37,21 @@ export function TopupButtons({ onAddressSelected }: TopupButtonsProps) {
       return
     }
     
-    if (!stellarConnected || !stellarAddress) {
-      toast.error('Please connect your Stellar wallet first')
+    const addressToUse = useManualEntry ? manualStellarAddress : stellarAddress
+    
+    if (!addressToUse) {
+      toast.error('Please connect your Stellar wallet or enter an address')
+      return
+    }
+    
+    // Validate manual Stellar address format (starts with G and is 56 characters)
+    if (useManualEntry && (!manualStellarAddress.startsWith('G') || manualStellarAddress.length !== 56)) {
+      toast.error('Invalid Stellar address format')
       return
     }
     
     // Emit selection for Stellar (chainId 1500 for Stellar testnet or 1501 for mainnet) with amount
-    onAddressSelected(1500, '', stellarAddress, amount)
+    onAddressSelected(1500, '', addressToUse, amount)
     toast.success(`Stellar address configured! Proceeding with ${amount} USDC payment...`)
   }
 
@@ -63,26 +73,12 @@ export function TopupButtons({ onAddressSelected }: TopupButtonsProps) {
             <img src="/logos/stellar.svg" alt="Stellar" className="h-6 w-6" />
             Top up your Stellar Wallet
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Top up USDC on your Stellar wallet with Base USDC
-          </p>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Stellar Wallet Connection */}
           <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-medium mb-3">Step 1: Connect Your Stellar Wallet</h3>
-            </div>
-
-            {!stellarConnected ? (
+            {!stellarConnected && !useManualEntry ? (
                 <div className="space-y-4">
-                  <div className="p-4 bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg">
-                    <div className="text-sm text-purple-700 dark:text-purple-300 space-y-2">
-                      <p>Connect your Stellar wallet to continue</p>
-                      <p className="text-xs opacity-80">Supports: LOBSTR, xBull, Freighter, and more</p>
-                    </div>
-                  </div>
-                  
                   <Button
                     onClick={connectStellarWallet}
                     disabled={stellarConnecting}
@@ -100,7 +96,68 @@ export function TopupButtons({ onAddressSelected }: TopupButtonsProps) {
                       </>
                     )}
                   </Button>
+                  
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">or</span>
+                    </div>
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={() => setUseManualEntry(true)}
+                    className="w-full"
+                  >
+                    Enter Stellar Address
+                  </Button>
                 </div>
+            ) : useManualEntry && !stellarConnected ? (
+              <div className="space-y-4">
+                <Input
+                  type="text"
+                  placeholder="Enter Stellar address (e.g., G...)"
+                  value={manualStellarAddress}
+                  onChange={(e) => setManualStellarAddress(e.target.value)}
+                  className="w-full font-mono text-sm"
+                />
+                {manualStellarAddress && (
+                  <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm text-blue-700 dark:text-blue-300">
+                        Address entered: {formatStellarAddress(manualStellarAddress)}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-5 w-5 p-0"
+                        onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(manualStellarAddress)
+                            toast.success('Address copied!')
+                          } catch {
+                            toast.error('Failed to copy address')
+                          }
+                        }}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setUseManualEntry(false)
+                    setManualStellarAddress('')
+                  }}
+                  className="w-full"
+                >
+                  Back to wallet connection
+                </Button>
+              </div>
             ) : (
               <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
                 <div className="flex items-center justify-between gap-2">
@@ -137,6 +194,8 @@ export function TopupButtons({ onAddressSelected }: TopupButtonsProps) {
                       disconnectStellarWallet()
                       setSelectedAmount(null)
                       setCustomAmount('')
+                      setUseManualEntry(false)
+                      setManualStellarAddress('')
                     }}
                     className="flex-shrink-0"
                   >
@@ -147,8 +206,8 @@ export function TopupButtons({ onAddressSelected }: TopupButtonsProps) {
             )}
           </div>
 
-          {/* Amount Selection - Only show after wallet is connected */}
-          {stellarConnected && (
+          {/* Amount Selection - Show after wallet is connected or address is entered */}
+          {(stellarConnected || (useManualEntry && manualStellarAddress)) && (
             <div className="space-y-4">
               <div>
                 <h3 className="text-sm font-medium mb-3">Step 2: Select Amount (USDC)</h3>
