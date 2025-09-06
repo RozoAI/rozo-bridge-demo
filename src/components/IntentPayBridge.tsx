@@ -10,6 +10,7 @@ import { Settings, RefreshCw, Loader2 } from 'lucide-react'
 import { ChainSelect } from './ChainSelect'
 import { AddressInput } from './AddressInput'
 import { StellarAddressInput } from './StellarAddressInput'
+import { useStellarWallet } from '@/contexts/StellarWalletContext'
 
 import { RozoPayButton, useRozoPayUI } from '@rozoai/intent-pay'
 import { getAddress } from 'viem'
@@ -43,6 +44,8 @@ export function IntentPayBridge({
 }: IntentPayBridgeProps = {}) {
   const MIN_USDC_AMOUNT = 0.10
   const { resetPayment } = useRozoPayUI() // Get resetPayment from hook
+  const { stellarAddress: contextStellarAddress, stellarConnected } = useStellarWallet()
+  
   const [toChainId, setToChainId] = useState<number>(preConfiguredChainId || 8453) // Base
   const [amount, setAmount] = useState(preConfiguredAmount ? preConfiguredAmount.toString() : '')
   const [toAddress, setToAddress] = useState(preConfiguredAddress || '')
@@ -62,6 +65,13 @@ export function IntentPayBridge({
 
   // Unified selection flags
   const isDestStellar = toChainId === 1500 || toChainId === 1501
+
+  // Sync with connected Stellar wallet when destination is Stellar (for manual mode)
+  useEffect(() => {
+    if (!isTopupFlow && isDestStellar && stellarConnected && contextStellarAddress) {
+      setToStellarAddress(contextStellarAddress)
+    }
+  }, [isDestStellar, stellarConnected, contextStellarAddress, isTopupFlow])
 
   // Validate form
   const isFormValid = () => {
