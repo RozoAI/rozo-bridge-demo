@@ -81,9 +81,6 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
       // Show wallet selection modal
       await stellarKit.openModal({
         modalTitle: 'Select Stellar Wallet',
-        modalDescription: isMobile 
-          ? 'Select your mobile wallet app. Make sure the app is installed and running.'
-          : 'Select your wallet to connect',
         onWalletSelected: async (option: ISupportedWallet) => {
           console.log('Selected wallet:', option.name, option.id)
           stellarKit.setWallet(option.id)
