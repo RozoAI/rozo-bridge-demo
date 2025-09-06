@@ -4,9 +4,10 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ArrowRight, Loader2, Wallet, CheckCircle } from 'lucide-react'
+import { ArrowRight, Loader2, Wallet, CheckCircle, Copy } from 'lucide-react'
 import { toast } from 'sonner'
 import { useStellarWallet } from '@/contexts/StellarWalletContext'
+import { formatStellarAddress } from '@/utils/address'
 
 interface TopupButtonsProps {
   onAddressSelected: (chainId: number, address: string, stellarAddress?: string, amount?: number) => void
@@ -76,8 +77,9 @@ export function TopupButtons({ onAddressSelected }: TopupButtonsProps) {
             {!stellarConnected ? (
                 <div className="space-y-4">
                   <div className="p-4 bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg">
-                    <div className="text-sm text-purple-700 dark:text-purple-300">
+                    <div className="text-sm text-purple-700 dark:text-purple-300 space-y-2">
                       <p>Connect your Stellar wallet to continue</p>
+                      <p className="text-xs opacity-80">Supports: LOBSTR, xBull, Freighter, and more</p>
                     </div>
                   </div>
                   
@@ -101,13 +103,30 @@ export function TopupButtons({ onAddressSelected }: TopupButtonsProps) {
                 </div>
             ) : (
               <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <div className="text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <div className="text-sm min-w-0 flex-1">
                       <div className="font-medium text-green-900 dark:text-green-100">Wallet Connected</div>
-                      <div className="text-green-700 dark:text-green-300 truncate max-w-xs">
-                        {stellarAddress}
+                      <div className="flex items-center gap-1">
+                        <span className="text-green-700 dark:text-green-300 font-mono text-xs">
+                          {formatStellarAddress(stellarAddress)}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-5 w-5 p-0"
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(stellarAddress)
+                              toast.success('Address copied!')
+                            } catch {
+                              toast.error('Failed to copy address')
+                            }
+                          }}
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -119,6 +138,7 @@ export function TopupButtons({ onAddressSelected }: TopupButtonsProps) {
                       setSelectedAmount(null)
                       setCustomAmount('')
                     }}
+                    className="flex-shrink-0"
                   >
                     Disconnect
                   </Button>

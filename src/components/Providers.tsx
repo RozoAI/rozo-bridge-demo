@@ -8,8 +8,15 @@ import { useState, useEffect } from 'react'
 import { initWalletConnect } from '@/lib/walletconnect'
 import { autoReconnectStellarWalletConnect } from '@/store/stellar'
 import { RozoPayProvider } from '@rozoai/intent-pay'
+import { setupCryptoPolyfill } from '@/utils/polyfills'
+
+// Setup polyfill immediately for mobile browsers
+if (typeof window !== 'undefined') {
+  setupCryptoPolyfill()
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const [isPolyfillReady, setIsPolyfillReady] = useState(false)
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
@@ -21,6 +28,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   // Initialize wallet systems and suppress development errors
   useEffect(() => {
+    // Ensure polyfill is set up
+    setupCryptoPolyfill()
+    setIsPolyfillReady(true)
+    
     const originalError = console.error
     console.error = (...args) => {
       // Suppress specific development errors
@@ -92,6 +103,23 @@ export function Providers({ children }: { children: React.ReactNode }) {
       console.error = originalError
     }
   }, [])
+
+  // Don't render RozoPayProvider until polyfill is ready
+  if (!isPolyfillReady) {
+    return (
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          {children}
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+            }}
+          />
+        </QueryClientProvider>
+      </WagmiProvider>
+    )
+  }
 
   return (
     <WagmiProvider config={config}>
