@@ -55,7 +55,7 @@ export function TopupButtons({ onAddressSelected }: TopupButtonsProps) {
             const publicKey = await stellarKit.getAddress()
             console.log('Stellar publicKey response:', publicKey, typeof publicKey)
             // Handle both string and object response formats
-            const address = typeof publicKey === 'string' ? publicKey : (publicKey as any).address
+            const address = typeof publicKey === 'string' ? publicKey : (publicKey as { address?: string }).address
             console.log('Extracted address:', address)
             setStellarAddress(address || '')
             setStellarConnected(true)

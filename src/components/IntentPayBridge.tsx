@@ -94,13 +94,19 @@ export function IntentPayBridge({
     setShouldRenderButton(false) // Completely remove from DOM
     
     // Force cleanup of any existing connections
-    if (typeof window !== 'undefined' && (window as Record<string, unknown>).rozoPayConnection) {
-      try {
-        const connection = (window as Record<string, unknown>).rozoPayConnection as { disconnect?: () => void };
-        connection.disconnect?.();
-        delete (window as Record<string, unknown>).rozoPayConnection;
-      } catch (e) {
-        console.log('Error cleaning up connection:', e)
+    interface WindowWithConnection extends Window {
+      rozoPayConnection?: { disconnect?: () => void };
+    }
+    
+    if (typeof window !== 'undefined') {
+      const windowWithConnection = window as unknown as WindowWithConnection;
+      if (windowWithConnection.rozoPayConnection) {
+        try {
+          windowWithConnection.rozoPayConnection.disconnect?.();
+          delete windowWithConnection.rozoPayConnection;
+        } catch (e) {
+          console.log('Error cleaning up connection:', e)
+        }
       }
     }
     
@@ -246,22 +252,31 @@ export function IntentPayBridge({
       // Automatically generate payment for quick topup
       handleGeneratePayment()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Only run once on mount
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (cleanupTimeoutRef.current) {
-        clearTimeout(cleanupTimeoutRef.current)
+      const timeoutId = cleanupTimeoutRef.current;
+      if (timeoutId) {
+        clearTimeout(timeoutId)
       }
+      
       // Clean up any connections on unmount
-      if (typeof window !== 'undefined' && (window as Record<string, unknown>).rozoPayConnection) {
-        try {
-          const connection = (window as Record<string, unknown>).rozoPayConnection as { disconnect?: () => void };
-          connection.disconnect?.();
-          delete (window as Record<string, unknown>).rozoPayConnection;
-        } catch (e) {
-          console.log('Error cleaning up connection on unmount:', e)
+      interface WindowWithConnection extends Window {
+        rozoPayConnection?: { disconnect?: () => void };
+      }
+      
+      if (typeof window !== 'undefined') {
+        const windowWithConnection = window as unknown as WindowWithConnection;
+        if (windowWithConnection.rozoPayConnection) {
+          try {
+            windowWithConnection.rozoPayConnection.disconnect?.();
+            delete windowWithConnection.rozoPayConnection;
+          } catch (e) {
+            console.log('Error cleaning up connection on unmount:', e)
+          }
         }
       }
     }
@@ -520,8 +535,8 @@ export function IntentPayBridge({
                         toUnits={intentConfig.toUnits}
                         toToken={getAddress(BASE_USDC.token)}
                         onPaymentStarted={handlePaymentStarted}
-                        onPaymentCompleted={(result) => {
-                          handlePaymentCompleted(result)
+                        onPaymentCompleted={() => {
+                          handlePaymentCompleted()
                           if (isTopupFlow && onTopupComplete) {
                             onTopupComplete()
                           }
@@ -533,16 +548,10 @@ export function IntentPayBridge({
                         key={`rozo-pay-button-${paymentKey}-${configuredAmount}-${configuredAddress}`}
                         appId={intentConfig.appId}
                         toChain={intentConfig.toChain}
-                        toAddress={intentConfig.toAddress}
+                        toAddress={intentConfig.toAddress || ('0x0000000000000000000000000000000000000000' as `0x${string}`)}
                         toUnits={intentConfig.toUnits}
                         toToken={intentConfig.toToken}
                         externalId={intentConfig.externalId}
-                        onTransactionComplete={(result) => {
-                          console.log('Transaction complete:', result)
-                          if (isTopupFlow && onTopupComplete) {
-                            onTopupComplete()
-                          }
-                        }}
                       />
                     )}
                   </div>
