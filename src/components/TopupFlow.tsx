@@ -42,6 +42,12 @@ export function TopupFlow() {
     setShowPayment(false)
   }
 
+  const handleGoBack = () => {
+    // Go back to the address selection screen
+    setShowPayment(false)
+    // Keep the selected values so user can modify them if needed
+  }
+
   return (
     <div className="space-y-6">
       {!showPayment ? (
@@ -54,6 +60,7 @@ export function TopupFlow() {
           preConfiguredAmount={selectedAmount || undefined}
           isTopupFlow={true}
           onTopupComplete={handleTopupComplete}
+          onGoBack={handleGoBack}
         />
       )}
     </div>

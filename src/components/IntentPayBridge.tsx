@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { Settings, RefreshCw, Loader2 } from 'lucide-react'
+import { Settings, RefreshCw, Loader2, ArrowLeft } from 'lucide-react'
 import { ChainSelect } from './ChainSelect'
 import { AddressInput } from './AddressInput'
 import { StellarAddressInput } from './StellarAddressInput'
@@ -32,6 +32,8 @@ interface IntentPayBridgeProps {
   isTopupFlow?: boolean
   // Callback when payment is completed in topup flow
   onTopupComplete?: () => void
+  // Callback to go back in topup flow
+  onGoBack?: () => void
 }
 
 export function IntentPayBridge({ 
@@ -40,7 +42,8 @@ export function IntentPayBridge({
   preConfiguredStellarAddress,
   preConfiguredAmount,
   isTopupFlow = false,
-  onTopupComplete 
+  onTopupComplete,
+  onGoBack
 }: IntentPayBridgeProps = {}) {
   const MIN_USDC_AMOUNT = 0.10
   const { resetPayment } = useRozoPayUI() // Get resetPayment from hook
@@ -504,10 +507,25 @@ export function IntentPayBridge({
       {isTopupFlow && (
         <Card>
           <CardHeader>
-            <CardTitle>Complete Your Top Up</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Top up {amount} USDC to your Stellar wallet
-            </p>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <CardTitle>Complete Your Top Up</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Top up {amount} USDC to your Stellar wallet
+                </p>
+              </div>
+              {onGoBack && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onGoBack}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Go Back
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Payment Summary */}

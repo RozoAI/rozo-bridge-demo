@@ -27,11 +27,68 @@ interface StellarWalletContextType {
 
 const StellarWalletContext = createContext<StellarWalletContextType | undefined>(undefined)
 
+const STORAGE_KEY = 'stellar_wallet_connection'
+
+interface StoredWalletData {
+  address: string
+  walletId: string
+  walletName: string
+  timestamp: number
+}
+
 export function StellarWalletProvider({ children }: { children: ReactNode }) {
   const [stellarAddress, setStellarAddress] = useState('')
   const [stellarConnected, setStellarConnected] = useState(false)
   const [stellarConnecting, setStellarConnecting] = useState(false)
   const [stellarKit, setStellarKit] = useState<StellarWalletsKit | null>(null)
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  // Load stored wallet data from localStorage
+  const loadStoredWallet = (): StoredWalletData | null => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (!stored) return null
+      
+      const data = JSON.parse(stored) as StoredWalletData
+      
+      // Check if data is not too old (24 hours)
+      const MAX_AGE = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+      if (Date.now() - data.timestamp > MAX_AGE) {
+        localStorage.removeItem(STORAGE_KEY)
+        return null
+      }
+      
+      return data
+    } catch (error) {
+      console.error('Error loading stored wallet:', error)
+      localStorage.removeItem(STORAGE_KEY)
+      return null
+    }
+  }
+
+  // Save wallet data to localStorage
+  const saveWalletData = (address: string, walletId: string, walletName: string) => {
+    try {
+      const data: StoredWalletData = {
+        address,
+        walletId,
+        walletName,
+        timestamp: Date.now()
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+    } catch (error) {
+      console.error('Error saving wallet data:', error)
+    }
+  }
+
+  // Clear stored wallet data
+  const clearStoredWallet = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch (error) {
+      console.error('Error clearing stored wallet:', error)
+    }
+  }
 
   useEffect(() => {
     // Setup crypto polyfill for mobile browsers
@@ -64,7 +121,45 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
       modules,
     })
     setStellarKit(kit)
+    setIsInitialized(true)
   }, [])
+
+  // Auto-reconnect on initialization
+  useEffect(() => {
+    if (!isInitialized || !stellarKit) return
+    
+    const autoReconnect = async () => {
+      const storedData = loadStoredWallet()
+      if (!storedData) return
+      
+      try {
+        // Set the previously used wallet
+        stellarKit.setWallet(storedData.walletId)
+        
+        // Small delay for wallet to initialize
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        // Try to reconnect
+        const publicKey = await stellarKit.getAddress()
+        const address = typeof publicKey === 'string' ? publicKey : (publicKey as { address?: string }).address
+        
+        if (address && address === storedData.address) {
+          setStellarAddress(address)
+          setStellarConnected(true)
+          console.log('Auto-reconnected to', storedData.walletName)
+        } else {
+          // Address mismatch or connection failed, clear stored data
+          clearStoredWallet()
+        }
+      } catch (error) {
+        console.log('Auto-reconnect failed:', error)
+        // Clear stored data if auto-reconnect fails
+        clearStoredWallet()
+      }
+    }
+    
+    autoReconnect()
+  }, [isInitialized, stellarKit])
 
   const connectStellarWallet = async () => {
     if (!stellarKit) {
@@ -103,8 +198,10 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
             
             setStellarAddress(address)
             setStellarConnected(true)
+            // Save wallet data for auto-reconnect
+            saveWalletData(address, option.id, option.name)
             toast.success(`Connected to ${option.name}`)
-          } catch (error: any) {
+          } catch (error: unknown) {
             console.error('Error connecting to wallet:', error)
             
             // Provide more helpful error messages
@@ -116,7 +213,8 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
               }
             } else {
               // Check for specific error types
-              if (error?.message?.includes('not found') || error?.message?.includes('not installed')) {
+              const errorMessage = error instanceof Error ? error.message : String(error)
+              if (errorMessage.includes('not found') || errorMessage.includes('not installed')) {
                 toast.error(`${option.name} wallet extension not found. Please install it first.`)
               } else {
                 toast.error('Failed to connect. Please try again.')
@@ -141,6 +239,7 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
   const disconnectStellarWallet = () => {
     setStellarAddress('')
     setStellarConnected(false)
+    clearStoredWallet() // Clear stored wallet data on disconnect
     toast.info('Disconnected from Stellar wallet')
   }
 
