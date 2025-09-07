@@ -463,6 +463,7 @@ export function IntentPayBridge({
                       <>
                         {configuredChainId !== 1500 && configuredChainId !== 1501 ? (
                           <RozoPayButton
+                            defaultOpen
                             key={`rozo-pay-button-${paymentKey}-${configuredAmount}-${configuredChainId}-${configuredAddress}`}
                             appId={intentConfig.appId}
                             toChain={intentConfig.toChain!}
@@ -475,6 +476,7 @@ export function IntentPayBridge({
                           />
                         ) : (
                           <RozoPayButton
+                            defaultOpen
                             key={`rozo-pay-button-stellar-${paymentKey}-${configuredAmount}-${configuredStellarAddress}`}
                             appId={intentConfig.appId}
                             toChain={BASE_USDC.chainId}
@@ -549,12 +551,13 @@ export function IntentPayBridge({
                 </Button>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4 w-full flex justify-center">
                 {/* Payment Button Component */}
                 {shouldRenderButton && intentConfig && (
                   <div className="w-full">
                     {intentConfig.toStellarAddress ? (
                       <RozoPayButton
+                        defaultOpen
                         key={`rozo-pay-button-stellar-${paymentKey}-${configuredAmount}-${configuredStellarAddress}`}
                         appId={intentConfig.appId}
                         toChain={BASE_USDC.chainId}
@@ -573,6 +576,7 @@ export function IntentPayBridge({
                       />
                     ) : (
                       <RozoPayButton
+                        defaultOpen
                         key={`rozo-pay-button-${paymentKey}-${configuredAmount}-${configuredAddress}`}
                         appId={intentConfig.appId}
                         toChain={intentConfig.toChain}
