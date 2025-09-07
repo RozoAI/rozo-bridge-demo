@@ -238,6 +238,11 @@ export function TopupButtons({ onAddressSelected }: TopupButtonsProps) {
                 </div>
               </div>
 
+              <p className="text-xs text-muted-foreground font-mono font-semibold">
+                Note: Add a USDC trustline to your Stellar wallet before
+                receiving funds.
+              </p>
+
               <Button 
                 onClick={handleProceedWithTopup}
                 className="w-full" 

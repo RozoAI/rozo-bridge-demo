@@ -32,9 +32,9 @@ export function Bridge() {
               >
                 Transfer to Base →
               </Button>
-              <p className="text-xs text-muted-foreground mt-2">
+              {/* <p className="text-xs text-muted-foreground mt-2">
                 Transfer USDC to Ethereum, Arbitrum, Optimism, and more
-              </p>
+              </p> */}
             </div>
           </>
         ) : (
