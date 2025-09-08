@@ -5,7 +5,7 @@ import {
   FREIGHTER_ID,
   XBULL_ID
 } from '@creit.tech/stellar-wallets-kit'
-import { Networks, Keypair, Account, TransactionBuilder, Operation, Asset, Memo } from '@stellar/stellar-sdk'
+import { Networks, Keypair, Account, TransactionBuilder, Operation, Asset, Memo, Horizon } from '@stellar/stellar-sdk'
 
 // Stellar network configuration
 export const STELLAR_NETWORKS = {
@@ -237,3 +237,43 @@ export const defaultStellarWalletState: StellarWalletState = {
   walletId: null,
   network: 'PUBLIC',
 }
+
+// Check USDC Trustline
+export const checkUSDCTrustline = async (
+  accountAddress: string,
+  horizonUrl: string = "https://horizon.stellar.org"
+): Promise<{ exists: boolean; balance: string }> => {
+  const server = new Horizon.Server(horizonUrl);
+  const assetCode = "USDC";
+  const assetIssuer =
+    "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN";
+
+  try {
+    const accountData = await server
+      .accounts()
+      .accountId(accountAddress)
+      .call();
+
+    const trustline = accountData.balances.find(
+      (balance) =>
+        balance.asset_type === "credit_alphanum4" &&
+        balance.asset_code === assetCode &&
+        balance.asset_issuer === assetIssuer
+    );
+
+    if (!trustline) {
+      return { exists: false, balance: "0" };
+    }
+
+    return {
+      exists: true,
+      balance: trustline.balance,
+    };
+  } catch (error) {
+    throw new Error(
+      `Failed to check trustline: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
+  }
+};
