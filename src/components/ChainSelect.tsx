@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/popover'
 import { Badge } from '@/components/ui/badge'
 import { supportedChains, comingSoonChains } from '@/lib/chains'
-import { SUPPORTED_INTENT_CHAINS } from '@/lib/intentPay'
 import { cn } from '@/lib/utils'
 
 interface ChainSelectProps {
@@ -40,12 +39,6 @@ export function ChainSelect({
   className,
 }: ChainSelectProps) {
   const [open, setOpen] = useState(false)
-  const [supportedChainIds, setSupportedChainIds] = useState<number[]>([])
-
-  // Load supported chains on mount
-  React.useEffect(() => {
-    setSupportedChainIds(SUPPORTED_INTENT_CHAINS)
-  }, [])
 
   const selectedChain = [...supportedChains, ...comingSoonChains].find(chain => chain.id === value)
   

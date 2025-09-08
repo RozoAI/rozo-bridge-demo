@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CheckCircle, AlertTriangle, Info, Copy } from 'lucide-react'
+import { CheckCircle, AlertTriangle, Info, Copy, Wallet } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { isValidStellarAddress, isMuxedAddress, normalizeStellarAddress } from '@/lib/stellar'
+import { useStellarWallet } from '@/contexts/StellarWalletContext'
 
 interface StellarAddressInputProps {
   value: string
@@ -28,6 +29,7 @@ export function StellarAddressInput({
   required = false,
   showValidation = true,
 }: StellarAddressInputProps) {
+  const { stellarConnected, stellarAddress, connectStellarWallet } = useStellarWallet()
   const [isFocused, setIsFocused] = useState(false)
   const [validationState, setValidationState] = useState<{
     isValid: boolean
@@ -139,19 +141,28 @@ export function StellarAddressInput({
           {required && <span className="text-red-500 ml-1">*</span>}
         </Label>
         
-        {showValid && (
-          <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-            <CheckCircle className="h-3 w-3" />
-            <span className="text-xs">Valid</span>
-          </div>
-        )}
-        
-        {showError && (
-          <div className="flex items-center gap-1 text-red-600 dark:text-red-400">
-            <AlertTriangle className="h-3 w-3" />
-            <span className="text-xs">Invalid</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {stellarConnected && (
+            <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+              <Wallet className="h-3 w-3" />
+              <span className="text-xs">Connected</span>
+            </div>
+          )}
+          
+          {showValid && (
+            <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+              <CheckCircle className="h-3 w-3" />
+              <span className="text-xs">Valid</span>
+            </div>
+          )}
+          
+          {showError && (
+            <div className="flex items-center gap-1 text-red-600 dark:text-red-400">
+              <AlertTriangle className="h-3 w-3" />
+              <span className="text-xs">Invalid</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Input */}

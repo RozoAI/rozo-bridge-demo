@@ -1,5 +1,4 @@
 import { Bridge } from "@/components/Bridge";
-import { RozoWalletSelector } from "@/components/RozoWalletSelector"; // Updated import
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -42,24 +41,6 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          {/* Hero Section */}
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-4">
-              Intent-Based USDC Transfers
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              Built for real-life micropayments. Fees are waived if a transaction takes longer than 10 seconds. Contact us for production use.
-            </p>
-            <div className="mt-2 flex justify-center">
-              <Link href="/docs">
-                <Button className="gap-2" size="sm">
-                  Documentation
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-
           {/* Bridge Component */}
           <Bridge />
 

@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { Settings, RefreshCw, Loader2 } from 'lucide-react'
+import { Settings, RefreshCw, Loader2, ArrowLeft } from 'lucide-react'
 import { ChainSelect } from './ChainSelect'
 import { AddressInput } from './AddressInput'
 import { StellarAddressInput } from './StellarAddressInput'
+import { useStellarWallet } from '@/contexts/StellarWalletContext'
 
 import { RozoPayButton, useRozoPayUI } from '@rozoai/intent-pay'
 import { getAddress } from 'viem'
@@ -31,6 +32,8 @@ interface IntentPayBridgeProps {
   isTopupFlow?: boolean
   // Callback when payment is completed in topup flow
   onTopupComplete?: () => void
+  // Callback to go back in topup flow
+  onGoBack?: () => void
 }
 
 export function IntentPayBridge({ 
@@ -39,10 +42,13 @@ export function IntentPayBridge({
   preConfiguredStellarAddress,
   preConfiguredAmount,
   isTopupFlow = false,
-  onTopupComplete 
+  onTopupComplete,
+  onGoBack
 }: IntentPayBridgeProps = {}) {
   const MIN_USDC_AMOUNT = 0.10
   const { resetPayment } = useRozoPayUI() // Get resetPayment from hook
+  const { stellarAddress: contextStellarAddress, stellarConnected } = useStellarWallet()
+  
   const [toChainId, setToChainId] = useState<number>(preConfiguredChainId || 8453) // Base
   const [amount, setAmount] = useState(preConfiguredAmount ? preConfiguredAmount.toString() : '')
   const [toAddress, setToAddress] = useState(preConfiguredAddress || '')
@@ -62,6 +68,13 @@ export function IntentPayBridge({
 
   // Unified selection flags
   const isDestStellar = toChainId === 1500 || toChainId === 1501
+
+  // Sync with connected Stellar wallet when destination is Stellar (for manual mode)
+  useEffect(() => {
+    if (!isTopupFlow && isDestStellar && stellarConnected && contextStellarAddress) {
+      setToStellarAddress(contextStellarAddress)
+    }
+  }, [isDestStellar, stellarConnected, contextStellarAddress, isTopupFlow])
 
   // Validate form
   const isFormValid = () => {
@@ -94,13 +107,19 @@ export function IntentPayBridge({
     setShouldRenderButton(false) // Completely remove from DOM
     
     // Force cleanup of any existing connections
-    if (typeof window !== 'undefined' && (window as Record<string, unknown>).rozoPayConnection) {
-      try {
-        const connection = (window as Record<string, unknown>).rozoPayConnection as { disconnect?: () => void };
-        connection.disconnect?.();
-        delete (window as Record<string, unknown>).rozoPayConnection;
-      } catch (e) {
-        console.log('Error cleaning up connection:', e)
+    interface WindowWithConnection extends Window {
+      rozoPayConnection?: { disconnect?: () => void };
+    }
+    
+    if (typeof window !== 'undefined') {
+      const windowWithConnection = window as unknown as WindowWithConnection;
+      if (windowWithConnection.rozoPayConnection) {
+        try {
+          windowWithConnection.rozoPayConnection.disconnect?.();
+          delete windowWithConnection.rozoPayConnection;
+        } catch (e) {
+          console.log('Error cleaning up connection:', e)
+        }
       }
     }
     
@@ -246,22 +265,31 @@ export function IntentPayBridge({
       // Automatically generate payment for quick topup
       handleGeneratePayment()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Only run once on mount
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (cleanupTimeoutRef.current) {
-        clearTimeout(cleanupTimeoutRef.current)
+      const timeoutId = cleanupTimeoutRef.current;
+      if (timeoutId) {
+        clearTimeout(timeoutId)
       }
+      
       // Clean up any connections on unmount
-      if (typeof window !== 'undefined' && (window as Record<string, unknown>).rozoPayConnection) {
-        try {
-          const connection = (window as Record<string, unknown>).rozoPayConnection as { disconnect?: () => void };
-          connection.disconnect?.();
-          delete (window as Record<string, unknown>).rozoPayConnection;
-        } catch (e) {
-          console.log('Error cleaning up connection on unmount:', e)
+      interface WindowWithConnection extends Window {
+        rozoPayConnection?: { disconnect?: () => void };
+      }
+      
+      if (typeof window !== 'undefined') {
+        const windowWithConnection = window as unknown as WindowWithConnection;
+        if (windowWithConnection.rozoPayConnection) {
+          try {
+            windowWithConnection.rozoPayConnection.disconnect?.();
+            delete windowWithConnection.rozoPayConnection;
+          } catch (e) {
+            console.log('Error cleaning up connection on unmount:', e)
+          }
         }
       }
     }
@@ -435,6 +463,7 @@ export function IntentPayBridge({
                       <>
                         {configuredChainId !== 1500 && configuredChainId !== 1501 ? (
                           <RozoPayButton
+                            defaultOpen
                             key={`rozo-pay-button-${paymentKey}-${configuredAmount}-${configuredChainId}-${configuredAddress}`}
                             appId={intentConfig.appId}
                             toChain={intentConfig.toChain!}
@@ -447,6 +476,7 @@ export function IntentPayBridge({
                           />
                         ) : (
                           <RozoPayButton
+                            defaultOpen
                             key={`rozo-pay-button-stellar-${paymentKey}-${configuredAmount}-${configuredStellarAddress}`}
                             appId={intentConfig.appId}
                             toChain={BASE_USDC.chainId}
@@ -479,10 +509,25 @@ export function IntentPayBridge({
       {isTopupFlow && (
         <Card>
           <CardHeader>
-            <CardTitle>Complete Your Top Up</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Top up {amount} USDC to your Stellar wallet
-            </p>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <CardTitle>Complete Your Top Up</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Top up {amount} USDC to your Stellar wallet
+                </p>
+              </div>
+              {onGoBack && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onGoBack}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Go Back
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Payment Summary */}
@@ -506,12 +551,13 @@ export function IntentPayBridge({
                 </Button>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4 w-full flex justify-center">
                 {/* Payment Button Component */}
                 {shouldRenderButton && intentConfig && (
                   <div className="w-full">
                     {intentConfig.toStellarAddress ? (
                       <RozoPayButton
+                        defaultOpen
                         key={`rozo-pay-button-stellar-${paymentKey}-${configuredAmount}-${configuredStellarAddress}`}
                         appId={intentConfig.appId}
                         toChain={BASE_USDC.chainId}
@@ -520,8 +566,8 @@ export function IntentPayBridge({
                         toUnits={intentConfig.toUnits}
                         toToken={getAddress(BASE_USDC.token)}
                         onPaymentStarted={handlePaymentStarted}
-                        onPaymentCompleted={(result) => {
-                          handlePaymentCompleted(result)
+                        onPaymentCompleted={() => {
+                          handlePaymentCompleted()
                           if (isTopupFlow && onTopupComplete) {
                             onTopupComplete()
                           }
@@ -530,19 +576,14 @@ export function IntentPayBridge({
                       />
                     ) : (
                       <RozoPayButton
+                        defaultOpen
                         key={`rozo-pay-button-${paymentKey}-${configuredAmount}-${configuredAddress}`}
                         appId={intentConfig.appId}
                         toChain={intentConfig.toChain}
-                        toAddress={intentConfig.toAddress}
+                        toAddress={intentConfig.toAddress || ('0x0000000000000000000000000000000000000000' as `0x${string}`)}
                         toUnits={intentConfig.toUnits}
                         toToken={intentConfig.toToken}
                         externalId={intentConfig.externalId}
-                        onTransactionComplete={(result) => {
-                          console.log('Transaction complete:', result)
-                          if (isTopupFlow && onTopupComplete) {
-                            onTopupComplete()
-                          }
-                        }}
                       />
                     )}
                   </div>
