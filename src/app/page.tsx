@@ -20,8 +20,8 @@ export default function Home() {
                 className="rounded-lg"
               />
               <div>
-                <h1 className="text-xl font-bold">Rozo Bridge</h1>
-                <p className="text-sm text-muted-foreground">Multi-chain USDC transfers</p>
+                <h1 className="text-xl font-bold">ROZO intents</h1>
+                <p className="text-sm text-muted-foreground">Any chain. Any stablecoin. Seconds.</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -50,27 +50,27 @@ export default function Home() {
               <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center mx-auto mb-3">
                 🎯
               </div>
-              <h3 className="font-semibold mb-2">Instant Transfer</h3>
+              <h3 className="font-semibold mb-2">Any Chain</h3>
               <p className="text-sm text-muted-foreground">
-                Within 5 seconds
+                Cross-chain transfers
               </p>
             </div>
             <div className="text-center p-4">
               <div className="w-12 h-12 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center mx-auto mb-3">
                 💰
               </div>
-              <h3 className="font-semibold mb-2">Frictionless</h3>
+              <h3 className="font-semibold mb-2">Any Stablecoin</h3>
               <p className="text-sm text-muted-foreground">
-                Limited-Time Free (0.1% Fee Waived)
+                USDC, USDT, DAI and more
               </p>
             </div>
             <div className="text-center p-4">
               <div className="w-12 h-12 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center mx-auto mb-3">
                 🔄
               </div>
-              <h3 className="font-semibold mb-2">Intent-Based</h3>
+              <h3 className="font-semibold mb-2">Seconds</h3>
               <p className="text-sm text-muted-foreground">
-                One Tap to Pay
+                Lightning fast transfers
               </p>
             </div>
           </div>

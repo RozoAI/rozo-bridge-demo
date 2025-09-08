@@ -1,12 +1,13 @@
-# Rozo Bridge Demo - Multi-Chain USDC Transfer
+# ROZO intents - Any chain. Any stablecoin. Seconds.
 
-A production-quality React/Next.js frontend for bridging USDC across chains using the Intent Pay SDK. This demo showcases Circle CCTP-style cross-chain transfers with a modern, accessible UI.
+A production-quality React/Next.js frontend for bridging stablecoins across chains using the Intent Pay SDK. This demo showcases lightning-fast cross-chain transfers with a modern, accessible UI.
 
 ## Features
 
-- 🌐 **Multi-Chain Support**: Bridge USDC between Ethereum, Polygon, Arbitrum, Optimism, Base, and Avalanche
-- ⚡ **Fast Transfers**: Typical bridge time of 5-10 minutes using Circle CCTP technology
-- 🔒 **Secure**: Native USDC burning and minting - no wrapped tokens
+- 🌐 **Any Chain**: Bridge stablecoins between Ethereum, Polygon, Arbitrum, Optimism, Base, Stellar, and more
+- 💰 **Any Stablecoin**: Support for USDC, USDT, DAI and other major stablecoins
+- ⚡ **Seconds**: Lightning-fast transfers with intent-based technology
+- 🔒 **Secure**: Native token burning and minting - no wrapped tokens
 - 📱 **Mobile-Friendly**: Responsive design that works on all devices
 - 🌙 **Dark Mode**: Beautiful dark theme by default
 - ♿ **Accessible**: Full keyboard navigation and screen reader support
@@ -101,12 +102,12 @@ NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id_here
 1. **Connect Wallet**: Click "Connect Wallet" and choose your preferred wallet
 2. **Select Chains**: Choose source and destination chains from the dropdowns
 3. **Enter Details**: 
-   - Amount of USDC to bridge
+   - Amount of stablecoin to bridge
    - Recipient address on the destination chain
 4. **Get Quote**: The app automatically fetches a quote when all fields are complete
 5. **Review & Confirm**: Review the quote details including fees and estimated time
 6. **Execute Bridge**: 
-   - Approve USDC spending (if needed)
+   - Approve stablecoin spending (if needed)
    - Submit the bridge transaction
    - Track progress through the stepper UI
 
@@ -124,7 +125,7 @@ NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id_here
 
 - **`Bridge.tsx`**: Main bridge interface component
 - **`ChainSelect.tsx`**: Chain selection dropdown with support status
-- **`AmountInput.tsx`**: USDC amount input with balance display and quick actions
+- **`AmountInput.tsx`**: Stablecoin amount input with balance display and quick actions
 - **`AddressInput.tsx`**: Address input with validation and saved recipients
 - **`QuoteCard.tsx`**: Quote display with fee breakdown and route details
 - **`BridgeStepper.tsx`**: Transaction status tracking with explorer links
