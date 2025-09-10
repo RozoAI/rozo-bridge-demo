@@ -157,12 +157,7 @@ export function IntentPayBridge({
           amount: amount,
           externalId: `bridge-${toChainId}-${toAddress}-${amount}`,
         })
-        resetPayment({
-          toChain: config.toChain,
-          toAddress: config.toAddress as `0x${string}`,
-          toUnits: config.toUnits,
-          toToken: config.toToken,
-        })
+        resetPayment(config);
       }
     } catch (error) {
       console.error('Error resetting payment:', error)
