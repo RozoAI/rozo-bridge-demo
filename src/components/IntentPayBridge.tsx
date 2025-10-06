@@ -1,143 +1,162 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
-import { Settings, RefreshCw, Loader2, ArrowLeft } from 'lucide-react'
-import { ChainSelect } from './ChainSelect'
-import { AddressInput } from './AddressInput'
-import { StellarAddressInput } from './StellarAddressInput'
-import { useStellarWallet } from '@/contexts/StellarWalletContext'
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { useStellarWallet } from "@/contexts/StellarWalletContext";
+import { ArrowLeft, Loader2, RefreshCw, Settings } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { AddressInput } from "./AddressInput";
+import { ChainSelect } from "./ChainSelect";
+import { StellarAddressInput } from "./StellarAddressInput";
 
-import { RozoPayButton, useRozoPayUI } from '@rozoai/intent-pay'
-import { getAddress } from 'viem'
-import { 
-  createIntentConfig, 
+import {
+  BASE_USDC,
+  createIntentConfig,
   DEFAULT_INTENT_PAY_CONFIG,
-  BASE_USDC
-} from '@/lib/intentPay'
-import { isValidStellarAddress } from '@/lib/stellar'
-import { toast } from 'sonner'
+} from "@/lib/intentPay";
+import { isValidStellarAddress } from "@/lib/stellar";
+import { RozoPayButton, useRozoPayUI } from "@rozoai/intent-pay";
+import { toast } from "sonner";
+import { getAddress } from "viem";
 
 interface IntentPayBridgeProps {
   // Pre-configured values from topup flow
-  preConfiguredChainId?: number
-  preConfiguredAddress?: string
-  preConfiguredStellarAddress?: string
-  preConfiguredAmount?: number
+  preConfiguredChainId?: number;
+  preConfiguredAddress?: string;
+  preConfiguredStellarAddress?: string;
+  preConfiguredAmount?: number;
   // Whether this is coming from the topup flow (hides manual input fields)
-  isTopupFlow?: boolean
+  isTopupFlow?: boolean;
   // Callback when payment is completed in topup flow
-  onTopupComplete?: () => void
+  onTopupComplete?: () => void;
   // Callback to go back in topup flow
-  onGoBack?: () => void
+  onGoBack?: () => void;
 }
 
-export function IntentPayBridge({ 
+export function IntentPayBridge({
   preConfiguredChainId,
   preConfiguredAddress,
   preConfiguredStellarAddress,
   preConfiguredAmount,
   isTopupFlow = false,
   onTopupComplete,
-  onGoBack
+  onGoBack,
 }: IntentPayBridgeProps = {}) {
-  const MIN_USDC_AMOUNT = 0.10
-  const { resetPayment } = useRozoPayUI() // Get resetPayment from hook
-  const { stellarAddress: contextStellarAddress, stellarConnected } = useStellarWallet()
-  
-  const [toChainId, setToChainId] = useState<number>(preConfiguredChainId || 8453) // Base
-  const [amount, setAmount] = useState(preConfiguredAmount ? preConfiguredAmount.toString() : '')
-  const [toAddress, setToAddress] = useState(preConfiguredAddress || '')
-  const [toStellarAddress, setToStellarAddress] = useState(preConfiguredStellarAddress || '')
-  const [showPayButton, setShowPayButton] = useState(false)
-  const [configuredAmount, setConfiguredAmount] = useState(preConfiguredAmount ? preConfiguredAmount.toString() : '')
-  const [configuredChainId, setConfiguredChainId] = useState<number>(preConfiguredChainId || 0)
-  const [configuredAddress, setConfiguredAddress] = useState(preConfiguredAddress || '')
-  const [configuredStellarAddress, setConfiguredStellarAddress] = useState(preConfiguredStellarAddress || '')
-  const [paymentKey, setPaymentKey] = useState(0) // Add a key to force remount
-  const [isGenerating, setIsGenerating] = useState(false) // Add loading state
-  const [shouldRenderButton, setShouldRenderButton] = useState(true) // Control button rendering
-  const cleanupTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const MIN_USDC_AMOUNT = 0.1;
+  const { resetPayment } = useRozoPayUI(); // Get resetPayment from hook
+  const { stellarAddress: contextStellarAddress, stellarConnected } =
+    useStellarWallet();
 
-  
+  const [toChainId, setToChainId] = useState<number>(
+    preConfiguredChainId || 8453
+  ); // Base
+  const [amount, setAmount] = useState(
+    preConfiguredAmount ? preConfiguredAmount.toString() : ""
+  );
+  const [toAddress, setToAddress] = useState(preConfiguredAddress || "");
+  const [toStellarAddress, setToStellarAddress] = useState(
+    preConfiguredStellarAddress || ""
+  );
+  const [showPayButton, setShowPayButton] = useState(false);
+  const [configuredAmount, setConfiguredAmount] = useState(
+    preConfiguredAmount ? preConfiguredAmount.toString() : ""
+  );
+  const [configuredChainId, setConfiguredChainId] = useState<number>(
+    preConfiguredChainId || 0
+  );
+  const [configuredAddress, setConfiguredAddress] = useState(
+    preConfiguredAddress || ""
+  );
+  const [configuredStellarAddress, setConfiguredStellarAddress] = useState(
+    preConfiguredStellarAddress || ""
+  );
+  const [paymentKey, setPaymentKey] = useState(0); // Add a key to force remount
+  const [isGenerating, setIsGenerating] = useState(false); // Add loading state
+  const [shouldRenderButton, setShouldRenderButton] = useState(true); // Control button rendering
+  const cleanupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Wallet connection is handled by Intent Pay SDK
 
   // Unified selection flags
-  const isDestStellar = toChainId === 1500 || toChainId === 1501
+  const isDestStellar = toChainId === 1500 || toChainId === 1501;
 
   // Sync with connected Stellar wallet when destination is Stellar (for manual mode)
   useEffect(() => {
-    if (!isTopupFlow && isDestStellar && stellarConnected && contextStellarAddress) {
-      setToStellarAddress(contextStellarAddress)
+    if (
+      !isTopupFlow &&
+      isDestStellar &&
+      stellarConnected &&
+      contextStellarAddress
+    ) {
+      setToStellarAddress(contextStellarAddress);
     }
-  }, [isDestStellar, stellarConnected, contextStellarAddress, isTopupFlow])
+  }, [isDestStellar, stellarConnected, contextStellarAddress, isTopupFlow]);
 
   // Validate form
   const isFormValid = () => {
-    if (!amount || parseFloat(amount) <= 0) return false
-    if (!Number.isFinite(parseFloat(amount))) return false
-    if (parseFloat(amount) < MIN_USDC_AMOUNT) return false
+    if (!amount || parseFloat(amount) <= 0) return false;
+    if (!Number.isFinite(parseFloat(amount))) return false;
+    if (parseFloat(amount) < MIN_USDC_AMOUNT) return false;
     if (isDestStellar) {
-      return !!toStellarAddress && isValidStellarAddress(toStellarAddress)
+      return !!toStellarAddress && isValidStellarAddress(toStellarAddress);
     }
-    return !!toAddress
-  }
+    return !!toAddress;
+  };
 
   // External ID is now created within handleGeneratePayment function when needed
 
   // Handle Generate Payment Button
   const handleGeneratePayment = async () => {
     if (!isFormValid()) {
-      toast.error('Please complete all required fields')
-      return
+      toast.error("Please complete all required fields");
+      return;
     }
-    
+
     // Clear any existing timeout
     if (cleanupTimeoutRef.current) {
-      clearTimeout(cleanupTimeoutRef.current)
+      clearTimeout(cleanupTimeoutRef.current);
     }
-    
+
     // Show loading state and completely unmount payment button
-    setIsGenerating(true)
-    setShowPayButton(false)
-    setShouldRenderButton(false) // Completely remove from DOM
-    
+    setIsGenerating(true);
+    setShowPayButton(false);
+    setShouldRenderButton(false); // Completely remove from DOM
+
     // Force cleanup of any existing connections
     interface WindowWithConnection extends Window {
       rozoPayConnection?: { disconnect?: () => void };
     }
-    
-    if (typeof window !== 'undefined') {
+
+    if (typeof window !== "undefined") {
       const windowWithConnection = window as unknown as WindowWithConnection;
       if (windowWithConnection.rozoPayConnection) {
         try {
           windowWithConnection.rozoPayConnection.disconnect?.();
           delete windowWithConnection.rozoPayConnection;
         } catch (e) {
-          console.log('Error cleaning up connection:', e)
+          console.log("Error cleaning up connection:", e);
         }
       }
     }
-    
+
     // Wait longer to ensure complete cleanup
-    await new Promise(resolve => setTimeout(resolve, 300))
-    
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
     // Save current configuration - only save the relevant address
-    setConfiguredAmount(amount)
-    setConfiguredChainId(toChainId)
+    setConfiguredAmount(amount);
+    setConfiguredChainId(toChainId);
     if (isDestStellar) {
-      setConfiguredAddress('') // Clear EVM address
-      setConfiguredStellarAddress(toStellarAddress)
+      setConfiguredAddress(""); // Clear EVM address
+      setConfiguredStellarAddress(toStellarAddress);
     } else {
-      setConfiguredAddress(toAddress)
-      setConfiguredStellarAddress('') // Clear Stellar address
+      setConfiguredAddress(toAddress);
+      setConfiguredStellarAddress(""); // Clear Stellar address
     }
-    setPaymentKey(Date.now()) // Use timestamp as unique key
-    
+    setPaymentKey(Date.now()); // Use timestamp as unique key
+
     // Reset payment with new configuration
     try {
       if (isDestStellar) {
@@ -148,7 +167,7 @@ export function IntentPayBridge({
           toStellarAddress: toStellarAddress,
           toUnits: amount,
           toToken: getAddress(BASE_USDC.token),
-        })
+        });
       } else {
         const config = createIntentConfig({
           appId: DEFAULT_INTENT_PAY_CONFIG.appId,
@@ -156,55 +175,56 @@ export function IntentPayBridge({
           toAddress: toAddress as `0x${string}`,
           amount: amount,
           externalId: `bridge-${toChainId}-${toAddress}-${amount}`,
-        })
+        });
         resetPayment(config);
       }
     } catch (error) {
-      console.error('Error resetting payment:', error)
+      console.error("Error resetting payment:", error);
     }
-    
+
     // Re-enable button rendering
-    setShouldRenderButton(true)
-    
+    setShouldRenderButton(true);
+
     // Wait another moment before showing the button
-    await new Promise(resolve => setTimeout(resolve, 200))
-    
-    setShowPayButton(true)
-    setIsGenerating(false)
-    
-    toast.success('Payment button generated! Click "Pay" to proceed.')
-  }
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    setShowPayButton(true);
+    setIsGenerating(false);
+
+    toast.success('Payment button generated! Click "Pay" to proceed.');
+  };
 
   // Handle configuration changes
   const handleConfigChange = () => {
-    setShowPayButton(false)
-  }
+    setShowPayButton(false);
+  };
 
   // Check if configuration has changed
   const hasConfigChanged = () => {
-    if (!showPayButton) return false
+    if (!showPayButton) return false;
     return (
       amount !== configuredAmount ||
       toChainId !== configuredChainId ||
       toAddress !== configuredAddress ||
       toStellarAddress !== configuredStellarAddress
-    )
-  }
+    );
+  };
 
   // Create Intent Pay configuration for configured values
   const getIntentConfig = () => {
-    const isConfiguredStellar = configuredChainId === 1500 || configuredChainId === 1501
-    const configExternalId = isConfiguredStellar 
+    const isConfiguredStellar =
+      configuredChainId === 1500 || configuredChainId === 1501;
+    const configExternalId = isConfiguredStellar
       ? `stellar-${configuredStellarAddress}-${configuredAmount}`
-      : `bridge-${configuredChainId}-${configuredAddress}-${configuredAmount}`
-    
+      : `bridge-${configuredChainId}-${configuredAddress}-${configuredAmount}`;
+
     if (isConfiguredStellar) {
       return createIntentConfig({
         appId: DEFAULT_INTENT_PAY_CONFIG.appId,
         toStellarAddress: configuredStellarAddress,
         amount: configuredAmount,
         externalId: configExternalId,
-      })
+      });
     }
 
     return createIntentConfig({
@@ -213,86 +233,90 @@ export function IntentPayBridge({
       toAddress: configuredAddress as `0x${string}`,
       amount: configuredAmount,
       externalId: configExternalId,
-    })
-  }
+    });
+  };
 
   const handlePaymentStarted = () => {
-    toast.success('Payment initiated! No gas fees required.')
-  }
+    toast.success("Payment initiated! No gas fees required.");
+  };
 
   const handlePaymentCompleted = () => {
-    toast.success('Transfer completed successfully!')
+    toast.success("Transfer completed successfully!");
     // Reset form
-    setAmount('')
+    setAmount("");
     if (!isTopupFlow) {
-      setToAddress('')
-      setToStellarAddress('')
+      setToAddress("");
+      setToStellarAddress("");
     }
-    setShowPayButton(false)
-    setConfiguredAmount('')
-    setConfiguredAddress('')
-    setConfiguredStellarAddress('')
-    
+    setShowPayButton(false);
+    setConfiguredAmount("");
+    setConfiguredAddress("");
+    setConfiguredStellarAddress("");
+
     // Call topup callback if provided
-    onTopupComplete?.()
-  }
+    onTopupComplete?.();
+  };
 
   const handlePaymentBounced = () => {
-    toast.error('Payment failed and was refunded.')
-  }
+    toast.error("Payment failed and was refunded.");
+  };
 
   // Remove memoization to ensure fresh config on every render
-  const intentConfig = showPayButton ? getIntentConfig() : null
-  
+  const intentConfig = showPayButton ? getIntentConfig() : null;
+
   // Debug logging
   if (intentConfig) {
-    console.log('IntentConfig:', {
+    console.log("IntentConfig:", {
       toUnits: intentConfig.toUnits,
       configuredAmount,
       paymentKey,
-      timestamp: new Date().toISOString()
-    })
+      timestamp: new Date().toISOString(),
+    });
   }
-  
+
   // Auto-generate payment for topup flow
   useEffect(() => {
-    if (isTopupFlow && preConfiguredAmount && preConfiguredStellarAddress && !showPayButton) {
+    if (
+      isTopupFlow &&
+      preConfiguredAmount &&
+      preConfiguredStellarAddress &&
+      !showPayButton
+    ) {
       // Automatically generate payment for quick topup
-      handleGeneratePayment()
+      handleGeneratePayment();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Only run once on mount
+  }, []); // Only run once on mount
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       const timeoutId = cleanupTimeoutRef.current;
       if (timeoutId) {
-        clearTimeout(timeoutId)
+        clearTimeout(timeoutId);
       }
-      
+
       // Clean up any connections on unmount
       interface WindowWithConnection extends Window {
         rozoPayConnection?: { disconnect?: () => void };
       }
-      
-      if (typeof window !== 'undefined') {
+
+      if (typeof window !== "undefined") {
         const windowWithConnection = window as unknown as WindowWithConnection;
         if (windowWithConnection.rozoPayConnection) {
           try {
             windowWithConnection.rozoPayConnection.disconnect?.();
             delete windowWithConnection.rozoPayConnection;
           } catch (e) {
-            console.log('Error cleaning up connection on unmount:', e)
+            console.log("Error cleaning up connection on unmount:", e);
           }
         }
       }
-    }
-  }, [])
+    };
+  }, []);
 
   return (
     <div className="space-y-6">
-
       {/* Transfer Form - Only show in manual mode */}
       {!isTopupFlow && (
         <Card>
@@ -313,191 +337,235 @@ export function IntentPayBridge({
                 type="number"
                 value={amount}
                 onChange={(e) => {
-                  setAmount(e.target.value)
-                  handleConfigChange()
+                  setAmount(e.target.value);
+                  handleConfigChange();
                 }}
                 placeholder="0.00"
                 step="0.01"
                 min="0"
               />
-              {amount && parseFloat(amount) > 0 && parseFloat(amount) < MIN_USDC_AMOUNT && (
-                <div className="text-xs text-red-600">
-                  Minimum order size is $0.10
-                </div>
-              )}
+              {amount &&
+                parseFloat(amount) > 0 &&
+                parseFloat(amount) < MIN_USDC_AMOUNT && (
+                  <div className="text-xs text-red-600">
+                    Minimum order size is $0.10
+                  </div>
+                )}
             </div>
 
             <Separator />
 
-          {/* Destination (Payout) - Hide in topup flow */}
-          {!isTopupFlow && (
-            <div className="space-y-4">
-              <div className="space-y-3">
-                <Label>To Chain</Label>
-                <ChainSelect
-                  value={toChainId}
-                  onValueChange={(chainId) => {
-                    if (chainId) {
-                      setToChainId(chainId)
-                      // Clear addresses when switching between EVM and Stellar
-                      const newIsDestStellar = chainId === 1500 || chainId === 1501
-                      if (newIsDestStellar !== isDestStellar) {
-                        setToAddress('')
-                        setToStellarAddress('')
+            {/* Destination (Payout) - Hide in topup flow */}
+            {!isTopupFlow && (
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  <Label>To Chain</Label>
+                  <ChainSelect
+                    value={toChainId}
+                    onValueChange={(chainId) => {
+                      if (chainId) {
+                        setToChainId(chainId);
+                        // Clear addresses when switching between EVM and Stellar
+                        const newIsDestStellar =
+                          chainId === 1500 || chainId === 1501;
+                        if (newIsDestStellar !== isDestStellar) {
+                          setToAddress("");
+                          setToStellarAddress("");
+                        }
+                        handleConfigChange();
                       }
-                      handleConfigChange()
-                    }
-                  }}
-                  placeholder="Select destination chain"
-                />
-              </div>
-
-              {!isDestStellar && (
-                <AddressInput
-                  value={toAddress}
-                  onChange={(value) => {
-                    setToAddress(value)
-                    handleConfigChange()
-                  }}
-                  label="Destination Address"
-                  placeholder="0x..."
-                />
-              )}
-
-              {isDestStellar && (
-                <StellarAddressInput
-                  value={toStellarAddress}
-                  onChange={(value) => {
-                    setToStellarAddress(value)
-                    handleConfigChange()
-                  }}
-                  label="Destination Stellar Address"
-                  required
-                />
-              )}
-            </div>
-          )}
-
-          {/* Show destination info in topup flow */}
-          {isTopupFlow && (
-            <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-blue-900 dark:text-blue-100">Destination Configured</div>
-                <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                  <div>Chain: {isDestStellar ? 'Stellar Network' : `Chain ID ${toChainId}`}</div>
-                  <div className="truncate">Address: {isDestStellar ? toStellarAddress : toAddress}</div>
+                    }}
+                    placeholder="Select destination chain"
+                  />
                 </div>
+
+                {!isDestStellar && (
+                  <AddressInput
+                    value={toAddress}
+                    onChange={(value) => {
+                      setToAddress(value);
+                      handleConfigChange();
+                    }}
+                    label="Destination Address"
+                    placeholder="0x..."
+                  />
+                )}
+
+                {isDestStellar && (
+                  <StellarAddressInput
+                    value={toStellarAddress}
+                    onChange={(value) => {
+                      setToStellarAddress(value);
+                      handleConfigChange();
+                    }}
+                    label="Destination Stellar Address"
+                    required
+                  />
+                )}
               </div>
-            </div>
-          )}
+            )}
 
-          {!isTopupFlow && <Separator />}
-
-          {/* Payment Actions */}
-          <div className="space-y-4">
-            {/* Configuration Status */}
-            {hasConfigChanged() && (
-              <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <RefreshCw className="h-4 w-4 text-amber-600" />
-                  <div className="text-sm">
-                    <div className="font-medium text-amber-900 dark:text-amber-100">Configuration Changed</div>
-                    <div className="text-amber-700 dark:text-amber-300">Click &quot;Generate Payment&quot; to update the payment button</div>
+            {/* Show destination info in topup flow */}
+            {isTopupFlow && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div className="space-y-2">
+                  <div className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                    Destination Configured
+                  </div>
+                  <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                    <div>
+                      Chain:{" "}
+                      {isDestStellar
+                        ? "Stellar Network"
+                        : `Chain ID ${toChainId}`}
+                    </div>
+                    <div className="truncate">
+                      Address: {isDestStellar ? toStellarAddress : toAddress}
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Generate Payment Button */}
-            {(!showPayButton || hasConfigChanged()) && !isGenerating ? (
-              <div className="flex flex-col items-center gap-4">
-                <Button 
-                  onClick={handleGeneratePayment}
-                  disabled={!isFormValid()}
-                  className="w-64" 
-                  size="lg"
-                  variant={hasConfigChanged() ? "default" : "default"}
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  {hasConfigChanged() ? 'Update Payment' : 'Generate Payment'}
-                </Button>
-                {!isFormValid() && (
-                  <div className="text-xs text-center text-muted-foreground">
-                    {!amount ? 'Enter amount to continue' :
-                     (Number.isFinite(parseFloat(amount)) && parseFloat(amount) > 0 && parseFloat(amount) < MIN_USDC_AMOUNT)
-                       ? 'Minimum amount is $0.10'
-                       : 'Complete all required fields'}
-                  </div>
-                )}
-              </div>
-            ) : isGenerating ? (
-              <div className="flex flex-col items-center gap-4">
-                <Button disabled className="w-64" size="lg">
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generating Payment...
-                </Button>
-              </div>
-            ) : showPayButton && !hasConfigChanged() ? (
-              <div className="space-y-4">
-                {/* Payment Summary */}
-                <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium text-green-900 dark:text-green-100">Payment Ready</div>
-                    <div className="text-sm text-green-700 dark:text-green-300 space-y-1">
-                      <div>Amount: {configuredAmount} USDC</div>
-                      <div>Destination: {configuredChainId === 1500 || configuredChainId === 1501 ? 'Stellar' : 'Chain ID ' + configuredChainId}</div>
-                      <div className="truncate">To: {configuredChainId === 1500 || configuredChainId === 1501 ? configuredStellarAddress : configuredAddress}</div>
+            {!isTopupFlow && <Separator />}
+
+            {/* Payment Actions */}
+            <div className="space-y-4">
+              {/* Configuration Status */}
+              {hasConfigChanged() && (
+                <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4 text-amber-600" />
+                    <div className="text-sm">
+                      <div className="font-medium text-amber-900 dark:text-amber-100">
+                        Configuration Changed
+                      </div>
+                      <div className="text-amber-700 dark:text-amber-300">
+                        Click &quot;Generate Payment&quot; to update the payment
+                        button
+                      </div>
                     </div>
                   </div>
                 </div>
+              )}
 
-                {/* RozoPayButton */}
-                {shouldRenderButton && (
-                  <div className="flex justify-center" key={`payment-button-wrapper-${paymentKey}`}>
-                    {intentConfig && (
-                      <>
-                        {configuredChainId !== 1500 && configuredChainId !== 1501 ? (
-                          <RozoPayButton
-                            defaultOpen
-                            key={`rozo-pay-button-${paymentKey}-${configuredAmount}-${configuredChainId}-${configuredAddress}`}
-                            appId={intentConfig.appId}
-                            toChain={intentConfig.toChain!}
-                            toToken={intentConfig.toToken!}
-                            toAddress={intentConfig.toAddress as `0x${string}`}
-                            toUnits={intentConfig.toUnits}
-                            onPaymentStarted={handlePaymentStarted}
-                            onPaymentCompleted={handlePaymentCompleted}
-                            onPaymentBounced={handlePaymentBounced}
-                          />
-                        ) : (
-                          <RozoPayButton
-                            defaultOpen
-                            key={`rozo-pay-button-stellar-${paymentKey}-${configuredAmount}-${configuredStellarAddress}`}
-                            appId={intentConfig.appId}
-                            toChain={BASE_USDC.chainId}
-                            // Use a valid placeholder EVM address for Stellar transfers (required by SDK)
-                            toAddress={getAddress("0x0000000000000000000000000000000000000001")}
-                            toStellarAddress={intentConfig.toStellarAddress}
-                            toUnits={intentConfig.toUnits}
-                            toToken={getAddress(BASE_USDC.token)}
-                            onPaymentStarted={handlePaymentStarted}
-                            onPaymentCompleted={handlePaymentCompleted}
-                            onPaymentBounced={handlePaymentBounced}
-                          />
-                        )}
-                      </>
-                    )}
+              {/* Generate Payment Button */}
+              {(!showPayButton || hasConfigChanged()) && !isGenerating ? (
+                <div className="flex flex-col items-center gap-4">
+                  <Button
+                    onClick={handleGeneratePayment}
+                    disabled={!isFormValid()}
+                    className="w-64"
+                    size="lg"
+                    variant={hasConfigChanged() ? "default" : "default"}
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    {hasConfigChanged() ? "Update Payment" : "Generate Payment"}
+                  </Button>
+                  {!isFormValid() && (
+                    <div className="text-xs text-center text-muted-foreground">
+                      {!amount
+                        ? "Enter amount to continue"
+                        : Number.isFinite(parseFloat(amount)) &&
+                          parseFloat(amount) > 0 &&
+                          parseFloat(amount) < MIN_USDC_AMOUNT
+                        ? "Minimum amount is $0.10"
+                        : "Complete all required fields"}
+                    </div>
+                  )}
+                </div>
+              ) : isGenerating ? (
+                <div className="flex flex-col items-center gap-4">
+                  <Button disabled className="w-64" size="lg">
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Generating Payment...
+                  </Button>
+                </div>
+              ) : showPayButton && !hasConfigChanged() ? (
+                <div className="space-y-4">
+                  {/* Payment Summary */}
+                  <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+                    <div className="space-y-2">
+                      <div className="text-sm font-medium text-green-900 dark:text-green-100">
+                        Payment Ready
+                      </div>
+                      <div className="text-sm text-green-700 dark:text-green-300 space-y-1">
+                        <div>Amount: {configuredAmount} USDC</div>
+                        <div>
+                          Destination:{" "}
+                          {configuredChainId === 1500 ||
+                          configuredChainId === 1501
+                            ? "Stellar"
+                            : "Chain ID " + configuredChainId}
+                        </div>
+                        <div className="truncate">
+                          To:{" "}
+                          {configuredChainId === 1500 ||
+                          configuredChainId === 1501
+                            ? configuredStellarAddress
+                            : configuredAddress}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                )}
+
+                  {/* RozoPayButton */}
+                  {shouldRenderButton && (
+                    <div
+                      className="flex justify-center"
+                      key={`payment-button-wrapper-${paymentKey}`}
+                    >
+                      {intentConfig && (
+                        <>
+                          {configuredChainId !== 1500 &&
+                          configuredChainId !== 1501 ? (
+                            <RozoPayButton
+                              defaultOpen
+                              key={`rozo-pay-button-${paymentKey}-${configuredAmount}-${configuredChainId}-${configuredAddress}`}
+                              appId={intentConfig.appId}
+                              toChain={intentConfig.toChain!}
+                              toToken={intentConfig.toToken!}
+                              toAddress={
+                                intentConfig.toAddress as `0x${string}`
+                              }
+                              toUnits={intentConfig.toUnits}
+                              onPaymentStarted={handlePaymentStarted}
+                              onPaymentCompleted={handlePaymentCompleted}
+                              onPaymentBounced={handlePaymentBounced}
+                              showProcessingPayout
+                            />
+                          ) : (
+                            <RozoPayButton
+                              defaultOpen
+                              key={`rozo-pay-button-stellar-${paymentKey}-${configuredAmount}-${configuredStellarAddress}`}
+                              appId={intentConfig.appId}
+                              toChain={BASE_USDC.chainId}
+                              // Use a valid placeholder EVM address for Stellar transfers (required by SDK)
+                              toAddress={getAddress(
+                                "0x0000000000000000000000000000000000000001"
+                              )}
+                              toStellarAddress={intentConfig.toStellarAddress}
+                              toUnits={intentConfig.toUnits}
+                              toToken={getAddress(BASE_USDC.token)}
+                              onPaymentStarted={handlePaymentStarted}
+                              onPaymentCompleted={handlePaymentCompleted}
+                              onPaymentBounced={handlePaymentBounced}
+                              showProcessingPayout
+                            />
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : null}
+
+              <div className="text-xs text-center text-muted-foreground">
+                ✨ Powered by Rozo - Visa for stablecoins
               </div>
-            ) : null}
-            
-            <div className="text-xs text-center text-muted-foreground">
-              ✨ Powered by Rozo - Visa for stablecoins
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
       )}
 
       {/* Quick Top-up Payment Section */}
@@ -528,7 +596,9 @@ export function IntentPayBridge({
             {/* Payment Summary */}
             <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
               <div className="space-y-2">
-                <div className="text-sm font-medium text-blue-900 dark:text-blue-100">Payment Details</div>
+                <div className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  Payment Details
+                </div>
                 <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
                   <div>Amount: {amount} USDC</div>
                   <div>Destination: Stellar Network</div>
@@ -556,18 +626,21 @@ export function IntentPayBridge({
                         key={`rozo-pay-button-stellar-${paymentKey}-${configuredAmount}-${configuredStellarAddress}`}
                         appId={intentConfig.appId}
                         toChain={BASE_USDC.chainId}
-                        toAddress={getAddress("0x0000000000000000000000000000000000000001")}
+                        toAddress={getAddress(
+                          "0x0000000000000000000000000000000000000001"
+                        )}
                         toStellarAddress={intentConfig.toStellarAddress}
                         toUnits={intentConfig.toUnits}
                         toToken={getAddress(BASE_USDC.token)}
                         onPaymentStarted={handlePaymentStarted}
                         onPaymentCompleted={() => {
-                          handlePaymentCompleted()
+                          handlePaymentCompleted();
                           if (isTopupFlow && onTopupComplete) {
-                            onTopupComplete()
+                            onTopupComplete();
                           }
                         }}
                         onPaymentBounced={handlePaymentBounced}
+                        showProcessingPayout
                       />
                     ) : (
                       <RozoPayButton
@@ -575,15 +648,19 @@ export function IntentPayBridge({
                         key={`rozo-pay-button-${paymentKey}-${configuredAmount}-${configuredAddress}`}
                         appId={intentConfig.appId}
                         toChain={intentConfig.toChain}
-                        toAddress={intentConfig.toAddress || ('0x0000000000000000000000000000000000000000' as `0x${string}`)}
+                        toAddress={
+                          intentConfig.toAddress ||
+                          ("0x0000000000000000000000000000000000000000" as `0x${string}`)
+                        }
                         toUnits={intentConfig.toUnits}
                         toToken={intentConfig.toToken}
                         externalId={intentConfig.externalId}
+                        showProcessingPayout
                       />
                     )}
                   </div>
                 )}
-                
+
                 <div className="text-xs text-center text-muted-foreground">
                   ✨ Powered by Rozo - Visa for stablecoins
                 </div>
@@ -592,7 +669,6 @@ export function IntentPayBridge({
           </CardContent>
         </Card>
       )}
-
     </div>
-  )
+  );
 }
