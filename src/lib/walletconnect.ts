@@ -1,121 +1,143 @@
-import { SignClient } from '@walletconnect/sign-client'
-import { SessionTypes } from '@walletconnect/types'
+import { SignClient } from "@walletconnect/sign-client";
+import { SessionTypes } from "@walletconnect/types";
 
 // WalletConnect configuration with both EVM and Stellar namespaces
 export const WALLETCONNECT_CONFIG = {
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'dummy-project-id',
+  projectId:
+    process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "dummy-project-id",
   metadata: {
-    name: 'Rozo Bridge Demo',
-    description: 'Multi-chain USDC bridge powered by Intent Pay',
-    url: 'https://bridge.rozo.ai',
-    icons: ['https://bridge.rozo.ai/icon.png']
+    name: "Rozo Bridge Demo",
+    description: "Multi-chain USDC bridge powered by Intent Pay",
+    url: "https://bridge.rozo.ai",
+    icons: ["https://bridge.rozo.ai/icon.png"],
   },
   // Required namespaces for both EVM and Stellar
   requiredNamespaces: {
     eip155: {
-      chains: ['eip155:1', 'eip155:8453', 'eip155:137', 'eip155:42161', 'eip155:10', 'eip155:43114'],
-      methods: [
-        'eth_sendTransaction',
-        'personal_sign',
-        'eth_signTypedData',
-        'eth_signTypedData_v4',
-        'wallet_switchEthereumChain',
-        'wallet_addEthereumChain'
+      chains: [
+        "eip155:1",
+        "eip155:8453",
+        "eip155:137",
+        "eip155:42161",
+        "eip155:10",
+        "eip155:43114",
       ],
-      events: ['accountsChanged', 'chainChanged']
+      methods: [
+        "eth_sendTransaction",
+        "personal_sign",
+        "eth_signTypedData",
+        "eth_signTypedData_v4",
+        "wallet_switchEthereumChain",
+        "wallet_addEthereumChain",
+      ],
+      events: ["accountsChanged", "chainChanged"],
     },
     stellar: {
-      chains: ['stellar:pubnet', 'stellar:testnet'],
-      methods: [
-        'stellar_signXDR',
-        'stellar_signAndSubmitXDR'
-      ],
-      events: []
-    }
-  }
-}
+      chains: ["stellar:pubnet", "stellar:testnet"],
+      methods: ["stellar_signXDR", "stellar_signAndSubmitXDR"],
+      events: [],
+    },
+  },
+};
 
 // WalletConnect client instance
-let walletConnectClient: InstanceType<typeof SignClient> | null = null
+let walletConnectClient: InstanceType<typeof SignClient> | null = null;
 
 // Initialize WalletConnect client
-export const initWalletConnect = async (): Promise<InstanceType<typeof SignClient>> => {
+export const initWalletConnect = async (): Promise<
+  InstanceType<typeof SignClient>
+> => {
   if (walletConnectClient) {
-    return walletConnectClient
+    return walletConnectClient;
   }
 
   try {
     walletConnectClient = await SignClient.init({
       projectId: WALLETCONNECT_CONFIG.projectId,
       metadata: WALLETCONNECT_CONFIG.metadata,
-    })
+    });
 
-    return walletConnectClient
+    return walletConnectClient;
   } catch (error) {
-    console.error('Failed to initialize WalletConnect:', error)
-    throw error
+    console.error("Failed to initialize WalletConnect:", error);
+    throw error;
   }
-}
+};
 
 // Get WalletConnect client
-export const getWalletConnectClient = (): InstanceType<typeof SignClient> | null => {
-  return walletConnectClient
-}
+export const getWalletConnectClient = (): InstanceType<
+  typeof SignClient
+> | null => {
+  return walletConnectClient;
+};
 
 // Connect to WalletConnect with both namespaces
 export const connectWalletConnect = async (): Promise<SessionTypes.Struct> => {
-  const client = await initWalletConnect()
+  const client = await initWalletConnect();
 
   try {
     const { uri, approval } = await client.connect({
       requiredNamespaces: WALLETCONNECT_CONFIG.requiredNamespaces,
-    })
+    });
 
     if (uri) {
       // Show QR code or handle deep linking
-      console.log('WalletConnect URI:', uri)
+      console.log("WalletConnect URI:", uri);
       // You can use this URI to show QR code or trigger deep linking
     }
 
-    const session = await approval()
-    return session
+    const session = await approval();
+    return session;
   } catch (error) {
-    console.error('Failed to connect WalletConnect:', error)
-    throw error
+    console.error("Failed to connect WalletConnect:", error);
+    throw error;
   }
-}
+};
 
 // Disconnect WalletConnect session
 export const disconnectWalletConnect = async (topic: string): Promise<void> => {
-  const client = getWalletConnectClient()
+  const client = getWalletConnectClient();
   if (!client) {
-    throw new Error('WalletConnect client not initialized')
+    console.warn("WalletConnect client not initialized, skipping disconnect");
+    return;
   }
 
   try {
+    // Check if session exists before attempting to disconnect
+    const session = client.session.get(topic);
+    if (!session) {
+      console.warn(
+        `WalletConnect session ${topic} not found, already disconnected`
+      );
+      return;
+    }
+
     await client.disconnect({
       topic,
       reason: {
         code: 6000,
-        message: 'User disconnected',
+        message: "User disconnected",
       },
-    })
+    });
+
+    console.log(`WalletConnect session ${topic} disconnected successfully`);
   } catch (error) {
-    console.error('Failed to disconnect WalletConnect:', error)
-    throw error
+    console.error("Failed to disconnect WalletConnect:", error);
+    // Don't throw error to prevent blocking the disconnect flow
+    // The local state will still be cleared
   }
-}
+};
 
 // Sign Stellar transaction via WalletConnect
 export const signStellarTransaction = async (
   topic: string,
   xdr: string,
   publicKey: string,
-  network: 'pubnet' | 'testnet' = 'pubnet'
+  network: "pubnet" | "testnet" = "pubnet"
 ): Promise<string> => {
-  const client = getWalletConnectClient()
+  const client = getWalletConnectClient();
   if (!client) {
-    throw new Error('WalletConnect client not initialized')
+    throw new Error("WalletConnect client not initialized");
   }
 
   try {
@@ -123,32 +145,32 @@ export const signStellarTransaction = async (
       topic,
       chainId: `stellar:${network}`,
       request: {
-        method: 'stellar_signXDR',
+        method: "stellar_signXDR",
         params: {
           xdr,
           publicKey,
           network,
         },
       },
-    })
+    });
 
-    return result as string
+    return result as string;
   } catch (error) {
-    console.error('Failed to sign Stellar transaction:', error)
-    throw error
+    console.error("Failed to sign Stellar transaction:", error);
+    throw error;
   }
-}
+};
 
 // Sign and submit Stellar transaction via WalletConnect
 export const signAndSubmitStellarTransaction = async (
   topic: string,
   xdr: string,
   publicKey: string,
-  network: 'pubnet' | 'testnet' = 'pubnet'
+  network: "pubnet" | "testnet" = "pubnet"
 ): Promise<string> => {
-  const client = getWalletConnectClient()
+  const client = getWalletConnectClient();
   if (!client) {
-    throw new Error('WalletConnect client not initialized')
+    throw new Error("WalletConnect client not initialized");
   }
 
   try {
@@ -156,76 +178,84 @@ export const signAndSubmitStellarTransaction = async (
       topic,
       chainId: `stellar:${network}`,
       request: {
-        method: 'stellar_signAndSubmitXDR',
+        method: "stellar_signAndSubmitXDR",
         params: {
           xdr,
           publicKey,
           network,
         },
       },
-    })
+    });
 
-    return result as string
+    return result as string;
   } catch (error) {
-    console.error('Failed to sign and submit Stellar transaction:', error)
-    throw error
+    console.error("Failed to sign and submit Stellar transaction:", error);
+    throw error;
   }
-}
+};
 
 // Get active WalletConnect sessions
 export const getActiveSessions = (): SessionTypes.Struct[] => {
-  const client = getWalletConnectClient()
+  const client = getWalletConnectClient();
   if (!client) {
-    return []
+    return [];
   }
 
-  return Object.values(client.session.getAll())
-}
+  return Object.values(client.session.getAll());
+};
 
 // Get session by topic
-export const getSessionByTopic = (topic: string): SessionTypes.Struct | undefined => {
-  const client = getWalletConnectClient()
+export const getSessionByTopic = (
+  topic: string
+): SessionTypes.Struct | undefined => {
+  const client = getWalletConnectClient();
   if (!client) {
-    return undefined
+    return undefined;
   }
 
-  return client.session.get(topic)
-}
+  return client.session.get(topic);
+};
 
 // Check if session supports Stellar
-export const sessionSupportsStellar = (session: SessionTypes.Struct): boolean => {
-  return Object.keys(session.namespaces).includes('stellar')
-}
+export const sessionSupportsStellar = (
+  session: SessionTypes.Struct
+): boolean => {
+  return Object.keys(session.namespaces).includes("stellar");
+};
 
 // Check if session supports EVM
 export const sessionSupportsEVM = (session: SessionTypes.Struct): boolean => {
-  return Object.keys(session.namespaces).includes('eip155')
-}
+  return Object.keys(session.namespaces).includes("eip155");
+};
 
 // Get Stellar accounts from session
 export const getStellarAccounts = (session: SessionTypes.Struct): string[] => {
-  const stellarNamespace = session.namespaces.stellar
+  const stellarNamespace = session.namespaces.stellar;
   if (!stellarNamespace) {
-    return []
+    return [];
   }
 
-  return stellarNamespace.accounts.map(account => {
-    // Account format: "stellar:pubnet:GXXXXXXX" or "stellar:testnet:GXXXXXXX"
-    const parts = account.split(':')
-    return parts[2] || ''
-  }).filter(Boolean)
-}
+  return stellarNamespace.accounts
+    .map((account) => {
+      // Account format: "stellar:pubnet:GXXXXXXX" or "stellar:testnet:GXXXXXXX"
+      const parts = account.split(":");
+      return parts[2] || "";
+    })
+    .filter(Boolean);
+};
 
 // Get EVM accounts from session
 export const getEVMAccounts = (session: SessionTypes.Struct): string[] => {
-  const evmNamespace = session.namespaces.eip155
+  const evmNamespace = session.namespaces.eip155;
   if (!evmNamespace) {
-    return []
+    return [];
   }
 
-  return evmNamespace.accounts.map(account => {
-    // Account format: "eip155:1:0xXXXXXX"
-    const parts = account.split(':')
-    return parts[2] || ''
-  }).filter(Boolean)
-}
+  return evmNamespace.accounts
+    .map((account) => {
+      // Account format: "eip155:1:0xXXXXXX"
+      const parts = account.split(":");
+      return parts[2] || "";
+    })
+    .filter(Boolean);
+};
