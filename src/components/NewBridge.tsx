@@ -10,7 +10,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
-  CheckCircle,
+  DollarSign,
   Info,
   Wallet,
 } from "lucide-react";
@@ -18,6 +18,8 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { getAddress } from "viem";
+import ChainsStacked from "./chains-stacked";
+import { ContactSupport } from "./ContactSupport";
 import { DepositIcon } from "./icons/deposit-icon";
 import { WithdrawIcon } from "./icons/withdraw-icon";
 import { StellarAddressInput } from "./StellarAddressInput";
@@ -53,7 +55,7 @@ interface PayData {
 }
 
 export function NewBridge() {
-  const [flowType, setFlowType] = useState<FlowType>("initial");
+  const [flowType, setFlowType] = useState<FlowType>("withdraw");
   const [evmAddress, setEvmAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [selectedChain, setSelectedChain] = useState<number | null>(null);
@@ -79,11 +81,12 @@ export function NewBridge() {
     [isConnected, publicKey, manualStellarAddress]
   );
 
-  // Available chains for withdraw (Base, Solana)
+  // Available chains for withdraw (Base, Stellar)
   const withdrawChains = supportedChains.filter(
     (chain) =>
       chain.id === 8453 || // Base
-      chain.id === 900 // Solana
+      chain.id === 1500 || // Stellar Mainnet
+      chain.id === 1501 // Stellar Testnet
   );
 
   const isValidStellarAddress = (address: string): boolean => {
@@ -94,15 +97,10 @@ export function NewBridge() {
     return address.startsWith("0x") && address.length === 42;
   };
 
-  const isValidSolanaAddress = (address: string): boolean => {
-    // Solana addresses are base58 encoded and typically 32-44 characters
-    return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
-  };
-
   const getAddressType = useCallback(
-    (address: string): "evm" | "solana" | "invalid" => {
+    (address: string): "evm" | "stellar" | "invalid" => {
       if (isValidEvmAddress(address)) return "evm";
-      if (isValidSolanaAddress(address)) return "solana";
+      if (isValidStellarAddress(address)) return "stellar";
       return "invalid";
     },
     []
@@ -114,8 +112,8 @@ export function NewBridge() {
       const addressType = getAddressType(address);
       if (addressType === "evm") {
         setSelectedChain(8453); // Base
-      } else if (addressType === "solana") {
-        setSelectedChain(900); // Solana
+      } else if (addressType === "stellar") {
+        setSelectedChain(1500); // Stellar Mainnet
       }
     },
     [getAddressType]
@@ -166,7 +164,7 @@ export function NewBridge() {
         loading: false,
       });
     }
-  }, [effectiveStellarAddress, checkTrustline]);
+  }, [effectiveStellarAddress]);
 
   const handleAmountSelect = (selectedAmount: string) => {
     setAmount(selectedAmount);
@@ -183,6 +181,16 @@ export function NewBridge() {
   };
 
   const handlePay = useCallback(() => {
+    if (!evmAddress) {
+      toast.error("Please enter a valid destination address");
+      return;
+    }
+
+    if (!amount) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+
     if (flowType === "deposit") {
       const data = {
         appId: DEFAULT_INTENT_PAY_CONFIG.appId,
@@ -207,23 +215,16 @@ export function NewBridge() {
 
         if (selectedChain === 8453) {
           data.toAddress = getAddress(evmAddress);
-        } else if (selectedChain === 900) {
-          data.toSolanaAddress = evmAddress;
+          data.toStellarAddress = "";
+        } else if (selectedChain === 1500 || selectedChain === 1501) {
+          data.toStellarAddress = evmAddress;
         }
 
         setWithdrawData(data);
         resetPayment(data);
       }
     }
-  }, [
-    flowType,
-    effectiveStellarAddress,
-    amount,
-    selectedChain,
-    trustlineInfo,
-    evmAddress,
-    resetPayment,
-  ]);
+  }, [flowType, effectiveStellarAddress, amount, selectedChain, evmAddress]);
 
   useEffect(() => {
     if (amount) {
@@ -231,7 +232,7 @@ export function NewBridge() {
         handlePay();
       }, 500);
     }
-  }, [amount]);
+  }, [amount, handlePay]);
 
   // Initial choice screen
   if (flowType === "initial") {
@@ -255,20 +256,6 @@ export function NewBridge() {
                   Deposit USDC from Base, Solana, or Polygon to your Stellar
                   wallet
                 </p>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span>Connect Stellar wallet</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span>Check USDC trustline</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span>Select amount & pay</span>
-                  </div>
-                </div>
               </CardContent>
               <CardFooter>
                 <Button className="w-full">
@@ -279,33 +266,19 @@ export function NewBridge() {
             </Card>
 
             <Card
-              className="cursor-pointer hover:shadow-lg transition-shadow"
+              className="cursor-pointer hover:shadow-lg transition-shadow gap-2"
               onClick={() => setFlowType("withdraw")}
             >
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <WithdrawIcon className="size-5" />
+                <CardTitle className="flex flex-col justify-center items-center gap-4">
+                  <WithdrawIcon className="size-10" />
                   Withdraw from Stellar
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Transfer USDC from Stellar to Base or Solana
+                  Transfer USDC from Stellar to Base or Stellar
                 </p>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span>Enter EVM address</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span>Select amount</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span>Generate payment</span>
-                  </div>
-                </div>
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full">
@@ -316,6 +289,12 @@ export function NewBridge() {
             </Card>
           </div>
 
+          <div className="flex justify-center items-center gap-2">
+            <ChainsStacked />
+            <span className="text-muted-foreground text-sm">
+              Safe and Secure Payments
+            </span>
+          </div>
           <div className="text-center text-sm text-muted-foreground">
             <p>Powered by Rozo - Visa for stablecoins</p>
           </div>
@@ -502,71 +481,52 @@ export function NewBridge() {
     const isValidAddress = addressType !== "invalid";
     const isChainCompatible =
       (addressType === "evm" && selectedChain === 8453) || // Base for EVM
-      (addressType === "solana" && selectedChain === 900); // Solana
+      (addressType === "stellar" &&
+        (selectedChain === 1500 || selectedChain === 1501)); // Stellar
 
     return (
-      <div className="w-full max-w-2xl mx-auto space-y-6">
+      <div className="w-full max-w-xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col items-start gap-4">
-          <Button
+          {/* <Button
             variant="ghost"
             size="sm"
             onClick={() => setFlowType("initial")}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Quick Top Up
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">Transfer Configuration</h1>
-            <p className="text-sm text-muted-foreground">
-              Configure your USDC transfer details
-            </p>
+          </Button> */}
+          <div className="flex flex-col-reverse md:flex-row justify-center md:justify-between items-center gap-2 w-full">
+            <div>
+              <h1 className="text-2xl font-bold">Transfer Configuration</h1>
+              <p className="text-sm text-muted-foreground">
+                Configure your USDC transfer details
+              </p>
+            </div>
+
+            <div className="flex justify-center items-center gap-2">
+              <ChainsStacked />
+              <span className="text-muted-foreground text-sm">
+                Safe and Secure Payments
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Destination Address and Chain Selection */}
         <Card>
           <CardHeader>
-            <CardTitle>Destination Address & Chain</CardTitle>
+            <CardTitle>Destination</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Address Input */}
-            <div className="space-y-2">
-              <Label htmlFor="destination-address">Destination Address</Label>
-              <Input
-                id="destination-address"
-                type="text"
-                value={evmAddress}
-                onChange={(e) => handleAddressChange(e.target.value)}
-                placeholder="Enter EVM (0x...) or Solana address"
-                className={cn(
-                  evmAddress &&
-                    !isValidAddress &&
-                    "border-red-300 focus:border-red-500"
-                )}
-              />
-
-              {/* Address Validation */}
-              {evmAddress && (
-                <>
-                  {!isValidAddress ? (
-                    <div className="flex items-center gap-2 text-red-600 text-sm">
-                      <AlertTriangle className="h-4 w-4" />
-                      <span>Invalid address format</span>
-                    </div>
-                  ) : null}
-                </>
-              )}
-            </div>
-
             {/* Chain Selection */}
             <div className="space-y-3">
-              <Label>To Chain</Label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {withdrawChains.map((chain) => {
                   const isCompatible =
                     (addressType === "evm" && chain.id === 8453) || // Base for EVM
-                    (addressType === "solana" && chain.id === 900); // Solana
+                    (addressType === "stellar" &&
+                      (chain.id === 1500 || chain.id === 1501)); // Stellar
 
                   return (
                     <Button
@@ -579,16 +539,27 @@ export function NewBridge() {
                       disabled={!!(evmAddress && !isCompatible)}
                     >
                       <div className="flex items-center gap-3">
-                        <Image
-                          src={chain.logo}
-                          alt={chain.name}
-                          width={32}
-                          height={32}
-                          className="w-8 h-8 rounded-full"
-                        />
+                        {typeof chain.logo === "string" ? (
+                          <Image
+                            src={chain.logo}
+                            alt={chain.name}
+                            width={32}
+                            height={32}
+                            className="w-8 h-8 rounded-full"
+                          />
+                        ) : (
+                          <span className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center">
+                            {chain.logo}
+                          </span>
+                        )}
                         <div className="text-left">
                           <div className="font-medium">{chain.name}</div>
-                          <div className="text-xs text-muted-foreground">
+                          <div
+                            className={cn(
+                              "text-xs text-muted-foreground",
+                              selectedChain === chain.id && "text-accent"
+                            )}
+                          >
                             {chain.ecosystem}
                           </div>
                         </div>
@@ -609,11 +580,54 @@ export function NewBridge() {
                   <AlertTriangle className="h-4 w-4" />
                   <span>
                     Selected chain is not compatible with{" "}
-                    {addressType === "evm" ? "EVM" : "Solana"} address
+                    {addressType === "evm" ? "EVM" : "Stellar"} address
                   </span>
                 </div>
               )}
             </div>
+
+            {/* Address Input */}
+            {selectedChain && (
+              <div className="space-y-2">
+                <Label htmlFor="destination-address">Destination Address</Label>
+                {selectedChain === 1500 || selectedChain === 1501 ? (
+                  <StellarAddressInput
+                    value={evmAddress}
+                    onChange={handleAddressChange}
+                    label={null}
+                    placeholder="Enter your Stellar address (G...)"
+                    required
+                    disabled={!!(isConnected && publicKey)}
+                    showValidation={false}
+                  />
+                ) : (
+                  <Input
+                    id="destination-address"
+                    type="text"
+                    value={evmAddress}
+                    onChange={(e) => handleAddressChange(e.target.value)}
+                    placeholder="Enter EVM address (0x...)"
+                    className={cn(
+                      evmAddress &&
+                        !isValidAddress &&
+                        "border-red-300 focus:border-red-500"
+                    )}
+                  />
+                )}
+
+                {/* Address Validation */}
+                {evmAddress && (
+                  <>
+                    {!isValidAddress ? (
+                      <div className="flex items-center gap-2 text-red-600 text-sm">
+                        <AlertTriangle className="h-4 w-4" />
+                        <span>Invalid address format</span>
+                      </div>
+                    ) : null}
+                  </>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -653,9 +667,9 @@ export function NewBridge() {
 
         {/* Pay Button */}
         {!withdrawData && (
-          <Button disabled={true} className="w-full h-12" size="lg">
-            <ArrowRight className="h-4 w-4 mr-2" />
-            Proceed with USDC Withdraw
+          <Button disabled={true} className="w-full h-12 text-lg" size="lg">
+            <DollarSign className="size-4" />
+            Process Transaction
           </Button>
         )}
 
@@ -665,7 +679,7 @@ export function NewBridge() {
             toChain={withdrawData.toChain!}
             toToken={withdrawData.toToken!}
             toAddress={withdrawData.toAddress as `0x${string}`}
-            toSolanaAddress={withdrawData.toSolanaAddress}
+            toStellarAddress={withdrawData.toStellarAddress}
             toUnits={withdrawData.toUnits}
             onPaymentCompleted={() => {
               toast.success("Withdraw completed successfully! 🎉", {
@@ -678,13 +692,15 @@ export function NewBridge() {
             showProcessingPayout
           >
             {({ show }) => (
-              <Button onClick={show} className="w-full h-12" size="lg">
-                <ArrowRight className="h-4 w-4 mr-2" />
-                Proceed with USDC Withdraw
+              <Button onClick={show} className="w-full h-12 text-lg" size="lg">
+                <DollarSign className="size-4" />
+                Process Transaction
               </Button>
             )}
           </RozoPayButton.Custom>
         )}
+
+        <ContactSupport />
       </div>
     );
   }

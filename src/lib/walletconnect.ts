@@ -6,7 +6,7 @@ export const WALLETCONNECT_CONFIG = {
   projectId:
     process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "dummy-project-id",
   metadata: {
-    name: "Rozo Bridge Demo",
+    name: "Rozo Bridge",
     description: "Multi-chain USDC bridge powered by Intent Pay",
     url: "https://bridge.rozo.ai",
     icons: ["https://bridge.rozo.ai/icon.png"],

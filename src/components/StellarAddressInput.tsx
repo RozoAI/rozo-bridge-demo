@@ -1,22 +1,20 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import {
   isMuxedAddress,
   isValidStellarAddress,
   normalizeStellarAddress,
 } from "@/lib/stellar";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, CheckCircle, Wallet } from "lucide-react";
+import { AlertTriangle, CheckCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface StellarAddressInputProps {
   value: string;
   onChange: (value: string) => void;
-  label?: string;
+  label?: string | null;
   placeholder?: string;
   className?: string;
   required?: boolean;
@@ -34,7 +32,6 @@ export function StellarAddressInput({
   showValidation = true,
   disabled = false,
 }: StellarAddressInputProps) {
-  const { stellarConnected } = useStellarWallet();
   const [validationState, setValidationState] = useState<{
     isValid: boolean;
     isMuxed: boolean;
@@ -140,37 +137,34 @@ export function StellarAddressInput({
   return (
     <div className={cn("space-y-2", className)}>
       {/* Label */}
-      <div className="flex items-center justify-between">
-        {label && (
-          <Label htmlFor="stellar-address" className="text-sm font-medium">
-            {label}
-            {required && <span className="text-red-500 ml-1">*</span>}
-          </Label>
-        )}
+      {label ||
+        showValid ||
+        (showError && (
+          <div className="flex items-center justify-between">
+            {label && (
+              <Label htmlFor="stellar-address" className="text-sm font-medium">
+                {label}
+                {required && <span className="text-red-500 ml-1">*</span>}
+              </Label>
+            )}
 
-        <div className="flex items-center gap-2">
-          {stellarConnected && (
-            <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
-              <Wallet className="h-3 w-3" />
-              <span className="text-xs">Connected</span>
-            </div>
-          )}
+            <div className="flex items-center gap-2">
+              {showValid && (
+                <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                  <CheckCircle className="h-3 w-3" />
+                  <span className="text-xs">Valid</span>
+                </div>
+              )}
 
-          {showValid && (
-            <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-              <CheckCircle className="h-3 w-3" />
-              <span className="text-xs">Valid</span>
+              {showError && (
+                <div className="flex items-center gap-1 text-red-600 dark:text-red-400">
+                  <AlertTriangle className="h-3 w-3" />
+                  <span className="text-xs">Invalid</span>
+                </div>
+              )}
             </div>
-          )}
-
-          {showError && (
-            <div className="flex items-center gap-1 text-red-600 dark:text-red-400">
-              <AlertTriangle className="h-3 w-3" />
-              <span className="text-xs">Invalid</span>
-            </div>
-          )}
-        </div>
-      </div>
+          </div>
+        ))}
 
       {/* Input */}
       <div className="relative">
@@ -187,7 +181,7 @@ export function StellarAddressInput({
         />
 
         {/* Paste Button */}
-        <Button
+        {/* <Button
           type="button"
           variant="ghost"
           size="sm"
@@ -196,7 +190,7 @@ export function StellarAddressInput({
           className="absolute right-1 top-1/2 -translate-y-1/2 h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
         >
           Paste
-        </Button>
+        </Button> */}
       </div>
 
       {/* Error Message */}

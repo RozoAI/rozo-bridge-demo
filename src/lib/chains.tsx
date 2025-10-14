@@ -10,9 +10,11 @@ import {
   sepolia,
 } from "viem/chains";
 
+import { Stellar } from "@/components/icons/chains";
+
 // Extended interface for all supported chains (EVM and non-EVM)
 export interface SupportedChain extends Chain {
-  logo: string;
+  logo: string | React.ReactNode;
   usdcAddress?: `0x${string}`; // Optional for non-EVM chains
   explorerUrl: string;
   ecosystem: "EVM" | "Solana" | "Stellar";
@@ -80,7 +82,7 @@ const USDC_ADDRESSES = {
 } as const;
 
 // Helper function to get chain logo path
-const getChainLogo = (chainId: number): string => {
+const getChainLogo = (chainId: number): string | React.ReactNode => {
   switch (chainId) {
     case mainnet.id:
       return "/logos/ethereum.png"; // Ethereum
@@ -103,9 +105,9 @@ const getChainLogo = (chainId: number): string => {
     case solanaDevnet.id:
       return "/logos/solana.png"; // Solana Devnet (no logo provided, use globe)
     case stellarMainnet.id:
-      return "/logos/stellar.svg"; // Stellar logo
+      return <Stellar width={32} height={32} className="rounded-full size-8" />; // Stellar logo
     case stellarTestnet.id:
-      return "/logos/stellar.svg"; // Stellar Testnet (use same logo)
+      return <Stellar width={32} height={32} className="rounded-full size-8" />; // Stellar Testnet (use same logo)
     default:
       return "/globe.svg"; // Default fallback
   }

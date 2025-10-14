@@ -1,9 +1,11 @@
+import { CryptoLogoPreloader } from "@/components/CryptoLogoPreloader";
+import { CryptoPolyfillSetup } from "@/components/CryptoPolyfillSetup";
+import IntercomInitializer from "@/components/IntercomInitializer";
+import { Providers } from "@/components/Providers";
+import { StellarWalletProvider } from "@/contexts/StellarWalletContext";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Providers } from "@/components/Providers";
-import { CryptoLogoPreloader } from "@/components/CryptoLogoPreloader";
-import { CryptoPolyfillSetup } from "@/components/CryptoPolyfillSetup";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +18,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rozo Bridge Demo - Multi-Chain USDC Transfer",
-  description: "Bridge USDC across chains with Intent Pay - fast, secure, and decentralized",
+  title: "Rozo Bridge - Multi-Chain USDC Transfer",
+  description:
+    "Bridge USDC across chains with Intent Pay - fast, secure, and decentralized",
 };
 
 export default function RootLayout({
@@ -33,8 +36,11 @@ export default function RootLayout({
       >
         <CryptoPolyfillSetup />
         <Providers>
-          <CryptoLogoPreloader />
-          {children}
+          <StellarWalletProvider>
+            {children}
+            <CryptoLogoPreloader />
+            <IntercomInitializer appId="kpfdpai7" />
+          </StellarWalletProvider>
         </Providers>
       </body>
     </html>
