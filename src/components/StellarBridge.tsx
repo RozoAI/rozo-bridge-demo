@@ -45,12 +45,12 @@ export function StellarBridge() {
         className="w-full flex flex-col"
       >
         <TabsList className="m-auto">
-          <TabsTrigger value="deposit">
-            <ArrowUpRight className="size-5 mr-1.5" />
+          <TabsTrigger value="deposit" className="text-xs">
+            <ArrowUpRight className="size-3 mr-1" />
             Deposit from any chains
           </TabsTrigger>
-          <TabsTrigger value="withdraw">
-            <ArrowDownLeft className="size-5 mr-1.5" />
+          <TabsTrigger value="withdraw" className="text-xs">
+            <ArrowDownLeft className="size-3 mr-1" />
             Withdraw to Base
           </TabsTrigger>
         </TabsList>

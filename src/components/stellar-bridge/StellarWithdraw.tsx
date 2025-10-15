@@ -14,7 +14,7 @@ import {
   Loader2,
   Star,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { StellarWalletConnect } from "../StellarWalletConnect";
 
@@ -146,6 +146,20 @@ export function StellarWithdraw({
       }
     }
   }, [step, toastId, paymentId]);
+
+  const ableToWithdraw = useMemo(() => {
+    return (
+      stellarConnected &&
+      trustlineStatus.exists &&
+      parseFloat(trustlineStatus.balance) > 0 &&
+      baseAddress
+    );
+  }, [
+    stellarConnected,
+    trustlineStatus.exists,
+    trustlineStatus.balance,
+    baseAddress,
+  ]);
 
   return (
     <Card className="gap-2">
@@ -353,6 +367,7 @@ export function StellarWithdraw({
                 size="lg"
                 className="w-full"
                 disabled={
+                  !ableToWithdraw ||
                   !stellarConnected ||
                   !trustlineStatus.exists ||
                   parseFloat(trustlineStatus.balance) === 0 ||
