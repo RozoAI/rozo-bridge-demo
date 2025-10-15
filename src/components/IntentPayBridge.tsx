@@ -176,7 +176,7 @@ export function IntentPayBridge({
           amount: amount,
           externalId: `bridge-${toChainId}-${toAddress}-${amount}`,
         });
-        resetPayment(config);
+        resetPayment(config as never);
       }
     } catch (error) {
       console.error("Error resetting payment:", error);
@@ -285,7 +285,6 @@ export function IntentPayBridge({
       // Automatically generate payment for quick topup
       handleGeneratePayment();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
   // Cleanup on unmount

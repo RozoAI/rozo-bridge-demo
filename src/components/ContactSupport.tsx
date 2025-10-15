@@ -76,12 +76,14 @@ export function ContactSupport() {
           <button
             type="button"
             className="cursor-pointer col-span-3 flex items-center gap-2 px-3 py-2 text-sm bg-neutral-50 dark:bg-neutral-900/20 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900/30 transition-colors rounded-lg border border-neutral-200 dark:border-neutral-800"
-            onClick={() =>
-              (window as any).Intercom?.(
-                "showNewMessage",
-                "Hi, I need help with my payment."
-              )
-            }
+            onClick={() => {
+              if (typeof window !== "undefined" && (window as any).Intercom) {
+                (window as any).Intercom(
+                  "showNewMessage",
+                  "Hi, I need help with my payment."
+                );
+              }
+            }}
           >
             <HelpCircleIcon className="h-4 w-4" />
             <span className="font-medium text-xs sm:text-md">Chat with us</span>

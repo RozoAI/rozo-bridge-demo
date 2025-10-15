@@ -2,12 +2,6 @@
 
 import { useEffect } from "react";
 
-declare global {
-  interface Window {
-    Intercom: unknown;
-  }
-}
-
 interface IntercomInitializerProps {
   appId: string;
   user?: {
