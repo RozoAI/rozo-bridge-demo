@@ -9,8 +9,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { cn } from "@/lib/utils";
-import { ChevronDown, LogOut, Star, Wallet } from "lucide-react";
+import {
+  AlertTriangle,
+  ChevronDown,
+  Copy,
+  Loader2,
+  LogOut,
+  RefreshCw,
+  Wallet,
+} from "lucide-react";
+import Image from "next/image";
 import { toast } from "sonner";
+import { Stellar } from "./icons/chains";
 
 interface StellarWalletConnectProps {
   className?: string;
@@ -23,6 +33,12 @@ export function StellarWalletConnect({ className }: StellarWalletConnectProps) {
     stellarConnecting,
     connectStellarWallet,
     disconnectStellarWallet,
+    stellarWalletName,
+    trustlineStatus,
+    xlmBalance,
+    createTrustline,
+    checkXlmBalance,
+    checkTrustline,
   } = useStellarWallet();
 
   const handleConnect = async () => {
@@ -58,6 +74,24 @@ export function StellarWalletConnect({ className }: StellarWalletConnectProps) {
     }
   };
 
+  const handleCreateTrustline = async () => {
+    try {
+      await createTrustline();
+    } catch (error) {
+      console.error("Failed to create trustline:", error);
+    }
+  };
+
+  const handleRefreshBalances = async () => {
+    try {
+      await Promise.all([checkXlmBalance(), checkTrustline()]);
+      toast.success("Balances refreshed");
+    } catch (error) {
+      console.error("Failed to refresh balances:", error);
+      toast.error("Failed to refresh balances");
+    }
+  };
+
   if (!stellarConnected) {
     return (
       <Button
@@ -80,9 +114,7 @@ export function StellarWalletConnect({ className }: StellarWalletConnectProps) {
           className={cn("flex items-center gap-2", className)}
         >
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-sm">
-              ⭐
-            </div>
+            <Wallet className="size-4" />
             <span className="font-mono">
               {formatStellarAddress(stellarAddress)}
             </span>
@@ -90,45 +122,107 @@ export function StellarWalletConnect({ className }: StellarWalletConnectProps) {
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
+      <DropdownMenuContent align="end" className="w-80">
         {/* Account Info */}
         <div className="p-3 border-b">
           <div className="flex items-center justify-between">
             <div>
               <div className="font-medium">Stellar Connected</div>
-              <div className="text-xs text-muted-foreground">
-                Stellar Wallet
-              </div>
-              <div className="text-xs text-muted-foreground font-mono mt-1">
+              <div className="text-sm text-muted-foreground font-mono mt-1 font-medium">
                 {formatStellarAddress(stellarAddress)}
               </div>
+              <div className="text-xs text-muted-foreground font-mono mt-1">
+                {stellarWalletName}
+              </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={copyAddress}
-              className="h-8 w-8 p-0"
-            >
-              📋
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleRefreshBalances}
+                className="h-8 w-8 p-0"
+                disabled={xlmBalance.checking || trustlineStatus.checking}
+              >
+                <RefreshCw
+                  className={cn(
+                    "size-4",
+                    (xlmBalance.checking || trustlineStatus.checking) &&
+                      "animate-spin"
+                  )}
+                />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={copyAddress}
+                className="h-8 w-8 p-0"
+              >
+                <Copy className="size-4" />
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* Network Info */}
-        <div className="p-3 border-b">
+        {/* Balances */}
+        <div className="p-3 border-b space-y-3">
+          {/* XLM Balance */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Star className="w-4 h-4 text-purple-500" />
-              <span className="text-sm font-medium">Stellar Mainnet</span>
+              <Stellar className="size-[20px] rounded-full" />
+              <span className="text-sm font-medium">XLM</span>
             </div>
+            <span className="text-sm font-mono">
+              {xlmBalance.checking ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                `${Number(xlmBalance.balance).toFixed(2)} XLM`
+              )}
+            </span>
+          </div>
+
+          {/* USDC Trustline Status */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Image src="/usdc.svg" alt="USDC" width={20} height={20} />
+                <span className="text-sm font-medium">USDC</span>
+              </div>
+              {trustlineStatus.checking ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : trustlineStatus.exists ? (
+                <span className="text-sm font-mono">
+                  {Number(trustlineStatus.balance).toFixed(2)} USDC
+                </span>
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-yellow-500" />
+              )}
+            </div>
+
+            {trustlineStatus.exists ? null : (
+              <div className="space-y-2">
+                <div className="text-xs text-yellow-600">
+                  ⚠ USDC trustline required
+                </div>
+                {parseFloat(xlmBalance.balance) >= 1.5 ? (
+                  <Button
+                    size="sm"
+                    onClick={handleCreateTrustline}
+                    className="w-full h-7 text-xs"
+                  >
+                    Add USDC Trustline
+                  </Button>
+                ) : (
+                  <div className="text-xs text-red-600">
+                    Need at least 2 XLM for trustline creation
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Disconnect */}
-        <DropdownMenuItem
-          onClick={handleDisconnect}
-          className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/20"
-        >
+        <DropdownMenuItem onClick={handleDisconnect} variant="destructive">
           <LogOut className="size-4" />
           Disconnect
         </DropdownMenuItem>

@@ -1,5 +1,6 @@
 "use client";
 
+import { checkUSDCTrustline, USDC_ASSET } from "@/lib/stellar";
 import { setupCryptoPolyfill } from "@/utils/polyfills";
 import {
   allowAllModules,
@@ -14,6 +15,14 @@ import {
   WalletConnectModule,
 } from "@creit.tech/stellar-wallets-kit/modules/walletconnect.module";
 import {
+  Asset,
+  BASE_FEE,
+  Horizon,
+  Networks,
+  Operation,
+  TransactionBuilder,
+} from "@stellar/stellar-sdk";
+import {
   createContext,
   ReactNode,
   useContext,
@@ -22,6 +31,17 @@ import {
 } from "react";
 import { toast } from "sonner";
 
+interface TrustlineStatus {
+  exists: boolean;
+  balance: string;
+  checking: boolean;
+}
+
+interface XlmBalance {
+  balance: string;
+  checking: boolean;
+}
+
 interface StellarWalletContextType {
   stellarAddress: string;
   stellarConnected: boolean;
@@ -29,6 +49,14 @@ interface StellarWalletContextType {
   connectStellarWallet: () => Promise<void>;
   disconnectStellarWallet: () => void;
   stellarKit: StellarWalletsKit | null;
+  stellarWalletName: string | null;
+  // USDC trustline management
+  trustlineStatus: TrustlineStatus;
+  checkTrustline: () => Promise<void>;
+  createTrustline: () => Promise<void>;
+  // XLM balance management
+  xlmBalance: XlmBalance;
+  checkXlmBalance: () => Promise<void>;
 }
 
 const StellarWalletContext = createContext<
@@ -45,11 +73,29 @@ interface StoredWalletData {
 }
 
 export function StellarWalletProvider({ children }: { children: ReactNode }) {
+  const server = new Horizon.Server("https://horizon.stellar.org");
+
   const [stellarAddress, setStellarAddress] = useState("");
   const [stellarConnected, setStellarConnected] = useState(false);
   const [stellarConnecting, setStellarConnecting] = useState(false);
   const [stellarKit, setStellarKit] = useState<StellarWalletsKit | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [stellarWalletName, setStellarWalletName] = useState<string | null>(
+    null
+  );
+
+  // USDC trustline state
+  const [trustlineStatus, setTrustlineStatus] = useState<TrustlineStatus>({
+    exists: false,
+    balance: "0",
+    checking: false,
+  });
+
+  // XLM balance state
+  const [xlmBalance, setXlmBalance] = useState<XlmBalance>({
+    balance: "0",
+    checking: false,
+  });
 
   // Load stored wallet data from localStorage
   const loadStoredWallet = (): StoredWalletData | null => {
@@ -99,6 +145,110 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem(STORAGE_KEY);
     } catch (error) {
       console.error("Error clearing stored wallet:", error);
+    }
+  };
+
+  // Check XLM balance
+  const checkXlmBalance = async () => {
+    if (!stellarConnected || !stellarAddress) {
+      setXlmBalance({ balance: "0", checking: false });
+      return;
+    }
+
+    setXlmBalance((prev) => ({ ...prev, checking: true }));
+
+    try {
+      const server = new Horizon.Server("https://horizon.stellar.org");
+      const accountData = await server
+        .accounts()
+        .accountId(stellarAddress)
+        .call();
+
+      const xlmBalance = accountData.balances.find(
+        (balance) => balance.asset_type === "native"
+      );
+
+      setXlmBalance({
+        balance: xlmBalance?.balance || "0",
+        checking: false,
+      });
+    } catch (error) {
+      console.error("Failed to check XLM balance:", error);
+      setXlmBalance({ balance: "0", checking: false });
+    }
+  };
+
+  // Check USDC trustline
+  const checkTrustline = async () => {
+    if (!stellarConnected || !stellarAddress) {
+      setTrustlineStatus({ exists: false, balance: "0", checking: false });
+      return;
+    }
+
+    setTrustlineStatus((prev) => ({ ...prev, checking: true }));
+
+    try {
+      const result = await checkUSDCTrustline(stellarAddress);
+      setTrustlineStatus({
+        exists: result.exists,
+        balance: result.balance,
+        checking: false,
+      });
+    } catch (error) {
+      console.error("Failed to check trustline:", error);
+      setTrustlineStatus({
+        exists: false,
+        balance: "0",
+        checking: false,
+      });
+      toast.error("Failed to check USDC trustline");
+    }
+  };
+
+  // Create USDC trustline
+  const createTrustline = async (): Promise<void> => {
+    if (!stellarKit || !stellarAddress) {
+      toast.error("Wallet not connected");
+      return;
+    }
+
+    try {
+      // Refresh account info to get latest sequence number
+      const freshAccount = await server.loadAccount(stellarAddress);
+
+      // Build transaction with fresh account data
+      const transactionBuilder = new TransactionBuilder(freshAccount, {
+        fee: BASE_FEE,
+        networkPassphrase: Networks.PUBLIC,
+      })
+        .addOperation(
+          Operation.changeTrust({
+            asset: new Asset(USDC_ASSET.code, USDC_ASSET.issuer),
+          })
+        )
+        .setTimeout(300)
+        .build();
+
+      const xdr = transactionBuilder.toXDR();
+      const signedXdr = await stellarKit.signTransaction(xdr);
+
+      // Reconstruct signed transaction from XDR
+      const signedTx = TransactionBuilder.fromXDR(
+        signedXdr.signedTxXdr,
+        Networks.PUBLIC
+      );
+
+      // Submit signed transaction to Stellar network
+      await server.submitTransaction(signedTx);
+
+      toast.success("USDC trustline created successfully!");
+
+      // Refresh balances after successful creation
+      await checkXlmBalance();
+      await checkTrustline();
+    } catch (error) {
+      console.error("Failed to create trustline:", error);
+      toast.error("Failed to create USDC trustline. Please try again.");
     }
   };
 
@@ -166,6 +316,7 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
         if (address && address === storedData.address) {
           setStellarAddress(address);
           setStellarConnected(true);
+          setStellarWalletName(storedData.walletName);
           console.log("Auto-reconnected to", storedData.walletName);
         } else {
           // Address mismatch or connection failed, clear stored data
@@ -180,6 +331,18 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
 
     autoReconnect();
   }, [isInitialized, stellarKit]);
+
+  // Check balances when wallet connects
+  useEffect(() => {
+    if (stellarConnected && stellarAddress) {
+      checkTrustline();
+      checkXlmBalance();
+    } else {
+      // Reset balances when disconnected
+      setTrustlineStatus({ exists: false, balance: "0", checking: false });
+      setXlmBalance({ balance: "0", checking: false });
+    }
+  }, [stellarConnected, stellarAddress]);
 
   const connectStellarWallet = async () => {
     if (!stellarKit) {
@@ -223,6 +386,7 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
             setStellarConnected(true);
             // Save wallet data for auto-reconnect
             saveWalletData(address, option.id, option.name);
+            setStellarWalletName(option.name);
             toast.success(`Connected to ${option.name}`);
           } catch (error: unknown) {
             console.error("Error connecting to wallet:", error);
@@ -287,6 +451,14 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
         connectStellarWallet,
         disconnectStellarWallet,
         stellarKit,
+        stellarWalletName,
+        // USDC trustline management
+        trustlineStatus,
+        checkTrustline,
+        createTrustline,
+        // XLM balance management
+        xlmBalance,
+        checkXlmBalance,
       }}
     >
       {children}

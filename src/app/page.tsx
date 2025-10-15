@@ -89,7 +89,7 @@ export default function Home() {
                     className="h-6 sm:h-7 w-auto transition-opacity group-hover:opacity-80"
                   />
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
-                    Base - Coinbase's L2 Network
+                    Base - Coinbase&apos;s L2 Network
                   </div>
                 </a>
               </div>

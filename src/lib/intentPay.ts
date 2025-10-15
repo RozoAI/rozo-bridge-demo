@@ -32,6 +32,7 @@ export interface IntentPayConfig {
     type: "text" | "id" | "hash";
     value: string;
   }; // Optional memo for Stellar transfers
+  metadata?: object;
 }
 
 // Get USDC token address for a given chain (EVM chains only)

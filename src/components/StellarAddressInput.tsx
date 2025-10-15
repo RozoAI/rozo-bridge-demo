@@ -1,14 +1,14 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import {
+  checkUSDCTrustline,
   isMuxedAddress,
   isValidStellarAddress,
   normalizeStellarAddress,
 } from "@/lib/stellar";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, CheckCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface StellarAddressInputProps {
@@ -32,6 +32,8 @@ export function StellarAddressInput({
   showValidation = true,
   disabled = false,
 }: StellarAddressInputProps) {
+  const { stellarConnected } = useStellarWallet();
+
   const [validationState, setValidationState] = useState<{
     isValid: boolean;
     isMuxed: boolean;
@@ -41,6 +43,18 @@ export function StellarAddressInput({
     isValid: false,
     isMuxed: false,
     normalizedAddress: null,
+    error: null,
+  });
+
+  const [trustlineState, setTrustlineState] = useState<{
+    exists: boolean;
+    balance: string;
+    checking: boolean;
+    error: string | null;
+  }>({
+    exists: false,
+    balance: "0",
+    checking: false,
     error: null,
   });
 
@@ -91,81 +105,66 @@ export function StellarAddressInput({
     }
   }, [value]);
 
+  // Check trustline when wallet is not connected but address is valid
+  useEffect(() => {
+    const checkTrustlineForAddress = async () => {
+      // Only check if wallet is not connected, address is valid, and we have a normalized address
+      if (
+        stellarConnected ||
+        !validationState.isValid ||
+        !validationState.normalizedAddress
+      ) {
+        setTrustlineState({
+          exists: false,
+          balance: "0",
+          checking: false,
+          error: null,
+        });
+        return;
+      }
+
+      setTrustlineState((prev) => ({ ...prev, checking: true, error: null }));
+
+      try {
+        const result = await checkUSDCTrustline(
+          validationState.normalizedAddress
+        );
+        setTrustlineState({
+          exists: result.exists,
+          balance: result.balance,
+          checking: false,
+          error: null,
+        });
+      } catch (error) {
+        console.error("Failed to check trustline:", error);
+        setTrustlineState({
+          exists: false,
+          balance: "0",
+          checking: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "Failed to check trustline",
+        });
+      }
+    };
+
+    checkTrustlineForAddress();
+  }, [
+    stellarConnected,
+    validationState.isValid,
+    validationState.normalizedAddress,
+  ]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     onChange(newValue);
   };
 
-  const handlePaste = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      onChange(text.trim());
-    } catch (error) {
-      console.warn("Failed to paste from clipboard:", error);
-    }
-  };
-
-  const copyNormalizedAddress = async () => {
-    if (validationState.normalizedAddress) {
-      try {
-        await navigator.clipboard.writeText(validationState.normalizedAddress);
-      } catch (error) {
-        console.warn("Failed to copy normalized address:", error);
-      }
-    }
-  };
-
-  const getInputClassName = () => {
-    if (!showValidation || !value.trim()) {
-      return "";
-    }
-
-    if (validationState.error) {
-      return "border-red-300 focus:border-red-500";
-    }
-
-    if (validationState.isValid) {
-      return "border-green-300 focus:border-green-500";
-    }
-
-    return "";
-  };
-
   const showError = showValidation && validationState.error && value.trim();
-  const showValid = showValidation && validationState.isValid && value.trim();
 
   return (
     <div className={cn("space-y-2", className)}>
-      {/* Label */}
-      {label ||
-        showValid ||
-        (showError && (
-          <div className="flex items-center justify-between">
-            {label && (
-              <Label htmlFor="stellar-address" className="text-sm font-medium">
-                {label}
-                {required && <span className="text-red-500 ml-1">*</span>}
-              </Label>
-            )}
-
-            <div className="flex items-center gap-2">
-              {showValid && (
-                <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                  <CheckCircle className="h-3 w-3" />
-                  <span className="text-xs">Valid</span>
-                </div>
-              )}
-
-              {showError && (
-                <div className="flex items-center gap-1 text-red-600 dark:text-red-400">
-                  <AlertTriangle className="h-3 w-3" />
-                  <span className="text-xs">Invalid</span>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-
       {/* Input */}
       <div className="relative">
         <Input
@@ -176,27 +175,53 @@ export function StellarAddressInput({
           onFocus={() => {}}
           onBlur={() => {}}
           placeholder={placeholder}
-          className={cn(getInputClassName())}
           disabled={disabled}
         />
-
-        {/* Paste Button */}
-        {/* <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={handlePaste}
-          disabled={disabled}
-          className="absolute right-1 top-1/2 -translate-y-1/2 h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
-        >
-          Paste
-        </Button> */}
       </div>
 
       {/* Error Message */}
       {showError && (
         <div className="text-xs text-red-600 dark:text-red-400">
           {validationState.error}
+        </div>
+      )}
+
+      {/* Trustline Information - Only show when wallet is not connected */}
+      {!stellarConnected && validationState.isValid && value.trim() && (
+        <div className="space-y-1">
+          {trustlineState.checking && (
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              Checking USDC trustline...
+            </div>
+          )}
+
+          {!trustlineState.checking && !trustlineState.error && (
+            <div className="text-xs">
+              {trustlineState.exists ? (
+                <div className="text-green-600 dark:text-green-400">
+                  ✓ USDC trustline exists (Balance:{" "}
+                  {Number(trustlineState.balance).toFixed(2)} USDC)
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <div className="text-yellow-600 dark:text-yellow-400">
+                    ⚠ No USDC trustline found
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    To receive USDC, this address needs to establish a trustline
+                    with USDC issuer. Connect your wallet to create the
+                    trustline.
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {!trustlineState.checking && trustlineState.error && (
+            <div className="text-xs text-orange-600 dark:text-orange-400">
+              ⚠ Could not check trustline: {trustlineState.error}
+            </div>
+          )}
         </div>
       )}
     </div>
