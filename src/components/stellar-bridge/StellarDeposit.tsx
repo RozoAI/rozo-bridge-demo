@@ -12,7 +12,7 @@ import {
 } from "@/lib/intentPay";
 import { RozoPayButton, useRozoPayUI } from "@rozoai/intent-pay";
 import { Wallet } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { getAddress } from "viem";
 import ChainsStacked from "../chains-stacked";
@@ -42,9 +42,13 @@ export function StellarDeposit({
 
   const { resetPayment } = useRozoPayUI();
 
+  const ableToPay = useMemo(() => {
+    return amount && (stellarAddress || destinationStellarAddress);
+  }, [amount, stellarAddress, destinationStellarAddress]);
+
   useEffect(() => {
     const fetchConfig = async () => {
-      if (trustlineStatus.exists && amount && stellarAddress) {
+      if (ableToPay) {
         const config = {
           appId: DEFAULT_INTENT_PAY_CONFIG.appId,
           toChain: BASE_USDC.chainId,
@@ -79,7 +83,7 @@ export function StellarDeposit({
     <Card className="gap-2">
       <CardHeader>
         <CardTitle className="flex items-center justify-between gap-2">
-          <span className="font-bold">Deposit a from any chains</span>
+          <span className="font-bold">Deposit from any chains</span>
           <StellarWalletConnect />
         </CardTitle>
       </CardHeader>
@@ -140,7 +144,7 @@ export function StellarDeposit({
                 />
               </div>
 
-              {amount && parseFloat(amount) > 0 && intentConfig ? (
+              {amount && parseFloat(amount) > 0 && intentConfig && ableToPay ? (
                 <div className="space-y-3">
                   <RozoPayButton.Custom
                     appId={intentConfig.appId}
@@ -175,7 +179,7 @@ export function StellarDeposit({
                   </RozoPayButton.Custom>
                 </div>
               ) : (
-                <Button size="lg" className="w-full" disabled>
+                <Button size="lg" className="w-full" disabled={!ableToPay}>
                   <Wallet className="size-4" />
                   Pay with USDC <ChainsStacked excludeChains={["stellar"]} />
                 </Button>

@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ContactSupport } from "./ContactSupport";
 import { StellarDeposit } from "./stellar-bridge/StellarDeposit";
 import { StellarWithdraw } from "./stellar-bridge/StellarWithdraw";
-import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 type FlowType = "deposit" | "withdraw";
 
@@ -38,57 +38,40 @@ export function StellarBridge() {
         </p>
       </div>
 
-      {/* Flow Selection Toggle */}
-      <div className="flex justify-center">
-        <ToggleGroup
-          variant="outline"
-          type="single"
-          value={flowType}
-          onValueChange={(value) => {
-            if (value) setFlowType(value as FlowType);
-          }}
-          className="grid w-full max-w-md grid-cols-2"
-        >
-          <ToggleGroupItem
-            value="deposit"
-            aria-label="Select deposit flow"
-            className="grid grid-cols-[2rem_1fr] gap-2 h-14 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-          >
-            <ArrowUpRight className="size-5 sm:size-6 m-auto" />
-            <span className="font-medium">Deposit from any chains</span>
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="withdraw"
-            aria-label="Select withdraw flow"
-            className="grid grid-cols-[1fr_2rem] gap-2 h-14 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-          >
-            <span className="font-medium ml-auto">Withdraw to Base</span>
-            <ArrowDownLeft className="size-5 sm:size-6 m-auto" />
-          </ToggleGroupItem>
-        </ToggleGroup>
-      </div>
-
-      {/* Deposit Flow */}
-      {flowType === "deposit" && (
-        <StellarDeposit
-          destinationStellarAddress={destinationStellarAddress}
-          onDestinationAddressChange={setDestinationStellarAddress}
-        />
-      )}
-
-      {/* Withdraw Flow */}
-      {flowType === "withdraw" && (
-        <StellarWithdraw
-          amount={amount}
-          onAmountChange={setAmount}
-          customAmount={customAmount}
-          onCustomAmountChange={setCustomAmount}
-          baseAddress={baseAddress}
-          onBaseAddressChange={setBaseAddress}
-          amountError={amountError}
-          onAmountErrorChange={setAmountError}
-        />
-      )}
+      <Tabs
+        defaultValue="deposit"
+        onValueChange={(value) => setFlowType(value as FlowType)}
+        className="w-full flex flex-col"
+      >
+        <TabsList className="m-auto">
+          <TabsTrigger value="deposit">
+            <ArrowUpRight className="size-5 mr-1.5" />
+            Deposit from any chains
+          </TabsTrigger>
+          <TabsTrigger value="withdraw">
+            <ArrowDownLeft className="size-5 mr-1.5" />
+            Withdraw to Base
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="deposit">
+          <StellarDeposit
+            destinationStellarAddress={destinationStellarAddress}
+            onDestinationAddressChange={setDestinationStellarAddress}
+          />
+        </TabsContent>
+        <TabsContent value="withdraw">
+          <StellarWithdraw
+            amount={amount}
+            onAmountChange={setAmount}
+            customAmount={customAmount}
+            onCustomAmountChange={setCustomAmount}
+            baseAddress={baseAddress}
+            onBaseAddressChange={setBaseAddress}
+            amountError={amountError}
+            onAmountErrorChange={setAmountError}
+          />
+        </TabsContent>
+      </Tabs>
 
       <div className="mt-10 flex flex-col items-center">
         <span className="text-sm text-muted-foreground mb-3">Powered by</span>
