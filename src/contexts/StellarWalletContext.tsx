@@ -43,6 +43,7 @@ interface XlmBalance {
 }
 
 interface StellarWalletContextType {
+  server: Horizon.Server;
   stellarAddress: string;
   stellarConnected: boolean;
   stellarConnecting: boolean;
@@ -445,6 +446,7 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
   return (
     <StellarWalletContext.Provider
       value={{
+        server,
         stellarAddress,
         stellarConnected,
         stellarConnecting,

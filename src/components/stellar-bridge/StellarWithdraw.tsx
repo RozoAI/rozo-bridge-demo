@@ -5,16 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
+import { useStellarTransfer } from "@/hooks/use-stellar-transfer";
+import { cn } from "@/lib/utils";
 import {
-  BASE_USDC,
-  DEFAULT_INTENT_PAY_CONFIG,
-  IntentPayConfig,
-} from "@/lib/intentPay";
-import { RozoPayButton, useRozoPayUI } from "@rozoai/intent-pay";
-import { AlertTriangle, ArrowDownLeft, DollarSign, Star } from "lucide-react";
+  AlertTriangle,
+  ArrowDownLeft,
+  DollarSign,
+  Loader2,
+  Star,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { getAddress } from "viem";
 import { StellarWalletConnect } from "../StellarWalletConnect";
 
 interface StellarWithdrawProps {
@@ -38,39 +39,113 @@ export function StellarWithdraw({
   amountError,
   onAmountErrorChange,
 }: StellarWithdrawProps) {
-  const [intentConfig, setIntentConfig] = useState<IntentPayConfig | null>();
-
   const { stellarConnected, trustlineStatus, checkTrustline, checkXlmBalance } =
     useStellarWallet();
+  const { transfer, step, paymentId, setStep } = useStellarTransfer();
 
-  const { resetPayment } = useRozoPayUI();
+  const [toastId, setToastId] = useState<string | number | null>(null);
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
+
+  const handleWithdraw = async () => {
+    if (toastId) {
+      toast.dismiss(toastId);
+      setToastId(null);
+    }
+
+    try {
+      setWithdrawLoading(true);
+      const result = await transfer({
+        bridge: true,
+        payload: {
+          amount: Number(amount).toFixed(2),
+          address: baseAddress,
+        },
+      });
+
+      if (result) {
+        checkTrustline();
+        checkXlmBalance();
+      } else {
+        // Dismiss the loading toast and show error
+        if (toastId) {
+          toast.dismiss(toastId);
+          setToastId(null);
+        }
+        toast.error("Failed to withdraw");
+      }
+    } catch (error) {
+      // Dismiss the loading toast and show error
+      if (toastId) {
+        toast.dismiss(toastId);
+        setToastId(null);
+      }
+      toast.error("Failed to withdraw");
+      console.error("Failed to withdraw:", error);
+    } finally {
+      setWithdrawLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchConfig = async () => {
-      if (amount && baseAddress) {
-        const config = {
-          appId: DEFAULT_INTENT_PAY_CONFIG.appId,
-          toChain: BASE_USDC.chainId,
-          toAddress: getAddress(baseAddress),
-          toToken: getAddress(BASE_USDC.token),
-          toUnits: amount,
-          metadata: {
-            items: [
-              {
-                name: "Rozo Bridge",
-                description: "Deposit USDC to Stellar",
-              },
-            ],
-          },
-        };
-
-        await resetPayment(config as never);
-        setIntentConfig(config);
+    if (step) {
+      if (!toastId) {
+        const id = toast.loading("Preparing...", {
+          position: "bottom-center",
+        });
+        setToastId(id);
+        return;
       }
-    };
 
-    fetchConfig();
-  }, [amount, baseAddress]);
+      if (step === "create-payment") {
+        toast.loading("📝 Creating payment order...", {
+          id: toastId,
+        });
+      } else if (step === "sign-transaction") {
+        toast.loading("✍️ Sign transaction in wallet", {
+          id: toastId,
+        });
+      } else if (step === "submit-transaction") {
+        toast.loading("🚀 Sending to Stellar network...", {
+          id: toastId,
+        });
+      } else if (step === "success") {
+        toast.success("Withdrawal complete!", {
+          id: toastId,
+          action: paymentId
+            ? {
+                label: "See Receipt",
+                type: "button",
+                onClick: () => {
+                  window.open(
+                    `https://invoice.rozo.ai/receipt?id=${paymentId}`,
+                    "_blank"
+                  );
+                  toast.dismiss(toastId);
+                  setToastId(null);
+                  setStep(null);
+                },
+              }
+            : undefined,
+          duration: Infinity,
+          closeButton: true,
+          description: "Funds incoming to Base. Please check your wallet soon.",
+          dismissible: false,
+        });
+      } else if (step === "error") {
+        toast.error("❌ Withdrawal failed. Please try again.", {
+          id: toastId,
+        });
+        setToastId(null);
+        setStep(null);
+      }
+    } else {
+      if (toastId) {
+        toast.dismiss(toastId);
+        setToastId(null);
+        setStep(null);
+      }
+    }
+  }, [step, toastId, paymentId]);
 
   return (
     <Card className="gap-2">
@@ -85,7 +160,14 @@ export function StellarWithdraw({
           <div className="grid grid-cols-1 gap-6">
             <div className="space-y-2">
               <Label htmlFor="withdraw-amount">Choose an amount</Label>
-              <div className="grid grid-cols-4 gap-3">
+              <div
+                className={cn(
+                  "grid grid-cols-4 gap-3",
+                  stellarConnected && trustlineStatus.exists
+                    ? "grid-cols-4"
+                    : "grid-cols-3"
+                )}
+              >
                 {["10", "25", "100"].map((presetAmount) => {
                   const maxBalance =
                     stellarConnected && trustlineStatus.exists
@@ -196,7 +278,7 @@ export function StellarWithdraw({
                       ? `Available: ${parseFloat(
                           trustlineStatus.balance
                         ).toFixed(2)} USDC`
-                      : "Connect wallet to see balance"}
+                      : null}
                   </span>
                 </div>
               </div>
@@ -229,23 +311,26 @@ export function StellarWithdraw({
                 </div>
               )}
 
-              {stellarConnected && !trustlineStatus.exists && (
-                <div className="p-4 rounded-lg border bg-yellow-50 dark:bg-yellow-950/20">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
-                    <div className="space-y-1">
-                      <p className="font-medium text-yellow-900 dark:text-yellow-100">
-                        No USDC Trustline
-                      </p>
-                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                        You need to establish a USDC trustline to withdraw
-                      </p>
+              {stellarConnected &&
+                !trustlineStatus.checking &&
+                !trustlineStatus.exists && (
+                  <div className="p-4 rounded-lg border bg-yellow-50 dark:bg-yellow-950/20">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                      <div className="space-y-1">
+                        <p className="font-medium text-yellow-900 dark:text-yellow-100">
+                          No USDC Trustline
+                        </p>
+                        <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                          You need to establish a USDC trustline to withdraw
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {stellarConnected &&
+                !trustlineStatus.checking &&
                 trustlineStatus.exists &&
                 parseFloat(trustlineStatus.balance) === 0 && (
                   <div className="p-4 rounded-lg border bg-yellow-50 dark:bg-yellow-950/20">
@@ -263,49 +348,24 @@ export function StellarWithdraw({
                   </div>
                 )}
 
-              {intentConfig &&
-              amount &&
-              parseFloat(amount) > 0 &&
-              baseAddress &&
-              !amountError ? (
-                <div className="space-y-3">
-                  <RozoPayButton.Custom
-                    appId={DEFAULT_INTENT_PAY_CONFIG.appId}
-                    toChain={intentConfig.toChain}
-                    toToken={intentConfig.toToken}
-                    toAddress={getAddress(
-                      intentConfig.toAddress as `0x${string}`
-                    )}
-                    toUnits={intentConfig.toUnits}
-                    metadata={intentConfig.metadata as never}
-                    onPaymentCompleted={() => {
-                      toast.success(`Withdraw is in progress! 🎉`, {
-                        description:
-                          "Your USDC is being transferred. It may take a moment to appear in your Base wallet.",
-                        duration: 5000,
-                      });
-                      onAmountChange("");
-                      onCustomAmountChange("");
-                      onBaseAddressChange("");
-                      checkTrustline(); // Refresh USDC balance
-                      checkXlmBalance(); // Refresh XLM balance
-                    }}
-                    showProcessingPayout
-                  >
-                    {({ show }) => (
-                      <Button onClick={show} size="lg" className="w-full">
-                        <ArrowDownLeft className="size-4" />
-                        Withdraw {Number(amount).toFixed(2)} USDC to Base
-                      </Button>
-                    )}
-                  </RozoPayButton.Custom>
-                </div>
-              ) : (
-                <Button size="lg" className="w-full" disabled>
+              <Button
+                onClick={handleWithdraw}
+                size="lg"
+                className="w-full"
+                disabled={
+                  !stellarConnected ||
+                  !trustlineStatus.exists ||
+                  parseFloat(trustlineStatus.balance) === 0 ||
+                  withdrawLoading
+                }
+              >
+                {withdrawLoading ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
                   <ArrowDownLeft className="size-4" />
-                  Withdraw USDC to Base
-                </Button>
-              )}
+                )}
+                Withdraw {Number(amount).toFixed(2)} USDC to Base
+              </Button>
             </div>
           </div>
         </div>

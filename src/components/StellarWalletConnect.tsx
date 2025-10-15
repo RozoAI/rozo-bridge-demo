@@ -15,6 +15,7 @@ import {
   Copy,
   Loader2,
   LogOut,
+  Plus,
   RefreshCw,
   Wallet,
 } from "lucide-react";
@@ -198,22 +199,29 @@ export function StellarWalletConnect({ className }: StellarWalletConnectProps) {
               )}
             </div>
 
-            {trustlineStatus.exists ? null : (
+            {!trustlineStatus.checking && !trustlineStatus.exists && (
               <div className="space-y-2">
-                <div className="text-xs text-yellow-600">
-                  ⚠ USDC trustline required
+                <div className="text-xs text-yellow-600 flex items-center gap-1">
+                  <AlertTriangle className="inline w-4 h-4 text-yellow-500" />
+                  USDC trustline required
                 </div>
-                {parseFloat(xlmBalance.balance) >= 1.5 ? (
+                {xlmBalance.checking ? (
+                  <div className="text-xs text-gray-500 flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Checking XLM balance...
+                  </div>
+                ) : parseFloat(xlmBalance.balance) >= 1.5 ? (
                   <Button
                     size="sm"
                     onClick={handleCreateTrustline}
                     className="w-full h-7 text-xs"
                   >
+                    <Plus className="w-3 h-3" />
                     Add USDC Trustline
                   </Button>
                 ) : (
                   <div className="text-xs text-red-600">
-                    Need at least 2 XLM for trustline creation
+                    Need at least 1.5 XLM for trustline creation
                   </div>
                 )}
               </div>
