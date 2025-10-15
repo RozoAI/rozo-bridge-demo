@@ -11,13 +11,12 @@ import {
   IntentPayConfig,
 } from "@/lib/intentPay";
 import { RozoPayButton, useRozoPayUI } from "@rozoai/intent-pay";
-import { Wallet } from "lucide-react";
+import { ArrowUpRight, Wallet } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { getAddress } from "viem";
 import ChainsStacked from "../chains-stacked";
 import { StellarAddressInput } from "../StellarAddressInput";
-import { StellarWalletConnect } from "../StellarWalletConnect";
 
 interface StellarDepositProps {
   destinationStellarAddress: string;
@@ -83,19 +82,13 @@ export function StellarDeposit({
     <Card className="gap-2">
       <CardHeader>
         <CardTitle className="flex items-center justify-between gap-2">
-          <span className="font-bold">Deposit from any chains</span>
-          <StellarWalletConnect />
+          <div className="font-bold flex items-center gap-2">
+            <ArrowUpRight className="size-4" />
+            Deposit from any chains
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {!stellarConnected && (
-          <StellarAddressInput
-            value={destinationStellarAddress}
-            onChange={onDestinationAddressChange}
-            placeholder="Enter your Stellar address"
-          />
-        )}
-
         <div className="space-y-3 mt-4">
           <div className="grid grid-cols-1 gap-6">
             <div className="space-y-2">
@@ -142,6 +135,21 @@ export function StellarDeposit({
                   step="0.01"
                   className="h-10"
                 />
+              </div>
+
+              <div className="space-y-2 mt-2">
+                <Label htmlFor="destination-address">Destination Address</Label>
+                {!stellarConnected ? (
+                  <StellarAddressInput
+                    value={destinationStellarAddress}
+                    onChange={onDestinationAddressChange}
+                    placeholder="Enter your Stellar address"
+                  />
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    {stellarAddress}
+                  </div>
+                )}
               </div>
 
               {amount && parseFloat(amount) > 0 && intentConfig && ableToPay ? (

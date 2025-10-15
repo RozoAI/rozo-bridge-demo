@@ -1,6 +1,6 @@
 export function SupportedBy() {
   return (
-    <div className="mt-10 flex flex-col items-center">
+    <div className="mt-4 flex flex-col items-center">
       <span className="text-sm text-muted-foreground mb-3">Supported by</span>
       <div className="flex flex-wrap gap-4 sm:gap-6 items-center justify-center">
         <div className="flex">
@@ -14,7 +14,7 @@ export function SupportedBy() {
             <img
               src="/draper.webp"
               alt="Draper University"
-              className="h-6 sm:h-7 w-auto transition-opacity group-hover:opacity-80"
+              className="h-6 w-auto transition-opacity group-hover:opacity-80"
             />
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
               Draper University - Entrepreneurship Program
@@ -32,7 +32,7 @@ export function SupportedBy() {
             <img
               src="/scf.svg"
               alt="Stellar"
-              className="h-6 sm:h-7 w-auto transition-opacity group-hover:opacity-80"
+              className="h-6 w-auto transition-opacity group-hover:opacity-80"
             />
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
               Stellar Community Fund
@@ -50,7 +50,7 @@ export function SupportedBy() {
             <img
               src="/base.svg"
               alt="Base"
-              className="h-6 sm:h-7 w-auto transition-opacity group-hover:opacity-80"
+              className="h-6 w-auto transition-opacity group-hover:opacity-80"
             />
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
               Base - Coinbase&apos;s L2 Network
@@ -68,7 +68,7 @@ export function SupportedBy() {
             <img
               src="/circle.svg"
               alt="Circle"
-              className="h-6 sm:h-7 w-auto transition-opacity group-hover:opacity-80"
+              className="h-6 w-auto transition-opacity group-hover:opacity-80"
             />
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
               Circle - USDC Issuer & Partner

@@ -1,27 +1,27 @@
 "use client";
 
-import { ChevronDown, ChevronUp, HelpCircleIcon } from "lucide-react";
+import { HelpCircleIcon } from "lucide-react";
 import { useState } from "react";
 
 export function ContactSupport() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 mt-6">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center justify-between w-full text-left text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="flex items-center justify-center w-full text-left text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <span>Need help? Contact us:</span>
-        {isExpanded ? (
+        {/* {isExpanded ? (
           <ChevronUp className="h-4 w-4" />
         ) : (
           <ChevronDown className="h-4 w-4" />
-        )}
+        )} */}
       </button>
 
       {isExpanded && (
-        <div className="grid grid-cols-6 items-center gap-2 flex-wrap animate-in slide-in-from-top-2 duration-200">
+        <div className="grid grid-cols-6 items-center gap-2 flex-wrap animate-in slide-in-from-top-2 duration-200 max-w-md m-auto">
           <a
             href="https://x.com/rozoai"
             target="_blank"

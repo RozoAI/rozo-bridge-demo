@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { StellarWalletConnect } from "../StellarWalletConnect";
 
 interface StellarWithdrawProps {
   amount: string;
@@ -165,8 +164,10 @@ export function StellarWithdraw({
     <Card className="gap-2">
       <CardHeader>
         <CardTitle className="flex items-center justify-between gap-2">
-          <span className="font-bold">Withdraw to Base</span>
-          <StellarWalletConnect />
+          <div className="font-bold flex items-center gap-2">
+            <ArrowDownLeft className="size-4" />
+            Withdraw to Base
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -297,7 +298,7 @@ export function StellarWithdraw({
                 </div>
               </div>
 
-              <div className="space-y-2 mt-3">
+              <div className="space-y-2">
                 <Label htmlFor="base-address">Base Address</Label>
                 <Input
                   id="base-address"

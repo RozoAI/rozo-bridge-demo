@@ -1,5 +1,6 @@
 import { ContactSupport } from "@/components/ContactSupport";
 import { NewBridge } from "@/components/NewBridge";
+import { PoweredBy } from "@/components/PoweredBy";
 import { SupportedBy } from "@/components/SupportedBy";
 import Image from "next/image";
 import Link from "next/link";
@@ -53,6 +54,8 @@ export default function Home() {
           {/* Bridge Component */}
 
           <NewBridge />
+
+          <PoweredBy />
 
           <SupportedBy />
 
