@@ -3,46 +3,20 @@
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { supportedChains } from "@/lib/chains";
 import { BASE_USDC, DEFAULT_INTENT_PAY_CONFIG } from "@/lib/intentPay";
-import { checkUSDCTrustline } from "@/lib/stellar";
 import { cn } from "@/lib/utils";
 import { RozoPayButton, useRozoPayUI } from "@rozoai/intent-pay";
-import {
-  AlertTriangle,
-  ArrowLeft,
-  ArrowRight,
-  DollarSign,
-  Info,
-  Wallet,
-} from "lucide-react";
+import { AlertTriangle, DollarSign } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { getAddress } from "viem";
 import ChainsStacked from "./chains-stacked";
 import { ContactSupport } from "./ContactSupport";
-import { DepositIcon } from "./icons/deposit-icon";
-import { WithdrawIcon } from "./icons/withdraw-icon";
 import { StellarAddressInput } from "./StellarAddressInput";
-import { StellarWalletConnect } from "./StellarWalletConnect";
 import { Button } from "./ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-
-type FlowType = "initial" | "deposit" | "withdraw";
-
-interface TrustlineInfo {
-  exists: boolean;
-  balance: string;
-  loading: boolean;
-  error?: string;
-}
 
 interface PayData {
   appId: string;
@@ -55,31 +29,25 @@ interface PayData {
 }
 
 export function NewBridge() {
-  const [flowType, setFlowType] = useState<FlowType>("withdraw");
   const [evmAddress, setEvmAddress] = useState("");
+  const [stellarAddress, setStellarAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [selectedChain, setSelectedChain] = useState<number | null>(null);
-  const [trustlineInfo, setTrustlineInfo] = useState<TrustlineInfo>({
-    exists: false,
-    balance: "0",
-    loading: false,
-  });
-  const [manualStellarAddress, setManualStellarAddress] = useState("");
 
   const { resetPayment } = useRozoPayUI();
 
-  const [depositData, setDepositData] = useState<PayData | null>(null);
   const [withdrawData, setWithdrawData] = useState<PayData | null>(null);
 
-  // const { isConnected, publicKey } = useStellarWalletConnection();
   const { stellarConnected: isConnected, stellarAddress: publicKey } =
     useStellarWallet();
 
-  // Determine the effective stellar address - prioritize connected wallet, fallback to manual input
-  const effectiveStellarAddress = useMemo(
-    () => (isConnected && publicKey ? publicKey : manualStellarAddress),
-    [isConnected, publicKey, manualStellarAddress]
-  );
+  // Auto-select Stellar chain and fill address when wallet is connected
+  useEffect(() => {
+    if (isConnected && publicKey) {
+      setSelectedChain(1500); // Stellar Mainnet
+      setStellarAddress(publicKey);
+    }
+  }, [isConnected, publicKey]);
 
   // Available chains for withdraw (Base, Stellar)
   const withdrawChains = supportedChains.filter(
@@ -119,58 +87,11 @@ export function NewBridge() {
     [getAddressType]
   );
 
-  const checkTrustline = useCallback(async () => {
-    if (!effectiveStellarAddress) return;
-
-    setTrustlineInfo((prev) => ({ ...prev, loading: true, error: undefined }));
-
-    try {
-      const result = await checkUSDCTrustline(effectiveStellarAddress);
-      setTrustlineInfo({
-        exists: result.exists,
-        balance: result.balance,
-        loading: false,
-      });
-    } catch (error) {
-      setTrustlineInfo({
-        exists: false,
-        balance: "0",
-        loading: false,
-        error:
-          error instanceof Error ? error.message : "Failed to check trustline",
-      });
-    }
-  }, [effectiveStellarAddress]);
-
-  useEffect(() => {
-    if (isConnected && publicKey) {
-      setManualStellarAddress(publicKey);
-    } else {
-      setManualStellarAddress("");
-    }
-  }, [isConnected, publicKey]);
-
-  // Check USDC trustline when Stellar address is provided
-  useEffect(() => {
-    if (
-      effectiveStellarAddress &&
-      isValidStellarAddress(effectiveStellarAddress)
-    ) {
-      checkTrustline();
-    } else {
-      setTrustlineInfo({
-        exists: false,
-        balance: "0",
-        loading: false,
-      });
-    }
-  }, [effectiveStellarAddress]);
-
   const handleAmountSelect = (selectedAmount: string) => {
     setAmount(selectedAmount);
   };
 
-  const handleAddressChange = (address: string) => {
+  const handleEvmAddressChange = (address: string) => {
     setEvmAddress(address);
     // Auto-select chain if address is valid, clear if empty
     if (address.trim()) {
@@ -180,8 +101,21 @@ export function NewBridge() {
     }
   };
 
+  const handleStellarAddressChange = (address: string) => {
+    setStellarAddress(address);
+    // Auto-select Stellar chain if address is valid, clear if empty
+    if (address.trim()) {
+      setSelectedChain(1500); // Stellar Mainnet
+    } else {
+      setSelectedChain(null);
+    }
+  };
+
   const handlePay = useCallback(() => {
-    if (!evmAddress) {
+    // Get the appropriate address based on selected chain
+    const currentAddress = selectedChain === 8453 ? evmAddress : stellarAddress;
+
+    if (!currentAddress) {
       toast.error("Please enter a valid destination address");
       return;
     }
@@ -191,102 +125,63 @@ export function NewBridge() {
       return;
     }
 
-    if (flowType === "deposit") {
-      const data = {
+    if (selectedChain) {
+      const data: PayData = {
         appId: DEFAULT_INTENT_PAY_CONFIG.appId,
         toChain: BASE_USDC.chainId,
         toToken: getAddress(BASE_USDC.token),
         toAddress: getAddress("0x0000000000000000000000000000000000000000"),
-        toStellarAddress: effectiveStellarAddress,
         toUnits: amount,
       };
 
-      setDepositData(data);
-      resetPayment(data);
-    } else if (flowType === "withdraw") {
-      if (selectedChain) {
-        const data: PayData = {
-          appId: DEFAULT_INTENT_PAY_CONFIG.appId,
-          toChain: BASE_USDC.chainId,
-          toToken: getAddress(BASE_USDC.token),
-          toAddress: getAddress("0x0000000000000000000000000000000000000000"),
-          toUnits: amount,
-        };
-
-        if (selectedChain === 8453) {
-          data.toAddress = getAddress(evmAddress);
-          data.toStellarAddress = "";
-        } else if (selectedChain === 1500 || selectedChain === 1501) {
-          data.toStellarAddress = evmAddress;
-        }
-
-        setWithdrawData(data);
-        resetPayment(data);
+      if (selectedChain === 8453) {
+        data.toAddress = getAddress(currentAddress);
+        data.toStellarAddress = "";
+      } else if (selectedChain === 1500 || selectedChain === 1501) {
+        data.toStellarAddress = currentAddress;
       }
+
+      setWithdrawData(data);
+      resetPayment(data);
     }
-  }, [flowType, effectiveStellarAddress, amount, selectedChain, evmAddress]);
+  }, [amount, selectedChain, evmAddress, stellarAddress]);
 
   useEffect(() => {
-    if (amount) {
+    if (amount && !isProcessTransactionDisabled) {
       setTimeout(() => {
         handlePay();
       }, 500);
     }
-  }, [amount, handlePay]);
+  }, [amount, selectedChain]);
 
-  // Initial choice screen
-  if (flowType === "initial") {
+  const isProcessTransactionDisabled = useMemo(() => {
     return (
-      <div className="w-full max-w-4xl mx-auto space-y-6">
-        <div className="text-center space-y-4">
-          {/* Flow Selection */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-            <Card
-              className="cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => setFlowType("deposit")}
-            >
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <DepositIcon className="size-5" />
-                  Deposit to Stellar
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Deposit USDC from Base, Solana, or Polygon to your Stellar
-                  wallet
-                </p>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full">
-                  <ArrowRight className="h-4 w-4 mr-2" />
-                  Start Deposit
-                </Button>
-              </CardFooter>
-            </Card>
+      selectedChain === null ||
+      !amount ||
+      (selectedChain === 8453 && !evmAddress) ||
+      ((selectedChain === 1500 || selectedChain === 1501) && !stellarAddress)
+    );
+  }, [selectedChain, evmAddress, stellarAddress, amount]);
 
-            <Card
-              className="cursor-pointer hover:shadow-lg transition-shadow gap-2"
-              onClick={() => setFlowType("withdraw")}
-            >
-              <CardHeader>
-                <CardTitle className="flex flex-col justify-center items-center gap-4">
-                  <WithdrawIcon className="size-10" />
-                  Withdraw from Stellar
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Transfer USDC from Stellar to Base or Stellar
-                </p>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full">
-                  <ArrowRight className="h-4 w-4 mr-2" />
-                  Start Withdraw
-                </Button>
-              </CardFooter>
-            </Card>
+  // Withdraw flow
+  const currentAddress = selectedChain === 8453 ? evmAddress : stellarAddress;
+  const addressType = getAddressType(currentAddress);
+  const isValidAddress = addressType !== "invalid";
+  const isChainCompatible =
+    (addressType === "evm" && selectedChain === 8453) || // Base for EVM
+    (addressType === "stellar" &&
+      (selectedChain === 1500 || selectedChain === 1501)); // Stellar
+
+  return (
+    <div className="w-full max-w-xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex flex-col items-start gap-4">
+        <div className="flex flex-col-reverse md:flex-row justify-center md:justify-between items-center gap-2 w-full">
+          <div>
+            <h1 className="text-2xl font-bold">Transfer Configuration</h1>
+            <p className="text-sm text-muted-foreground">
+              Configure your USDC transfer details
+            </p>
           </div>
 
           <div className="flex justify-center items-center gap-2">
@@ -295,415 +190,201 @@ export function NewBridge() {
               Safe and Secure Payments
             </span>
           </div>
-          <div className="text-center text-sm text-muted-foreground">
-            <p>Powered by Rozo - Visa for stablecoins</p>
-          </div>
         </div>
       </div>
-    );
-  }
 
-  // Deposit flow
-  if (flowType === "deposit") {
-    return (
-      <div className="w-full max-w-2xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex flex-col items-start gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setFlowType("initial")}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">Top up your Stellar Wallet</h1>
-            <p className="text-sm text-muted-foreground">
-              Deposit USDC from other chains
-            </p>
-          </div>
-        </div>
+      {/* Destination Address and Chain Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between gap-2">
+            <span>Destination</span>
+            {/* <StellarWalletConnect /> */}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Chain Selection */}
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {withdrawChains.map((chain) => {
+                const isCompatible =
+                  (addressType === "evm" && chain.id === 8453) || // Base for EVM
+                  (addressType === "stellar" &&
+                    (chain.id === 1500 || chain.id === 1501)); // Stellar
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Wallet className="h-5 w-5" />
-              Stellar Address
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Connect Wallet Section */}
-            <div className="space-y-3 flex flex-col gap-2 items-center">
-              <StellarWalletConnect />
-            </div>
-
-            {/* Separator */}
-            {!isConnected && !publicKey && (
-              <div className="flex items-center gap-4">
-                <div className="flex-1 h-px bg-border"></div>
-                <span className="text-sm text-muted-foreground">or</span>
-                <div className="flex-1 h-px bg-border"></div>
-              </div>
-            )}
-
-            {/* Manual Address Input Section */}
-            <div className="space-y-3">
-              <StellarAddressInput
-                value={effectiveStellarAddress}
-                onChange={setManualStellarAddress}
-                label={undefined}
-                placeholder="Enter your Stellar address (G...)"
-                required
-                disabled={!!(isConnected && publicKey)}
-              />
-
-              {effectiveStellarAddress ? (
-                <>
-                  {trustlineInfo.loading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin h-4 w-4 border-2 border-purple-500 border-t-transparent rounded-full" />
-                      <span>Checking trustline...</span>
-                    </div>
-                  ) : trustlineInfo.error ? (
-                    <div className="flex items-center gap-2 text-red-600">
-                      <AlertTriangle className="h-4 w-4" />
-                      <span>{trustlineInfo.error}</span>
-                    </div>
-                  ) : trustlineInfo.exists ? (
-                    <div className="space-y-2">
-                      <div className="text-sm font-medium">
-                        Balance: {Number(trustlineInfo.balance).toFixed(2)} USDC
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-yellow-600">
-                        <AlertTriangle className="h-4 w-4" />
-                        <span className="font-medium">
-                          USDC trustline not found
+                return (
+                  <Button
+                    key={chain.id}
+                    variant={selectedChain === chain.id ? "default" : "outline"}
+                    onClick={() => setSelectedChain(chain.id)}
+                    className="h-16 justify-start"
+                    // disabled={!!(currentAddress && !isCompatible)}
+                  >
+                    <div className="flex items-center gap-3">
+                      {typeof chain.logo === "string" ? (
+                        <Image
+                          src={chain.logo}
+                          alt={chain.name}
+                          width={32}
+                          height={32}
+                          className="w-8 h-8 rounded-full"
+                        />
+                      ) : (
+                        <span className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center">
+                          {chain.logo}
                         </span>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Add a USDC trustline to your Stellar wallet before
-                        receiving funds
+                      )}
+                      <div className="text-left">
+                        <div className="font-medium">{chain.name}</div>
+                        <div
+                          className={cn(
+                            "text-xs text-muted-foreground",
+                            selectedChain === chain.id && "text-accent"
+                          )}
+                        >
+                          {chain.ecosystem}
+                        </div>
                       </div>
                     </div>
-                  )}
-                </>
-              ) : (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Info className="h-4 w-4" />
-                  <span>
-                    Please provide a Stellar address to check trustline status
-                  </span>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Amount Selection */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Select Amount</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-2">
-              {["1", "100", "1000"].map((amountOption) => (
-                <Button
-                  key={amountOption}
-                  variant={amount === amountOption ? "default" : "outline"}
-                  onClick={() => handleAmountSelect(amountOption)}
-                  className="h-12"
-                >
-                  {amountOption} USDC
-                </Button>
-              ))}
+                  </Button>
+                );
+              })}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="custom-amount">Other amount:</Label>
-              <Input
-                id="custom-amount"
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="Enter custom amount"
-                min="0"
-                step="0.01"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Pay Button */}
-        {!depositData && (
-          <Button disabled={true} className="w-full h-12" size="lg">
-            <ArrowRight className="h-4 w-4 mr-2" />
-            Proceed with USDC Top Up
-          </Button>
-        )}
-
-        {depositData && (
-          <RozoPayButton.Custom
-            appId={depositData.appId}
-            toChain={depositData.toChain!}
-            toToken={depositData.toToken!}
-            toAddress={depositData.toAddress as `0x${string}`}
-            toStellarAddress={depositData.toStellarAddress}
-            toUnits={depositData.toUnits}
-            onPaymentCompleted={() => {
-              toast.success("Top up completed successfully! 🎉", {
-                description:
-                  "Your USDC has been deposited. It may take a moment to appear in your wallet.",
-                duration: 5000,
-              });
-            }}
-            resetOnSuccess
-            showProcessingPayout
-          >
-            {({ show }) => (
-              <Button onClick={show} className="w-full h-12" size="lg">
-                <ArrowRight className="h-4 w-4 mr-2" />
-                Proceed with USDC Top Up
-              </Button>
+            {/* Chain Compatibility Warning */}
+            {currentAddress && isValidAddress && !isChainCompatible && (
+              <div className="flex items-center gap-2 text-yellow-600 text-sm">
+                <AlertTriangle className="h-4 w-4" />
+                <span>
+                  Selected chain is not compatible with{" "}
+                  {addressType === "evm" ? "EVM" : "Stellar"} address
+                </span>
+              </div>
             )}
-          </RozoPayButton.Custom>
-        )}
-      </div>
-    );
-  }
-
-  // Withdraw flow
-  if (flowType === "withdraw") {
-    const addressType = getAddressType(evmAddress);
-    const isValidAddress = addressType !== "invalid";
-    const isChainCompatible =
-      (addressType === "evm" && selectedChain === 8453) || // Base for EVM
-      (addressType === "stellar" &&
-        (selectedChain === 1500 || selectedChain === 1501)); // Stellar
-
-    return (
-      <div className="w-full max-w-xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex flex-col items-start gap-4">
-          {/* <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setFlowType("initial")}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Quick Top Up
-          </Button> */}
-          <div className="flex flex-col-reverse md:flex-row justify-center md:justify-between items-center gap-2 w-full">
-            <div>
-              <h1 className="text-2xl font-bold">Transfer Configuration</h1>
-              <p className="text-sm text-muted-foreground">
-                Configure your USDC transfer details
-              </p>
-            </div>
-
-            <div className="flex justify-center items-center gap-2">
-              <ChainsStacked />
-              <span className="text-muted-foreground text-sm">
-                Safe and Secure Payments
-              </span>
-            </div>
           </div>
-        </div>
 
-        {/* Destination Address and Chain Selection */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Destination</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Chain Selection */}
-            <div className="space-y-3">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {withdrawChains.map((chain) => {
-                  const isCompatible =
-                    (addressType === "evm" && chain.id === 8453) || // Base for EVM
-                    (addressType === "stellar" &&
-                      (chain.id === 1500 || chain.id === 1501)); // Stellar
+          {/* Address Input */}
+          {selectedChain && (
+            <div className="space-y-2">
+              <Label htmlFor="destination-address">Destination Address</Label>
+              {selectedChain === 1500 || selectedChain === 1501 ? (
+                <StellarAddressInput
+                  value={stellarAddress}
+                  onChange={handleStellarAddressChange}
+                  label={null}
+                  placeholder="Enter your Stellar address (G...)"
+                  required
+                  showValidation={false}
+                />
+              ) : (
+                <Input
+                  id="destination-address"
+                  type="text"
+                  value={evmAddress}
+                  onChange={(e) => handleEvmAddressChange(e.target.value)}
+                  placeholder="Enter EVM address (0x...)"
+                  className={cn(
+                    currentAddress &&
+                      !isValidAddress &&
+                      "border-red-300 focus:border-red-500"
+                  )}
+                />
+              )}
 
-                  return (
-                    <Button
-                      key={chain.id}
-                      variant={
-                        selectedChain === chain.id ? "default" : "outline"
-                      }
-                      onClick={() => setSelectedChain(chain.id)}
-                      className="h-16 justify-start"
-                      disabled={!!(evmAddress && !isCompatible)}
-                    >
-                      <div className="flex items-center gap-3">
-                        {typeof chain.logo === "string" ? (
-                          <Image
-                            src={chain.logo}
-                            alt={chain.name}
-                            width={32}
-                            height={32}
-                            className="w-8 h-8 rounded-full"
-                          />
-                        ) : (
-                          <span className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center">
-                            {chain.logo}
-                          </span>
-                        )}
-                        <div className="text-left">
-                          <div className="font-medium">{chain.name}</div>
-                          <div
-                            className={cn(
-                              "text-xs text-muted-foreground",
-                              selectedChain === chain.id && "text-accent"
-                            )}
-                          >
-                            {chain.ecosystem}
-                          </div>
-                        </div>
-                        {evmAddress && !isCompatible && (
-                          <div className="ml-auto">
-                            <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                          </div>
-                        )}
-                      </div>
-                    </Button>
-                  );
-                })}
-              </div>
-
-              {/* Chain Compatibility Warning */}
-              {evmAddress && isValidAddress && !isChainCompatible && (
-                <div className="flex items-center gap-2 text-yellow-600 text-sm">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span>
-                    Selected chain is not compatible with{" "}
-                    {addressType === "evm" ? "EVM" : "Stellar"} address
-                  </span>
-                </div>
+              {/* Address Validation */}
+              {currentAddress && (
+                <>
+                  {!isValidAddress ? (
+                    <div className="flex items-center gap-2 text-red-600 text-sm">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span>Invalid address format</span>
+                    </div>
+                  ) : null}
+                </>
               )}
             </div>
+          )}
+        </CardContent>
+      </Card>
 
-            {/* Address Input */}
-            {selectedChain && (
-              <div className="space-y-2">
-                <Label htmlFor="destination-address">Destination Address</Label>
-                {selectedChain === 1500 || selectedChain === 1501 ? (
-                  <StellarAddressInput
-                    value={evmAddress}
-                    onChange={handleAddressChange}
-                    label={null}
-                    placeholder="Enter your Stellar address (G...)"
-                    required
-                    disabled={!!(isConnected && publicKey)}
-                    showValidation={false}
-                  />
-                ) : (
-                  <Input
-                    id="destination-address"
-                    type="text"
-                    value={evmAddress}
-                    onChange={(e) => handleAddressChange(e.target.value)}
-                    placeholder="Enter EVM address (0x...)"
-                    className={cn(
-                      evmAddress &&
-                        !isValidAddress &&
-                        "border-red-300 focus:border-red-500"
-                    )}
-                  />
-                )}
-
-                {/* Address Validation */}
-                {evmAddress && (
-                  <>
-                    {!isValidAddress ? (
-                      <div className="flex items-center gap-2 text-red-600 text-sm">
-                        <AlertTriangle className="h-4 w-4" />
-                        <span>Invalid address format</span>
-                      </div>
-                    ) : null}
-                  </>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Amount Selection */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Amount (USDC)</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-2">
-              {["1", "100", "1000"].map((amountOption) => (
-                <Button
-                  key={amountOption}
-                  variant={amount === amountOption ? "default" : "outline"}
-                  onClick={() => handleAmountSelect(amountOption)}
-                  className="h-12"
-                >
-                  {amountOption} USDC
-                </Button>
-              ))}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="custom-amount">Other amount:</Label>
-              <Input
-                id="withdraw-amount"
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="100"
-                min="0"
-                step="0.01"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Pay Button */}
-        {!withdrawData && (
-          <Button disabled={true} className="w-full h-12 text-lg" size="lg">
-            <DollarSign className="size-4" />
-            Process Transaction
-          </Button>
-        )}
-
-        {withdrawData && (
-          <RozoPayButton.Custom
-            appId={withdrawData.appId}
-            toChain={withdrawData.toChain!}
-            toToken={withdrawData.toToken!}
-            toAddress={withdrawData.toAddress as `0x${string}`}
-            toStellarAddress={withdrawData.toStellarAddress}
-            toUnits={withdrawData.toUnits}
-            onPaymentCompleted={() => {
-              toast.success("Withdraw completed successfully! 🎉", {
-                description:
-                  "Your USDC has been withdrawn. It may take a moment to appear in your wallet.",
-                duration: 5000,
-              });
-            }}
-            resetOnSuccess
-            showProcessingPayout
-          >
-            {({ show }) => (
-              <Button onClick={show} className="w-full h-12 text-lg" size="lg">
-                <DollarSign className="size-4" />
-                Process Transaction
+      {/* Amount Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Amount (USDC)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-3 gap-2">
+            {["1", "100", "1000"].map((amountOption) => (
+              <Button
+                key={amountOption}
+                variant={amount === amountOption ? "default" : "outline"}
+                onClick={() => handleAmountSelect(amountOption)}
+                className="h-12"
+              >
+                {amountOption} USDC
               </Button>
-            )}
-          </RozoPayButton.Custom>
-        )}
+            ))}
+          </div>
 
-        <ContactSupport />
-      </div>
-    );
-  }
+          <div className="space-y-2">
+            <Label htmlFor="custom-amount">Other amount:</Label>
+            <Input
+              id="withdraw-amount"
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="100"
+              min="0"
+              step="0.01"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-  return null;
+      {/* Pay Button */}
+      {!withdrawData && (
+        <Button
+          disabled={isProcessTransactionDisabled}
+          className="w-full h-12 text-lg"
+          size="lg"
+        >
+          <DollarSign className="size-4" />
+          Process Transaction
+        </Button>
+      )}
+
+      {withdrawData && (
+        <RozoPayButton.Custom
+          appId={withdrawData.appId}
+          toChain={withdrawData.toChain!}
+          toToken={withdrawData.toToken!}
+          toAddress={withdrawData.toAddress as `0x${string}`}
+          toStellarAddress={withdrawData.toStellarAddress}
+          toUnits={withdrawData.toUnits}
+          onPaymentCompleted={() => {
+            toast.success("Withdraw is in progress! 🎉", {
+              description:
+                "Your USDC is being transferred. It may take a moment to appear in your wallet.",
+              duration: 5000,
+            });
+          }}
+          resetOnSuccess
+          showProcessingPayout
+        >
+          {({ show }) => (
+            <Button
+              onClick={show}
+              disabled={isProcessTransactionDisabled}
+              className="w-full h-12 text-lg"
+              size="lg"
+            >
+              <DollarSign className="size-4" />
+              Process Transaction
+            </Button>
+          )}
+        </RozoPayButton.Custom>
+      )}
+
+      <ContactSupport />
+    </div>
+  );
 }

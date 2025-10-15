@@ -176,7 +176,7 @@ export function StellarAddressInput({
           onFocus={() => {}}
           onBlur={() => {}}
           placeholder={placeholder}
-          className={cn("pr-20", getInputClassName())}
+          className={cn(getInputClassName())}
           disabled={disabled}
         />
 
