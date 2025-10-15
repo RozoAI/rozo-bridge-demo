@@ -13,7 +13,9 @@ import {
 import { RozoPayButton, useRozoPayUI } from "@rozoai/intent-pay";
 import {
   AlertTriangle,
+  ArrowDownLeft,
   ArrowUp,
+  ArrowUpRight,
   DollarSign,
   Loader2,
   Star,
@@ -25,8 +27,6 @@ import { toast } from "sonner";
 import { getAddress } from "viem";
 import ChainsStacked from "./chains-stacked";
 import { ContactSupport } from "./ContactSupport";
-import { DepositIcon } from "./icons/deposit-icon";
-import { WithdrawIcon } from "./icons/withdraw-icon";
 import { StellarAddressInput } from "./StellarAddressInput";
 import { StellarWalletConnect } from "./StellarWalletConnect";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
@@ -172,26 +172,18 @@ export function StellarBridge() {
           <ToggleGroupItem
             value="deposit"
             aria-label="Select deposit flow"
-            className="grid grid-cols-[2rem_1fr] gap-2 h-16 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+            className="grid grid-cols-[2rem_1fr] gap-2 h-14 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
           >
-            <DepositIcon className="size-5 sm:size-6 m-auto" />
-            <div className="flex flex-col items-start">
-              <span className="font-medium">Deposit</span>
-              <span className="text-xs opacity-70">
-                Deposit from any chains
-              </span>
-            </div>
+            <ArrowUpRight className="size-5 sm:size-6 m-auto" />
+            <span className="font-medium">Deposit from any chains</span>
           </ToggleGroupItem>
           <ToggleGroupItem
             value="withdraw"
             aria-label="Select withdraw flow"
-            className="grid grid-cols-[1fr_2rem] gap-2 h-16 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+            className="grid grid-cols-[1fr_2rem] gap-2 h-14 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
           >
-            <div className="flex flex-col items-end">
-              <span className="font-medium">Withdraw</span>
-              <span className="text-xs opacity-70">Send USDC to Base</span>
-            </div>
-            <WithdrawIcon className="size-5 sm:size-6 m-auto" />
+            <span className="font-medium ml-auto">Withdraw to Base</span>
+            <ArrowDownLeft className="size-5 sm:size-6 m-auto" />
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
@@ -201,7 +193,7 @@ export function StellarBridge() {
         <Card className="gap-2">
           <CardHeader>
             <CardTitle className="flex items-center justify-between gap-2">
-              <span className="font-medium">Deposit a USDC Stellar</span>
+              <span className="font-bold">Deposit a from any chains</span>
               <StellarWalletConnect />
             </CardTitle>
           </CardHeader>
@@ -214,12 +206,12 @@ export function StellarBridge() {
               />
             )}
 
-            <div className="space-y-3 mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3 mt-4">
+              <div className="grid grid-cols-1 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="amount">Choose an amount</Label>
-                  <div className="grid grid-cols-4 md:grid-cols-2 gap-3">
-                    {["10", "25", "50", "100"].map((presetAmount) => (
+                  <div className="grid grid-cols-3 gap-3">
+                    {["25", "100", "1000"].map((presetAmount) => (
                       <Button
                         key={presetAmount}
                         variant={
@@ -238,13 +230,21 @@ export function StellarBridge() {
                   </div>
                 </div>
 
+                <div className="relative flex items-center justify-center my-1.5">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-muted-foreground/20"></div>
+                  </div>
+                  <div className="relative bg-card px-3 text-xs text-muted-foreground">
+                    Or
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 gap-3">
                   <div className="space-y-2">
-                    <Label htmlFor="custom-amount">Other amount</Label>
                     <Input
                       id="amount"
                       type="number"
-                      placeholder="Enter custom amount"
+                      placeholder="Enter amount"
                       value={customAmount}
                       onChange={(e) => {
                         setCustomAmount(e.target.value);
@@ -463,9 +463,31 @@ export function StellarBridge() {
         </Card>
       )}
 
-      <ContactSupport />
-
       <div className="mt-10 flex flex-col items-center">
+        <span className="text-sm text-muted-foreground mb-3">Powered by</span>
+        <div className="flex flex-wrap gap-4 sm:gap-6 items-center justify-center">
+          <div className="flex">
+            <a
+              href="https://rozo.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Rozo"
+              className="flex items-center"
+            >
+              <img
+                src="/rozo-white-transparent.png"
+                alt="Rozo"
+                className="h-8 sm:h-12 w-auto transition-opacity group-hover:opacity-80"
+              />
+              <span className="text-lg sm:text-2xl text-white font-bold">
+                ROZO
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div className="my-10 flex flex-col items-center">
         <span className="text-sm text-muted-foreground mb-3">Supported by</span>
         <div className="flex flex-wrap gap-4 sm:gap-6 items-center justify-center">
           <div className="flex">
@@ -542,6 +564,8 @@ export function StellarBridge() {
           </div>
         </div>
       </div>
+
+      <ContactSupport />
     </div>
   );
 }
