@@ -11,7 +11,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { getAddress } from "viem";
 import ChainsStacked from "./chains-stacked";
-import { ContactSupport } from "./ContactSupport";
 import { StellarAddressInput } from "./StellarAddressInput";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -383,8 +382,6 @@ export function NewBridge() {
           )}
         </RozoPayButton.Custom>
       )}
-
-      <ContactSupport />
     </div>
   );
 }
