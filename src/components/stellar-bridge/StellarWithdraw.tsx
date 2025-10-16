@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface StellarWithdrawProps {
   amount: string;
@@ -382,28 +381,14 @@ export function StellarWithdraw({
               )}
 
               <div className="flex items-center justify-center gap-4 font-mono">
-                <Tooltip>
-                  <TooltipTrigger>
-                    <span className="flex items-center gap-1 text-muted-foreground">
-                      <Fuel className="size-4" />
-                      <span className="text-sm">Free</span>
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Gas fee is free</p>
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Clock className="size-4" />
-                      &lt;10s
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Typical deposit time</p>
-                  </TooltipContent>
-                </Tooltip>
+                <span className="flex items-center gap-1 text-muted-foreground">
+                  <Fuel className="size-4" />
+                  <span className="text-sm">Limited time free</span>
+                </span>
+                <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <Clock className="size-4" />
+                  &lt;10s
+                </span>
               </div>
 
               <Button
