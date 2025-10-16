@@ -249,53 +249,7 @@ We reserve the right to modify these Terms at any time. We will provide notice o
 
 Your continued use of the Bridge after changes become effective constitutes acceptance of the modified Terms. If you do not agree to the changes, you must stop using the Bridge.
 
-## 15. Dispute Resolution
-
-### 15.1 Governing Law
-
-These Terms shall be governed by and construed in accordance with the laws of the State of Delaware, United States, without regard to conflict of law principles.
-
-### 15.2 Arbitration
-
-Any dispute, claim, or controversy arising out of or relating to these Terms or the Bridge shall be resolved through binding arbitration administered by the American Arbitration Association (AAA) in accordance with its Commercial Arbitration Rules.
-
-The arbitration shall be conducted by a single arbitrator in Delaware, United States. The arbitrator's decision shall be final and binding.
-
-### 15.3 Class Action Waiver
-
-You agree that any arbitration or proceeding shall be limited to the dispute between you and us individually. You waive any right to participate in a class action, collective action, or representative proceeding.
-
-### 15.4 Exceptions
-
-Either party may seek equitable relief in court for intellectual property infringement or unauthorized access to the Bridge.
-
-## 16. Miscellaneous
-
-### 16.1 Entire Agreement
-
-These Terms, together with the Privacy Policy, constitute the entire agreement between you and us regarding the Bridge.
-
-### 16.2 Severability
-
-If any provision of these Terms is found to be invalid or unenforceable, the remaining provisions shall remain in full force and effect.
-
-### 16.3 No Waiver
-
-Our failure to enforce any provision of these Terms shall not constitute a waiver of that provision or any other provision.
-
-### 16.4 Assignment
-
-You may not assign or transfer these Terms or your rights hereunder without our prior written consent. We may assign these Terms without restriction.
-
-### 16.5 Force Majeure
-
-We shall not be liable for any delay or failure to perform resulting from causes outside our reasonable control, including but not limited to acts of God, war, terrorism, riots, embargoes, acts of civil or military authorities, fire, floods, accidents, network infrastructure failures, or blockchain network issues.
-
-### 16.6 Survival
-
-Sections that by their nature should survive termination shall survive, including but not limited to Sections 5, 10, 11, 12, and 15.
-
-## 17. Contact Information
+## 15. Contact Information
 
 For questions about these Terms, please contact us at:
 
