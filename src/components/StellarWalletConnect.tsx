@@ -195,16 +195,15 @@ export function StellarWalletConnect({ className }: StellarWalletConnectProps) {
                   {Number(trustlineStatus.balance).toFixed(2)} USDC
                 </span>
               ) : (
-                <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                <div className="text-xs text-yellow-600 flex items-center gap-1">
+                  <AlertTriangle className="inline w-4 h-4 text-yellow-500" />
+                  USDC trustline required
+                </div>
               )}
             </div>
 
             {!trustlineStatus.checking && !trustlineStatus.exists && (
               <div className="space-y-2">
-                <div className="text-xs text-yellow-600 flex items-center gap-1">
-                  <AlertTriangle className="inline w-4 h-4 text-yellow-500" />
-                  USDC trustline required
-                </div>
                 {xlmBalance.checking ? (
                   <div className="text-xs text-gray-500 flex items-center gap-1">
                     <Loader2 className="w-3 h-3 animate-spin" />

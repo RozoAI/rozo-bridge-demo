@@ -37,13 +37,40 @@ export function StellarDeposit({
     trustlineStatus,
     checkTrustline,
     checkXlmBalance,
+    createTrustline,
+    xlmBalance,
   } = useStellarWallet();
 
   const { resetPayment } = useRozoPayUI();
 
+  const handleCreateTrustline = async () => {
+    // Check XLM balance before creating trustline
+    const xlmBalanceNum = parseFloat(xlmBalance.balance);
+    if (xlmBalanceNum < 1.5) {
+      toast.error("Insufficient XLM balance", {
+        description:
+          "You need at least 1.5 XLM to create a USDC trustline. Please add more XLM to your wallet.",
+        duration: 5000,
+      });
+      return;
+    }
+
+    // If balance is sufficient, proceed with trustline creation
+    await createTrustline();
+  };
+
   const ableToPay = useMemo(() => {
-    return amount && (stellarAddress || destinationStellarAddress);
-  }, [amount, stellarAddress, destinationStellarAddress]);
+    return (
+      amount &&
+      (stellarAddress || destinationStellarAddress) &&
+      trustlineStatus.exists
+    );
+  }, [
+    amount,
+    stellarAddress,
+    destinationStellarAddress,
+    trustlineStatus.exists,
+  ]);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -159,6 +186,59 @@ export function StellarDeposit({
                   </div>
                 </div>
               )}
+
+              {!trustlineStatus.checking &&
+                !trustlineStatus.exists &&
+                stellarConnected &&
+                parseFloat(xlmBalance.balance) >= 1.5 && (
+                  <div className="p-4 rounded-lg border bg-red-50 dark:bg-red-950/20">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+                      <div className="space-y-3">
+                        <div>
+                          <p className="font-medium text-red-900 dark:text-red-100">
+                            USDC Trustline Required
+                          </p>
+                          <p className="text-sm text-red-700 dark:text-red-300">
+                            Your Stellar wallet needs to establish a trustline
+                            for USDC to receive deposits. This is a one-time
+                            setup.
+                          </p>
+                        </div>
+                        <Button
+                          onClick={handleCreateTrustline}
+                          disabled={trustlineStatus.checking}
+                          size="sm"
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                          {trustlineStatus.checking
+                            ? "Creating..."
+                            : "Create USDC Trustline"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+              {!trustlineStatus.checking &&
+                !trustlineStatus.exists &&
+                stellarConnected &&
+                parseFloat(xlmBalance.balance) < 1.5 && (
+                  <div className="p-4 rounded-lg border bg-orange-50 dark:bg-orange-950/20">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
+                      <div className="space-y-1">
+                        <p className="font-medium text-orange-900 dark:text-orange-100">
+                          Insufficient XLM Balance
+                        </p>
+                        <p className="text-sm text-orange-700 dark:text-orange-300">
+                          You need at least 1.5 XLM to create a USDC trustline.
+                          Current balance: {xlmBalance.balance} XLM
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
               {amount && parseFloat(amount) > 1000 && (
                 <div className="p-4 rounded-lg border bg-yellow-50 dark:bg-yellow-950/20">
