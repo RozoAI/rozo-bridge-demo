@@ -160,17 +160,6 @@ export function StellarDeposit({
                 </div>
               )}
 
-              {stellarConnected && (
-                <div className="space-y-2 mt-2">
-                  <Label htmlFor="destination-address">
-                    Destination Address
-                  </Label>
-                  <div className="text-sm text-muted-foreground">
-                    {stellarAddress}
-                  </div>
-                </div>
-              )}
-
               {amount && parseFloat(amount) > 0 && intentConfig && ableToPay ? (
                 <div className="space-y-3">
                   <RozoPayButton.Custom

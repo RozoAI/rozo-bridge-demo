@@ -6,13 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { useStellarTransfer } from "@/hooks/use-stellar-transfer";
-import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
   ArrowDownLeft,
   DollarSign,
   Loader2,
-  Star,
+  Wallet,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -44,6 +43,7 @@ export function StellarWithdraw({
 
   const [toastId, setToastId] = useState<string | number | null>(null);
   const [withdrawLoading, setWithdrawLoading] = useState(false);
+  const [isCustomizeSelected, setIsCustomizeSelected] = useState(false);
 
   const handleWithdraw = async () => {
     if (toastId) {
@@ -171,132 +171,138 @@ export function StellarWithdraw({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-3 mt-4">
-          <div className="grid grid-cols-1 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="withdraw-amount">Choose an amount</Label>
-              <div
-                className={cn(
-                  "grid grid-cols-4 gap-3",
-                  stellarConnected && trustlineStatus.exists
-                    ? "grid-cols-4"
-                    : "grid-cols-3"
-                )}
-              >
-                {["10", "25", "100"].map((presetAmount) => {
-                  const maxBalance =
-                    stellarConnected && trustlineStatus.exists
-                      ? parseFloat(trustlineStatus.balance)
-                      : Infinity;
-                  const isDisabled =
-                    stellarConnected && trustlineStatus.exists
-                      ? parseFloat(presetAmount) > maxBalance
-                      : false;
-
-                  return (
-                    <Button
-                      key={presetAmount}
-                      variant={amount === presetAmount ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => {
-                        onAmountChange(presetAmount);
-                        onCustomAmountChange(presetAmount);
-                        onAmountErrorChange("");
-                      }}
-                      disabled={isDisabled}
-                      className="h-10"
-                    >
-                      {presetAmount} USDC
-                    </Button>
-                  );
-                })}
-                {stellarConnected &&
-                  trustlineStatus.exists &&
-                  parseFloat(trustlineStatus.balance) > 0 && (
-                    <Button
-                      variant={
-                        amount === trustlineStatus.balance
-                          ? "default"
-                          : "outline"
-                      }
-                      size="sm"
-                      onClick={() => {
-                        onAmountChange(trustlineStatus.balance);
-                        onCustomAmountChange(
-                          Number(trustlineStatus.balance).toFixed(2)
-                        );
-                        onAmountErrorChange("");
-                      }}
-                      className="h-10"
-                    >
-                      Max
-                    </Button>
-                  )}
-              </div>
+        {!stellarConnected ? (
+          <div className="text-center py-8">
+            <div className="text-muted-foreground mb-4">
+              <Wallet className="size-12 mx-auto mb-3 opacity-50" />
+              <p className="text-lg font-medium">
+                Connect your Stellar wallet for withdrawal
+              </p>
             </div>
-
-            <div className="relative flex items-center justify-center my-1.5">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-muted-foreground/20"></div>
-              </div>
-              <div className="relative bg-card px-3 text-xs text-muted-foreground">
-                Or
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3">
+          </div>
+        ) : (
+          <div className="space-y-3 mt-4">
+            <div className="grid grid-cols-1 gap-6">
               <div className="space-y-2">
-                <Input
-                  id="withdraw-amount"
-                  type="number"
-                  placeholder="Enter amount"
-                  value={customAmount}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    onCustomAmountChange(value);
-                    onAmountChange(value);
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="withdraw-amount">Choose an amount</Label>
+                  {stellarConnected && trustlineStatus.exists && (
+                    <span className="text-xs text-muted-foreground">
+                      Balance:{" "}
+                      {parseFloat(trustlineStatus.balance).toLocaleString(
+                        undefined,
+                        { maximumFractionDigits: 2 }
+                      )}{" "}
+                      USDC
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {["1", "20", "100", "200", "500", "Customize"].map(
+                    (presetAmount) => {
+                      const maxBalance =
+                        stellarConnected && trustlineStatus.exists
+                          ? parseFloat(trustlineStatus.balance)
+                          : Infinity;
+                      const isDisabled =
+                        presetAmount !== "Customize" &&
+                        stellarConnected &&
+                        trustlineStatus.exists
+                          ? parseFloat(presetAmount) > maxBalance
+                          : false;
 
-                    // Validate amount against balance
-                    if (stellarConnected && trustlineStatus.exists && value) {
-                      const inputAmount = parseFloat(value);
-                      const availableBalance = parseFloat(
-                        trustlineStatus.balance
+                      return (
+                        <Button
+                          key={presetAmount}
+                          variant={
+                            presetAmount === "Customize"
+                              ? isCustomizeSelected
+                                ? "default"
+                                : "outline"
+                              : amount === presetAmount
+                              ? "default"
+                              : "outline"
+                          }
+                          size="sm"
+                          onClick={() => {
+                            if (presetAmount === "Customize") {
+                              setIsCustomizeSelected(true);
+                              onAmountChange("");
+                              onCustomAmountChange("");
+                              onAmountErrorChange("");
+                            } else {
+                              setIsCustomizeSelected(false);
+                              onAmountChange(presetAmount);
+                              onCustomAmountChange(presetAmount);
+                              onAmountErrorChange("");
+                            }
+                          }}
+                          disabled={isDisabled}
+                          className="h-10"
+                        >
+                          {presetAmount === "Customize"
+                            ? "Customize"
+                            : `${presetAmount} USDC`}
+                        </Button>
                       );
-
-                      if (inputAmount > availableBalance) {
-                        onAmountErrorChange(
-                          `Amount exceeds available balance of ${parseFloat(
-                            trustlineStatus.balance
-                          ).toFixed(2)} USDC`
-                        );
-                      } else if (inputAmount <= 0) {
-                        onAmountErrorChange("Amount must be greater than 0");
-                      } else {
-                        onAmountErrorChange("");
-                      }
-                    } else {
-                      onAmountErrorChange("");
                     }
-                  }}
-                  min="0"
-                  step="0.01"
-                  className={`h-10 ${
-                    amountError ? "border-red-500 focus:border-red-500" : ""
-                  }`}
-                />
-                {amountError && (
-                  <p className="text-xs text-red-500">{amountError}</p>
-                )}
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>
-                    {stellarConnected && trustlineStatus.exists
-                      ? `Available: ${parseFloat(
-                          trustlineStatus.balance
-                        ).toFixed(2)} USDC`
-                      : null}
-                  </span>
+                  )}
                 </div>
               </div>
+
+              {isCustomizeSelected && (
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="space-y-2">
+                    <Input
+                      id="withdraw-amount"
+                      type="number"
+                      placeholder="Enter amount"
+                      value={customAmount}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        onCustomAmountChange(value);
+                        onAmountChange(value);
+
+                        // Validate amount against balance
+                        if (
+                          stellarConnected &&
+                          trustlineStatus.exists &&
+                          value
+                        ) {
+                          const inputAmount = parseFloat(value);
+                          const availableBalance = parseFloat(
+                            trustlineStatus.balance
+                          );
+
+                          if (inputAmount > availableBalance) {
+                            onAmountErrorChange(
+                              `Amount exceeds available balance of ${parseFloat(
+                                trustlineStatus.balance
+                              ).toFixed(2)} USDC`
+                            );
+                          } else if (inputAmount <= 0) {
+                            onAmountErrorChange(
+                              "Amount must be greater than 0"
+                            );
+                          } else {
+                            onAmountErrorChange("");
+                          }
+                        } else {
+                          onAmountErrorChange("");
+                        }
+                      }}
+                      min="0"
+                      step="0.01"
+                      className={`h-10 ${
+                        amountError ? "border-red-500 focus:border-red-500" : ""
+                      }`}
+                    />
+                    {amountError && (
+                      <p className="text-xs text-red-500">{amountError}</p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="base-address">Base Address</Label>
@@ -308,23 +314,6 @@ export function StellarWithdraw({
                   className="h-10"
                 />
               </div>
-
-              {/* Show wallet connection status */}
-              {!stellarConnected && (
-                <div className="p-4 rounded-lg border bg-blue-50 dark:bg-blue-950/20">
-                  <div className="flex items-start gap-3">
-                    <Star className="w-5 h-5 text-blue-600 mt-0.5" />
-                    <div className="space-y-1">
-                      <p className="font-medium text-blue-900 dark:text-blue-100">
-                        Connect Stellar Wallet
-                      </p>
-                      <p className="text-sm text-blue-700 dark:text-blue-300">
-                        Connect your Stellar wallet to proceed with withdrawal
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {stellarConnected &&
                 !trustlineStatus.checking &&
@@ -384,7 +373,7 @@ export function StellarWithdraw({
               </Button>
             </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
