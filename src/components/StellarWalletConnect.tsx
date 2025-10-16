@@ -1,253 +1,240 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { ChevronDown, LogOut, AlertTriangle, Star } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from "@/components/ui/dropdown-menu";
+import { useStellarWallet } from "@/contexts/StellarWalletContext";
+import { cn } from "@/lib/utils";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
-import { useStellarWalletConnection, getAvailableStellarWallets } from '@/store/stellar'
-import { STELLAR_WALLETS, StellarNetwork } from '@/lib/stellar'
+  AlertTriangle,
+  ChevronDown,
+  Copy,
+  Loader2,
+  LogOut,
+  Plus,
+  RefreshCw,
+  Wallet,
+} from "lucide-react";
+import Image from "next/image";
+import { toast } from "sonner";
+import { Stellar } from "./icons/chains";
 
 interface StellarWalletConnectProps {
-  className?: string
+  className?: string;
 }
 
 export function StellarWalletConnect({ className }: StellarWalletConnectProps) {
-  const [showConnectDialog, setShowConnectDialog] = useState(false)
-  
   const {
-    isConnected,
-    publicKey,
-    walletId,
-    network,
-    error,
-    isConnecting,
-    connect,
-    disconnect,
-    switchNetwork,
-  } = useStellarWalletConnection()
+    stellarAddress,
+    stellarConnected,
+    stellarConnecting,
+    connectStellarWallet,
+    disconnectStellarWallet,
+    stellarWalletName,
+    trustlineStatus,
+    xlmBalance,
+    createTrustline,
+    checkXlmBalance,
+    checkTrustline,
+  } = useStellarWallet();
 
-  const availableWallets = getAvailableStellarWallets()
-
-  const handleConnect = async (selectedWalletId: string) => {
+  const handleConnect = async () => {
     try {
-      await connect(selectedWalletId)
-      setShowConnectDialog(false)
+      await connectStellarWallet();
     } catch (error) {
-      console.error('Failed to connect Stellar wallet:', error)
+      console.error("Failed to connect Stellar wallet:", error);
     }
-  }
+  };
 
   const handleDisconnect = async () => {
     try {
-      await disconnect()
+      disconnectStellarWallet();
+      toast.success("Stellar wallet disconnected successfully");
     } catch (error) {
-      console.error('Failed to disconnect Stellar wallet:', error)
+      console.error("Failed to disconnect Stellar wallet:", error);
+      toast.error("Failed to disconnect wallet. Please try again.");
     }
-  }
-
-  const handleSwitchNetwork = async (targetNetwork: StellarNetwork) => {
-    if (targetNetwork !== network) {
-      await switchNetwork(targetNetwork)
-    }
-  }
+  };
 
   const formatStellarAddress = (address: string) => {
-    return `${address.slice(0, 4)}...${address.slice(-4)}`
-  }
+    return `${address.slice(0, 4)}...${address.slice(-4)}`;
+  };
 
   const copyAddress = async () => {
-    if (publicKey) {
+    if (stellarAddress) {
       try {
-        await navigator.clipboard.writeText(publicKey)
+        await navigator.clipboard.writeText(stellarAddress);
+        toast.success("Stellar address copied to clipboard");
       } catch (error) {
-        console.warn('Failed to copy Stellar address:', error)
+        console.warn("Failed to copy Stellar address:", error);
       }
     }
-  }
+  };
 
-  const getWalletIcon = (walletId: string) => {
-    const wallet = STELLAR_WALLETS.find(w => w.id === walletId)
-    return wallet?.icon || '⭐'
-  }
+  const handleCreateTrustline = async () => {
+    try {
+      await createTrustline();
+    } catch (error) {
+      console.error("Failed to create trustline:", error);
+    }
+  };
 
-  const getWalletName = (walletId: string) => {
-    const wallet = STELLAR_WALLETS.find(w => w.id === walletId)
-    return wallet?.name || 'Unknown Wallet'
-  }
+  const handleRefreshBalances = async () => {
+    try {
+      await Promise.all([checkXlmBalance(), checkTrustline()]);
+      toast.success("Balances refreshed");
+    } catch (error) {
+      console.error("Failed to refresh balances:", error);
+      toast.error("Failed to refresh balances");
+    }
+  };
 
-  if (!isConnected) {
+  if (!stellarConnected) {
     return (
-      <Dialog open={showConnectDialog} onOpenChange={setShowConnectDialog}>
-        <DialogTrigger asChild>
-          <Button variant="outline" className={cn('flex items-center gap-2', className)}>
-            <Star className="h-4 w-4" />
-            Connect Stellar
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Connect Stellar Wallet</DialogTitle>
-            <DialogDescription>
-              Choose a Stellar wallet to connect for cross-chain bridging
-            </DialogDescription>
-          </DialogHeader>
-          
-          {error && (
-            <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
-              <div className="flex items-center gap-2 text-red-800 dark:text-red-400">
-                <AlertTriangle className="h-4 w-4" />
-                <span className="text-sm font-medium">Connection Error</span>
-              </div>
-              <p className="text-sm text-red-700 dark:text-red-500 mt-1">
-                {error}
-              </p>
-            </div>
-          )}
-
-          <div className="space-y-3">
-            {availableWallets.map((wallet) => (
-              <Button
-                key={wallet.id}
-                variant="outline"
-                className="w-full justify-start h-12"
-                onClick={() => handleConnect(wallet.id)}
-                disabled={isConnecting}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-lg">
-                    {wallet.icon}
-                  </div>
-                  <div className="text-left">
-                    <div className="font-medium">{wallet.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {wallet.id === 'walletconnect' && 'Mobile wallets (LOBSTR, etc.)'}
-                      {wallet.id === 'freighter' && 'Browser extension'}
-                      {wallet.id === 'xbull' && 'Extension & web wallet'}
-                    </div>
-                  </div>
-                  {!wallet.installed && wallet.id !== 'walletconnect' && (
-                    <Badge variant="secondary" className="text-xs">
-                      Not Installed
-                    </Badge>
-                  )}
-                </div>
-              </Button>
-            ))}
-          </div>
-
-          <div className="text-xs text-muted-foreground text-center mt-4">
-            <p>Stellar wallets support XLM and Stellar assets</p>
-            <p>Network: {network === 'PUBLIC' ? 'Mainnet' : 'Testnet'}</p>
-          </div>
-        </DialogContent>
-      </Dialog>
-    )
+      <Button
+        variant="outline"
+        className={cn("flex items-center gap-2", className)}
+        onClick={handleConnect}
+        disabled={stellarConnecting}
+      >
+        <Wallet className="size-4" />
+        {stellarConnecting ? "Connecting..." : "Connect Stellar"}
+      </Button>
+    );
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className={cn('flex items-center gap-2', className)}>
+        <Button
+          variant="outline"
+          className={cn("flex items-center gap-2", className)}
+        >
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-sm">
-              {getWalletIcon(walletId!)}
-            </div>
-            <span className="font-mono">{formatStellarAddress(publicKey!)}</span>
+            <Wallet className="size-4" />
+            <span className="font-mono">
+              {formatStellarAddress(stellarAddress)}
+            </span>
           </div>
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
+      <DropdownMenuContent align="end" className="w-80">
         {/* Account Info */}
         <div className="p-3 border-b">
           <div className="flex items-center justify-between">
             <div>
               <div className="font-medium">Stellar Connected</div>
-              <div className="text-xs text-muted-foreground">
-                {getWalletName(walletId!)}
+              <div className="text-sm text-muted-foreground font-mono mt-1 font-medium">
+                {formatStellarAddress(stellarAddress)}
               </div>
               <div className="text-xs text-muted-foreground font-mono mt-1">
-                {formatStellarAddress(publicKey!)}
+                {stellarWalletName}
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={copyAddress}
-              className="h-8 w-8 p-0"
-            >
-              📋
-            </Button>
-          </div>
-        </div>
-
-        {/* Network Info */}
-        <div className="p-3 border-b">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Star className="w-4 h-4 text-purple-500" />
-              <span className="text-sm font-medium">
-                Stellar {network === 'PUBLIC' ? 'Mainnet' : 'Testnet'}
-              </span>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleRefreshBalances}
+                className="h-8 w-8 p-0"
+                disabled={xlmBalance.checking || trustlineStatus.checking}
+              >
+                <RefreshCw
+                  className={cn(
+                    "size-4",
+                    (xlmBalance.checking || trustlineStatus.checking) &&
+                      "animate-spin"
+                  )}
+                />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={copyAddress}
+                className="h-8 w-8 p-0"
+              >
+                <Copy className="size-4" />
+              </Button>
             </div>
           </div>
         </div>
 
-        {/* Network Switch Options */}
-        <div className="p-2">
-          <div className="text-xs font-medium text-muted-foreground mb-2 px-2">
-            Switch Network
+        {/* Balances */}
+        <div className="p-3 border-b space-y-3">
+          {/* XLM Balance */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Stellar className="size-[20px] rounded-full" />
+              <span className="text-sm font-medium">XLM</span>
+            </div>
+            <span className="text-sm font-mono">
+              {xlmBalance.checking ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                `${Number(xlmBalance.balance).toFixed(2)} XLM`
+              )}
+            </span>
           </div>
-          {(['PUBLIC', 'TESTNET'] as StellarNetwork[]).map((targetNetwork) => {
-            const isCurrentNetwork = targetNetwork === network
-            const networkName = targetNetwork === 'PUBLIC' ? 'Mainnet' : 'Testnet'
-            
-            return (
-              <DropdownMenuItem
-                key={targetNetwork}
-                onClick={() => handleSwitchNetwork(targetNetwork)}
-                disabled={isCurrentNetwork}
-                className="flex items-center gap-2 px-2 py-2"
-              >
-                <Star className="w-4 h-4 text-purple-500" />
-                <span className="flex-1">Stellar {networkName}</span>
-                {isCurrentNetwork && (
-                  <Badge variant="secondary" className="text-xs">
-                    Current
-                  </Badge>
+
+          {/* USDC Trustline Status */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Image src="/usdc.svg" alt="USDC" width={20} height={20} />
+                <span className="text-sm font-medium">USDC</span>
+              </div>
+              {trustlineStatus.checking ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : trustlineStatus.exists ? (
+                <span className="text-sm font-mono">
+                  {Number(trustlineStatus.balance).toFixed(2)} USDC
+                </span>
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-yellow-500" />
+              )}
+            </div>
+
+            {!trustlineStatus.checking && !trustlineStatus.exists && (
+              <div className="space-y-2">
+                <div className="text-xs text-yellow-600 flex items-center gap-1">
+                  <AlertTriangle className="inline w-4 h-4 text-yellow-500" />
+                  USDC trustline required
+                </div>
+                {xlmBalance.checking ? (
+                  <div className="text-xs text-gray-500 flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Checking XLM balance...
+                  </div>
+                ) : parseFloat(xlmBalance.balance) >= 1.5 ? (
+                  <Button
+                    size="sm"
+                    onClick={handleCreateTrustline}
+                    className="w-full h-7 text-xs"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Add USDC Trustline
+                  </Button>
+                ) : (
+                  <div className="text-xs text-red-600">
+                    Need at least 1.5 XLM for trustline creation
+                  </div>
                 )}
-              </DropdownMenuItem>
-            )
-          })}
+              </div>
+            )}
+          </div>
         </div>
 
-        <DropdownMenuSeparator />
-
         {/* Disconnect */}
-        <DropdownMenuItem
-          onClick={handleDisconnect}
-          className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/20"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
+        <DropdownMenuItem onClick={handleDisconnect} variant="destructive">
+          <LogOut className="size-4" />
           Disconnect
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
