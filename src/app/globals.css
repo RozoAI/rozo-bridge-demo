@@ -120,3 +120,44 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Privacy Policy Page Styles */
+.privacy-policy-content {
+  @apply text-foreground;
+}
+
+.privacy-policy-content h1 {
+  @apply text-3xl font-bold mb-6 text-foreground;
+}
+
+.privacy-policy-content h2 {
+  @apply text-2xl font-semibold mt-8 mb-4 text-foreground;
+}
+
+.privacy-policy-content h3 {
+  @apply text-xl font-medium mt-6 mb-3 text-foreground;
+}
+
+.privacy-policy-content p {
+  @apply mb-4 leading-relaxed text-foreground;
+}
+
+.privacy-policy-content ul {
+  @apply mb-4 ml-6;
+}
+
+.privacy-policy-content li {
+  @apply mb-2 text-foreground;
+}
+
+.privacy-policy-content strong {
+  @apply font-semibold text-foreground;
+}
+
+.privacy-policy-content a {
+  @apply text-primary hover:underline;
+}
+
+.privacy-policy-content code {
+  @apply bg-muted px-2 py-1 rounded text-sm font-mono;
+}

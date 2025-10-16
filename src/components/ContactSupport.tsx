@@ -12,7 +12,7 @@ export function ContactSupport() {
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center justify-center w-full text-left text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
-        <span>Need help? Contact us:</span>
+        <span>Need help? Contact us.</span>
         {/* {isExpanded ? (
           <ChevronUp className="h-4 w-4" />
         ) : (

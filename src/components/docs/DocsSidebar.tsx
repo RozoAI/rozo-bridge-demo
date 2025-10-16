@@ -1,67 +1,115 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { usePathname } from 'next/navigation'
-import { ChevronDown, ChevronRight, Book, Code, Zap, Globe } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from "@/lib/utils";
+import {
+  Book,
+  ChevronDown,
+  ChevronRight,
+  Code,
+  Globe,
+  Shield,
+  Zap,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 interface DocSection {
-  title: string
-  icon: React.ComponentType<{ className?: string }>
-  items: DocItem[]
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  items: DocItem[];
 }
 
 interface DocItem {
-  title: string
-  href: string
-  description?: string
+  title: string;
+  href: string;
+  description?: string;
 }
 
 const docSections: DocSection[] = [
   {
-    title: 'Getting Started',
+    title: "Getting Started",
     icon: Book,
     items: [
-      { title: 'Overview', href: '/docs', description: 'Welcome to Rozo Bridge' },
-      { title: 'Quick Start', href: '/docs/quick-start', description: 'Bridge in 5 seconds' },
-    ]
+      {
+        title: "Overview",
+        href: "/docs",
+        description: "Welcome to Rozo Bridge",
+      },
+      {
+        title: "Quick Start",
+        href: "/docs/quick-start",
+        description: "Bridge in 5 seconds",
+      },
+    ],
   },
   {
-    title: 'API Reference',
+    title: "API Reference",
     icon: Globe,
     items: [
-      { title: 'REST API', href: '/docs/api', description: 'Complete API documentation' },
-    ]
+      {
+        title: "REST API",
+        href: "/docs/api",
+        description: "Complete API documentation",
+      },
+    ],
   },
   {
-    title: 'SDK Guide',
+    title: "SDK Guide",
     icon: Code,
     items: [
-      { title: 'TypeScript SDK', href: '/docs/sdk', description: 'Intent Pay SDK guide' },
-    ]
+      {
+        title: "TypeScript SDK",
+        href: "/docs/sdk",
+        description: "Intent Pay SDK guide",
+      },
+    ],
   },
   {
-    title: 'Examples',
+    title: "Examples",
     icon: Zap,
     items: [
-      { title: 'Code Examples', href: '/docs/examples', description: 'Working implementations' },
-    ]
-  }
-]
+      {
+        title: "Code Examples",
+        href: "/docs/examples",
+        description: "Working implementations",
+      },
+    ],
+  },
+  {
+    title: "Legal",
+    icon: Shield,
+    items: [
+      {
+        title: "Privacy Policy",
+        href: "/privacy",
+        description: "How we protect your privacy",
+      },
+      {
+        title: "Terms of Service",
+        href: "/terms",
+        description: "Terms and conditions",
+      },
+    ],
+  },
+];
 
 export function DocsSidebar() {
-  const pathname = usePathname()
-  const [expandedSections, setExpandedSections] = useState<string[]>(['Getting Started', 'API Reference', 'SDK Guide', 'Examples'])
+  const pathname = usePathname();
+  const [expandedSections, setExpandedSections] = useState<string[]>([
+    "Getting Started",
+    "API Reference",
+    "SDK Guide",
+    "Examples",
+    "Legal",
+  ]);
 
   const toggleSection = (title: string) => {
-    setExpandedSections(prev => 
-      prev.includes(title) 
-        ? prev.filter(s => s !== title)
-        : [...prev, title]
-    )
-  }
+    setExpandedSections((prev) =>
+      prev.includes(title) ? prev.filter((s) => s !== title) : [...prev, title]
+    );
+  };
 
   return (
     <div className="w-64 h-full bg-card border-r border-border overflow-y-auto">
@@ -82,8 +130,8 @@ export function DocsSidebar() {
 
         <nav className="space-y-2">
           {docSections.map((section) => {
-            const isExpanded = expandedSections.includes(section.title)
-            const Icon = section.icon
+            const isExpanded = expandedSections.includes(section.title);
+            const Icon = section.icon;
 
             return (
               <div key={section.title}>
@@ -117,17 +165,19 @@ export function DocsSidebar() {
                       >
                         <div className="font-medium">{item.title}</div>
                         {item.description && (
-                          <div className="text-xs opacity-75 mt-1">{item.description}</div>
+                          <div className="text-xs opacity-75 mt-1">
+                            {item.description}
+                          </div>
                         )}
                       </Link>
                     ))}
                   </div>
                 )}
               </div>
-            )
+            );
           })}
         </nav>
       </div>
     </div>
-  )
+  );
 }

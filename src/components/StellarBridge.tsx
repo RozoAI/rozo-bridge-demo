@@ -2,6 +2,7 @@
 
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { ContactSupport } from "./ContactSupport";
 import { PoweredBy } from "./PoweredBy";
@@ -78,6 +79,19 @@ export function StellarBridge() {
       <PoweredBy />
 
       <SupportedBy />
+
+      {/* Footer Links */}
+      <div className="flex justify-center gap-6 text-sm text-muted-foreground mt-[3rem]">
+        <Link
+          href="/privacy"
+          className="hover:text-foreground transition-colors"
+        >
+          Privacy Policy
+        </Link>
+        <Link href="/terms" className="hover:text-foreground transition-colors">
+          Terms of Service
+        </Link>
+      </div>
 
       <ContactSupport />
     </div>
