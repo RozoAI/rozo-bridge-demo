@@ -16,7 +16,6 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { getAddress } from "viem";
 import ChainsStacked from "../chains-stacked";
-import { StellarAddressInput } from "../StellarAddressInput";
 
 interface StellarDepositProps {
   destinationStellarAddress: string;
@@ -29,6 +28,7 @@ export function StellarDeposit({
 }: StellarDepositProps) {
   const [amount, setAmount] = useState("");
   const [customAmount, setCustomAmount] = useState("");
+  const [isCustomizeSelected, setIsCustomizeSelected] = useState(false);
   const [intentConfig, setIntentConfig] = useState<IntentPayConfig | null>();
 
   const {
@@ -89,68 +89,87 @@ export function StellarDeposit({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-3 mt-4">
-          <div className="grid grid-cols-1 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="amount">Choose an amount</Label>
-              <div className="grid grid-cols-3 gap-3">
-                {["25", "100", "1000"].map((presetAmount) => (
-                  <Button
-                    key={presetAmount}
-                    variant={amount === presetAmount ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => {
-                      setAmount(presetAmount);
-                      setCustomAmount(presetAmount);
-                    }}
-                    className="h-10"
-                  >
-                    {presetAmount} USDC
-                  </Button>
-                ))}
-              </div>
+        {!stellarConnected ? (
+          <div className="text-center py-8">
+            <div className="text-muted-foreground mb-4">
+              <Wallet className="size-12 mx-auto mb-3 opacity-50" />
+              <p className="text-lg font-medium">
+                Connect your Stellar wallet for deposit
+              </p>
             </div>
-
-            <div className="relative flex items-center justify-center my-1.5">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-muted-foreground/20"></div>
-              </div>
-              <div className="relative bg-card px-3 text-xs text-muted-foreground">
-                Or
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3">
+          </div>
+        ) : (
+          <div className="space-y-3 mt-4">
+            <div className="grid grid-cols-1 gap-6">
               <div className="space-y-2">
-                <Input
-                  id="amount"
-                  type="number"
-                  placeholder="Enter amount"
-                  value={customAmount}
-                  onChange={(e) => {
-                    setCustomAmount(e.target.value);
-                    setAmount(e.target.value);
-                  }}
-                  min="0"
-                  step="0.01"
-                  className="h-10"
-                />
+                <Label htmlFor="amount">Choose an amount</Label>
+                <div className="grid grid-cols-3 gap-3">
+                  {["1", "20", "100", "200", "500", "Customize"].map(
+                    (presetAmount) => (
+                      <Button
+                        key={presetAmount}
+                        variant={
+                          presetAmount === "Customize"
+                            ? isCustomizeSelected
+                              ? "default"
+                              : "outline"
+                            : amount === presetAmount
+                            ? "default"
+                            : "outline"
+                        }
+                        size="sm"
+                        onClick={() => {
+                          if (presetAmount === "Customize") {
+                            setIsCustomizeSelected(true);
+                            setAmount("");
+                            setCustomAmount("");
+                          } else {
+                            setIsCustomizeSelected(false);
+                            setAmount(presetAmount);
+                            setCustomAmount(presetAmount);
+                          }
+                        }}
+                        className="h-10"
+                      >
+                        {presetAmount === "Customize"
+                          ? "Customize"
+                          : `${presetAmount} USDC`}
+                      </Button>
+                    )
+                  )}
+                </div>
               </div>
 
-              <div className="space-y-2 mt-2">
-                <Label htmlFor="destination-address">Destination Address</Label>
-                {!stellarConnected ? (
-                  <StellarAddressInput
-                    value={destinationStellarAddress}
-                    onChange={onDestinationAddressChange}
-                    placeholder="Enter your Stellar address"
-                  />
-                ) : (
+              {isCustomizeSelected && (
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="space-y-2">
+                    <Input
+                      id="amount"
+                      type="number"
+                      placeholder="Enter amount"
+                      value={customAmount}
+                      onChange={(e) => {
+                        setCustomAmount(e.target.value);
+                        setAmount(e.target.value);
+                      }}
+                      min="0"
+                      step="0.01"
+                      className="h-10"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {stellarConnected && (
+                <div className="space-y-2 mt-2">
+                  <Label htmlFor="destination-address">
+                    Destination Address
+                  </Label>
                   <div className="text-sm text-muted-foreground">
                     {stellarAddress}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
               {amount && parseFloat(amount) > 0 && intentConfig && ableToPay ? (
                 <div className="space-y-3">
@@ -194,7 +213,7 @@ export function StellarDeposit({
               )}
             </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
