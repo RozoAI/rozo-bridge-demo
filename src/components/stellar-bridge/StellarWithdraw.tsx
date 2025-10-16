@@ -355,6 +355,32 @@ export function StellarWithdraw({
                   </div>
                 )}
 
+              {amount && parseFloat(amount) > 1000 && (
+                <div className="p-4 rounded-lg border bg-yellow-50 dark:bg-yellow-950/20">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="font-medium text-yellow-900 dark:text-yellow-100">
+                        Bridge Amount Limit
+                      </p>
+                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                        The bridge amount is upper bounded $1000 for alpha. Join
+                        our Discord (
+                        <a
+                          href="https://discord.com/invite/EfWejgTbuU"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
+                        >
+                          here
+                        </a>
+                        ) for updates to unlock the limits.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-center gap-4 font-mono">
                 <Tooltip>
                   <TooltipTrigger>

@@ -1,4 +1,4 @@
-import { StellarBridge } from "@/components/StellarBridge";
+import { StellarBridge } from "@/components/stellar-bridge/StellarBridge";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

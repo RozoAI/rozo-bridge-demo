@@ -3,14 +3,14 @@
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { ContactSupport } from "./ContactSupport";
-import { PoweredBy } from "./PoweredBy";
-import { StellarDeposit } from "./stellar-bridge/StellarDeposit";
-import { StellarWithdraw } from "./stellar-bridge/StellarWithdraw";
-import { StellarWalletConnect } from "./StellarWalletConnect";
-import { SupportedBy } from "./SupportedBy";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { useEffect, useState } from "react";
+import { ContactSupport } from "../ContactSupport";
+import { PoweredBy } from "../PoweredBy";
+import { StellarWalletConnect } from "../StellarWalletConnect";
+import { SupportedBy } from "../SupportedBy";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { StellarDeposit } from "./StellarDeposit";
+import { StellarWithdraw } from "./StellarWithdraw";
 
 type FlowType = "deposit" | "withdraw";
 
@@ -22,6 +22,11 @@ export function StellarBridge() {
   const [customAmount, setCustomAmount] = useState("");
   const [baseAddress, setBaseAddress] = useState("");
   const [amountError, setAmountError] = useState("");
+
+  useEffect(() => {
+    setAmount("");
+    setCustomAmount("");
+  }, [flowType]);
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
