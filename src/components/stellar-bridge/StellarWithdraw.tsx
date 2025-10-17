@@ -9,7 +9,7 @@ import { useStellarTransfer } from "@/hooks/use-stellar-transfer";
 import {
   AlertTriangle,
   ArrowDownLeft,
-  Clock,
+  ChevronDown,
   DollarSign,
   Fuel,
   Loader2,
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { USDC } from "../icons/chains";
 
 interface StellarWithdrawProps {
   amount: string;
@@ -46,6 +47,7 @@ export function StellarWithdraw({
   const [toastId, setToastId] = useState<string | number | null>(null);
   const [withdrawLoading, setWithdrawLoading] = useState(false);
   const [isCustomizeSelected, setIsCustomizeSelected] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleWithdraw = async () => {
     if (toastId) {
@@ -163,16 +165,16 @@ export function StellarWithdraw({
   ]);
 
   return (
-    <Card className="gap-2">
-      <CardHeader>
+    <Card className="gap-2 p-6">
+      <CardHeader className="p-0">
         <CardTitle className="flex items-center justify-between gap-2">
           <div className="font-bold flex items-center gap-2">
-            <ArrowDownLeft className="size-4" />
+            <ArrowDownLeft className="size-5" />
             Withdraw to Base
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6 px-0">
         {!stellarConnected ? (
           <div className="text-center py-8">
             <div className="text-muted-foreground mb-4">
@@ -183,11 +185,16 @@ export function StellarWithdraw({
             </div>
           </div>
         ) : (
-          <div className="space-y-3 mt-4">
-            <div className="grid grid-cols-1 gap-6">
-              <div className="space-y-2">
+          <div className="space-y-4 mt-3">
+            <div className="grid grid-cols-1 gap-8">
+              <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <Label htmlFor="withdraw-amount">Choose an amount</Label>
+                  <Label
+                    htmlFor="withdraw-amount"
+                    className="text-base font-medium"
+                  >
+                    Choose an amount
+                  </Label>
                   {stellarConnected && trustlineStatus.exists && (
                     <span className="text-xs text-muted-foreground">
                       Balance:{" "}
@@ -199,7 +206,7 @@ export function StellarWithdraw({
                     </span>
                   )}
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-4">
                   {["1", "20", "100", "200", "500", "Customize"].map(
                     (presetAmount) => {
                       const maxBalance =
@@ -225,7 +232,7 @@ export function StellarWithdraw({
                               ? "default"
                               : "outline"
                           }
-                          size="sm"
+                          size="lg"
                           onClick={() => {
                             if (presetAmount === "Customize") {
                               setIsCustomizeSelected(true);
@@ -240,7 +247,7 @@ export function StellarWithdraw({
                             }
                           }}
                           disabled={isDisabled}
-                          className="h-10"
+                          className="h-14 text-sm font-medium"
                         >
                           {presetAmount === "Customize"
                             ? "Customize"
@@ -380,21 +387,42 @@ export function StellarWithdraw({
                 </div>
               )}
 
-              <div className="flex items-center justify-center gap-4 font-mono">
-                <span className="flex items-center gap-1 text-muted-foreground">
-                  <Fuel className="size-4" />
-                  <span className="text-sm">Limited time free</span>
-                </span>
-                <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Clock className="size-4" />
-                  &lt;10s
-                </span>
-              </div>
+              {amount && parseFloat(amount) > 0 && (
+                <div className="flex items-center justify-center">
+                  <div className="bg-muted/50 rounded-lg p-3 border">
+                    <button
+                      onClick={() => setIsExpanded(!isExpanded)}
+                      className="flex items-center gap-3 text-sm font-mono"
+                    >
+                      <p className="flex items-center gap-1">
+                        <USDC className="size-4" />
+                        <span>{amount} USDC</span>
+                        <span className="text-muted-foreground">in</span>
+                        <span>~10s</span>
+                      </p>
+                      <ChevronDown
+                        className={`size-4 text-muted-foreground transition-transform ${
+                          isExpanded ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {isExpanded && (
+                      <div className="mt-3 pt-3 border-t border-muted-foreground/20">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Fuel className="size-4" />
+                          <span>Limited time free</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <Button
                 onClick={handleWithdraw}
                 size="lg"
-                className="w-full"
+                className="w-full py-6"
                 disabled={
                   !ableToWithdraw ||
                   !stellarConnected ||

@@ -11,11 +11,18 @@ import {
   IntentPayConfig,
 } from "@/lib/intentPay";
 import { RozoPayButton, useRozoPayUI } from "@rozoai/intent-pay";
-import { AlertTriangle, ArrowUpRight, Clock, Fuel, Wallet } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  ChevronDown,
+  Fuel,
+  Wallet,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { getAddress } from "viem";
 import ChainsStacked from "../chains-stacked";
+import { USDC } from "../icons/chains";
 
 interface StellarDepositProps {
   destinationStellarAddress: string;
@@ -30,6 +37,7 @@ export function StellarDeposit({
   const [customAmount, setCustomAmount] = useState("");
   const [isCustomizeSelected, setIsCustomizeSelected] = useState(false);
   const [intentConfig, setIntentConfig] = useState<IntentPayConfig | null>();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const {
     stellarConnected,
@@ -106,16 +114,16 @@ export function StellarDeposit({
   ]);
 
   return (
-    <Card className="gap-2">
-      <CardHeader>
+    <Card className="gap-2 p-6">
+      <CardHeader className="p-0">
         <CardTitle className="flex items-center justify-between gap-2">
           <div className="font-bold flex items-center gap-2">
-            <ArrowUpRight className="size-4" />
+            <ArrowUpRight className="size-5" />
             Deposit from any chains
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6 px-0">
         {!stellarConnected ? (
           <div className="text-center py-8">
             <div className="text-muted-foreground mb-4">
@@ -126,11 +134,13 @@ export function StellarDeposit({
             </div>
           </div>
         ) : (
-          <div className="space-y-3 mt-4">
-            <div className="grid grid-cols-1 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="amount">Choose an amount</Label>
-                <div className="grid grid-cols-3 gap-3">
+          <div className="space-y-4 mt-3">
+            <div className="grid grid-cols-1 gap-8">
+              <div className="space-y-3">
+                <Label htmlFor="amount" className="text-base font-medium">
+                  Choose an amount
+                </Label>
+                <div className="grid grid-cols-3 gap-4">
                   {["1", "20", "100", "200", "500", "Customize"].map(
                     (presetAmount) => (
                       <Button
@@ -144,7 +154,7 @@ export function StellarDeposit({
                             ? "default"
                             : "outline"
                         }
-                        size="sm"
+                        size="lg"
                         onClick={() => {
                           if (presetAmount === "Customize") {
                             setIsCustomizeSelected(true);
@@ -156,7 +166,7 @@ export function StellarDeposit({
                             setCustomAmount(presetAmount);
                           }
                         }}
-                        className="h-10"
+                        className="h-14 text-sm font-medium"
                       >
                         {presetAmount === "Customize"
                           ? "Customize"
@@ -266,16 +276,37 @@ export function StellarDeposit({
                 </div>
               )}
 
-              <div className="flex items-center justify-center gap-4 font-mono">
-                <span className="flex items-center gap-1 text-muted-foreground">
-                  <Fuel className="size-4" />
-                  <span className="text-sm">Limited time free</span>
-                </span>
-                <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Clock className="size-4" />
-                  &lt;10s
-                </span>
-              </div>
+              {amount && parseFloat(amount) > 0 && (
+                <div className="flex items-center justify-center">
+                  <div className="bg-muted/50 rounded-lg p-3 border">
+                    <button
+                      onClick={() => setIsExpanded(!isExpanded)}
+                      className="flex items-center gap-3 text-sm font-mono"
+                    >
+                      <p className="flex items-center gap-1">
+                        <USDC className="size-4" />
+                        <span>{amount} USDC</span>
+                        <span className="text-muted-foreground">in</span>
+                        <span>~10s</span>
+                      </p>
+                      <ChevronDown
+                        className={`size-4 text-muted-foreground transition-transform ${
+                          isExpanded ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {isExpanded && (
+                      <div className="mt-3 pt-3 border-t border-muted-foreground/20">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Fuel className="size-4" />
+                          <span>Limited time free</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {amount && parseFloat(amount) > 0 && intentConfig && ableToPay ? (
                 <div className="space-y-3">
@@ -303,8 +334,12 @@ export function StellarDeposit({
                     showProcessingPayout
                   >
                     {({ show }) => (
-                      <Button onClick={show} size="lg" className="w-full">
-                        <Wallet className="size-4" />
+                      <Button
+                        onClick={show}
+                        size="lg"
+                        className="w-full py-6 text-lg"
+                      >
+                        <Wallet className="size-5" />
                         Pay with USDC{" "}
                         <ChainsStacked excludeChains={["stellar"]} />
                       </Button>
@@ -312,8 +347,8 @@ export function StellarDeposit({
                   </RozoPayButton.Custom>
                 </div>
               ) : (
-                <Button size="lg" className="w-full" disabled={!ableToPay}>
-                  <Wallet className="size-4" />
+                <Button size="lg" className="w-full py-6" disabled={!ableToPay}>
+                  <Wallet className="size-4 " />
                   Pay with USDC <ChainsStacked excludeChains={["stellar"]} />
                 </Button>
               )}
