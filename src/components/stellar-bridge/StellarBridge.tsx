@@ -1,5 +1,6 @@
 "use client";
 
+import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { cn } from "@/lib/utils";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import Image from "next/image";
@@ -8,6 +9,7 @@ import { useEffect, useState } from "react";
 import { PoweredBy } from "../PoweredBy";
 import { StellarWalletConnect } from "../StellarWalletConnect";
 import { StellarDeposit } from "./StellarDeposit";
+import { StellarHistory } from "./StellarHistory";
 import { StellarWithdraw } from "./StellarWithdraw";
 
 type FlowType = "deposit" | "withdraw";
@@ -20,6 +22,8 @@ export function StellarBridge() {
   const [customAmount, setCustomAmount] = useState("");
   const [baseAddress, setBaseAddress] = useState("");
   const [amountError, setAmountError] = useState("");
+
+  const { stellarConnected, stellarAddress } = useStellarWallet();
 
   useEffect(() => {
     setAmount("");
@@ -91,23 +95,32 @@ export function StellarBridge() {
       {/* Content Area - More Responsive Width */}
       <div className="flex w-full flex-1">
         <div className="mx-auto w-full max-w-2xl px-4">
-          {flowType === "deposit" ? (
-            <StellarDeposit
-              destinationStellarAddress={destinationStellarAddress}
-              onDestinationAddressChange={setDestinationStellarAddress}
-            />
-          ) : (
-            <StellarWithdraw
-              amount={amount}
-              onAmountChange={setAmount}
-              customAmount={customAmount}
-              onCustomAmountChange={setCustomAmount}
-              baseAddress={baseAddress}
-              onBaseAddressChange={setBaseAddress}
-              amountError={amountError}
-              onAmountErrorChange={setAmountError}
-            />
-          )}
+          <div className="space-y-6">
+            {flowType === "deposit" ? (
+              <StellarDeposit
+                destinationStellarAddress={destinationStellarAddress}
+                onDestinationAddressChange={setDestinationStellarAddress}
+              />
+            ) : (
+              <StellarWithdraw
+                amount={amount}
+                onAmountChange={setAmount}
+                customAmount={customAmount}
+                onCustomAmountChange={setCustomAmount}
+                baseAddress={baseAddress}
+                onBaseAddressChange={setBaseAddress}
+                amountError={amountError}
+                onAmountErrorChange={setAmountError}
+              />
+            )}
+
+            {/* Transaction History - Only show if wallet is connected */}
+            {stellarConnected && stellarAddress && (
+              <div className="bg-card border-border rounded-lg border p-6">
+                <StellarHistory walletAddress={stellarAddress} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -234,8 +247,6 @@ export function StellarBridge() {
 
           <PoweredBy />
         </div>
-
-        {/* <SupportedBy /> */}
       </div>
     </div>
   );

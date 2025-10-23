@@ -58,6 +58,7 @@ interface StellarWalletContextType {
   // XLM balance management
   xlmBalance: XlmBalance;
   checkXlmBalance: () => Promise<void>;
+  selectedWallet: ISupportedWallet | null;
 }
 
 const StellarWalletContext = createContext<
@@ -82,6 +83,9 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
   const [stellarKit, setStellarKit] = useState<StellarWalletsKit | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [stellarWalletName, setStellarWalletName] = useState<string | null>(
+    null
+  );
+  const [selectedWallet, setSelectedWallet] = useState<ISupportedWallet | null>(
     null
   );
 
@@ -363,6 +367,7 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
         onWalletSelected: async (option: ISupportedWallet) => {
           console.log("Selected wallet:", option.name, option.id);
           stellarKit.setWallet(option.id);
+          setSelectedWallet(option);
 
           // Add a small delay for mobile wallets to initialize
           if (isMobile) {
@@ -440,7 +445,6 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
     setStellarAddress("");
     setStellarConnected(false);
     clearStoredWallet(); // Clear stored wallet data on disconnect
-    toast.info("Disconnected from Stellar wallet");
   };
 
   return (
@@ -461,6 +465,7 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
         // XLM balance management
         xlmBalance,
         checkXlmBalance,
+        selectedWallet,
       }}
     >
       {children}

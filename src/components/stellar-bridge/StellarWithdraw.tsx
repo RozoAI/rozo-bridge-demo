@@ -1,11 +1,13 @@
 "use client";
 
+import { TokenAmountInput } from "@/components/TokenAmountInput";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { useStellarTransfer } from "@/hooks/use-stellar-transfer";
+import { useToastQueue } from "@/hooks/use-toast-queue";
 import {
   AlertTriangle,
   ArrowDownLeft,
@@ -16,8 +18,8 @@ import {
   Wallet,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { USDC } from "../icons/chains";
+import { saveStellarHistory } from "./utils/history";
 
 interface StellarWithdrawProps {
   amount: string;
@@ -40,20 +42,36 @@ export function StellarWithdraw({
   amountError,
   onAmountErrorChange,
 }: StellarWithdrawProps) {
-  const { stellarConnected, trustlineStatus, checkTrustline, checkXlmBalance } =
-    useStellarWallet();
+  const {
+    stellarConnected,
+    stellarAddress,
+    trustlineStatus,
+    checkTrustline,
+    checkXlmBalance,
+  } = useStellarWallet();
   const { transfer, step, paymentId, setStep } = useStellarTransfer();
+  const {
+    currentToastId,
+    updateCurrentToast,
+    completeCurrentToast,
+    errorCurrentToast,
+    dismissCurrentToast,
+    clearQueue,
+  } = useToastQueue();
 
-  const [toastId, setToastId] = useState<string | number | null>(null);
   const [withdrawLoading, setWithdrawLoading] = useState(false);
   const [isCustomizeSelected, setIsCustomizeSelected] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleWithdraw = async () => {
-    if (toastId) {
-      toast.dismiss(toastId);
-      setToastId(null);
-    }
+    // Clear any existing toasts and reset queue
+    clearQueue();
+
+    // Reset step state to ensure clean start
+    setStep(null);
+
+    // Small delay to ensure previous toast is dismissed
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     try {
       setWithdrawLoading(true);
@@ -69,21 +87,27 @@ export function StellarWithdraw({
         checkTrustline();
         checkXlmBalance();
       } else {
-        // Dismiss the loading toast and show error
-        if (toastId) {
-          toast.dismiss(toastId);
-          setToastId(null);
-        }
-        toast.error("Failed to withdraw");
+        errorCurrentToast("Failed to withdraw");
+        setStep("error");
       }
     } catch (error) {
-      // Dismiss the loading toast and show error
-      if (toastId) {
-        toast.dismiss(toastId);
-        setToastId(null);
-      }
-      toast.error("Failed to withdraw");
       console.error("Failed to withdraw:", error);
+
+      // Extract meaningful error message
+      let errorMessage = "Failed to withdraw";
+      if (error && typeof error === "object" && "message" in error) {
+        const axiosError = error as any;
+        if (axiosError.response?.status === 504) {
+          errorMessage = "Request timeout - please try again";
+        } else if (axiosError.response?.status) {
+          errorMessage = `Request failed (${axiosError.response.status}) - please try again`;
+        } else if (axiosError.message) {
+          errorMessage = `Withdrawal failed: ${axiosError.message}`;
+        }
+      }
+
+      errorCurrentToast(errorMessage);
+      setStep("error");
     } finally {
       setWithdrawLoading(false);
     }
@@ -91,29 +115,41 @@ export function StellarWithdraw({
 
   useEffect(() => {
     if (step) {
-      if (!toastId) {
-        const id = toast.loading("Preparing...", {
+      if (!currentToastId) {
+        updateCurrentToast("Preparing...", {
           position: "bottom-center",
         });
-        setToastId(id);
         return;
       }
 
       if (step === "create-payment") {
-        toast.loading("📝 Creating payment order...", {
-          id: toastId,
-        });
+        updateCurrentToast("📝 Creating payment order...");
       } else if (step === "sign-transaction") {
-        toast.loading("✍️ Sign transaction in wallet", {
-          id: toastId,
-        });
+        updateCurrentToast("✍️ Sign transaction in wallet");
       } else if (step === "submit-transaction") {
-        toast.loading("🚀 Sending to Stellar network...", {
-          id: toastId,
-        });
+        updateCurrentToast("🚀 Sending to Stellar network...");
       } else if (step === "success") {
-        toast.success("Withdrawal complete!", {
-          id: toastId,
+        // Save transaction history when withdrawal is successful
+        if (stellarAddress && paymentId) {
+          try {
+            saveStellarHistory(
+              stellarAddress,
+              paymentId,
+              amount,
+              baseAddress,
+              "withdraw",
+              "Stellar",
+              "Base"
+            );
+
+            // Dispatch custom event to update history
+            window.dispatchEvent(new CustomEvent("stellar-payment-completed"));
+          } catch (error) {
+            console.error("Failed to save transaction history:", error);
+          }
+        }
+
+        completeCurrentToast("Withdrawal complete!", {
           action: paymentId
             ? {
                 label: "See Receipt",
@@ -123,8 +159,7 @@ export function StellarWithdraw({
                     `https://invoice.rozo.ai/receipt?id=${paymentId}`,
                     "_blank"
                   );
-                  toast.dismiss(toastId);
-                  setToastId(null);
+                  dismissCurrentToast();
                   setStep(null);
                 },
               }
@@ -132,23 +167,30 @@ export function StellarWithdraw({
           duration: Infinity,
           closeButton: true,
           description: "Funds incoming to Base. Please check your wallet soon.",
-          dismissible: false,
+          dismissible: true,
         });
       } else if (step === "error") {
-        toast.error("❌ Withdrawal failed. Please try again.", {
-          id: toastId,
-        });
-        setToastId(null);
+        errorCurrentToast("❌ Withdrawal failed. Please try again.");
         setStep(null);
       }
     } else {
-      if (toastId) {
-        toast.dismiss(toastId);
-        setToastId(null);
+      if (currentToastId) {
+        dismissCurrentToast();
         setStep(null);
       }
     }
-  }, [step, toastId, paymentId]);
+  }, [
+    step,
+    currentToastId,
+    paymentId,
+    updateCurrentToast,
+    completeCurrentToast,
+    errorCurrentToast,
+    dismissCurrentToast,
+    stellarAddress,
+    amount,
+    baseAddress,
+  ]);
 
   const ableToWithdraw = useMemo(() => {
     return (
@@ -262,15 +304,11 @@ export function StellarWithdraw({
               {isCustomizeSelected && (
                 <div className="grid grid-cols-1 gap-3">
                   <div className="space-y-2">
-                    <Input
-                      id="withdraw-amount"
-                      type="number"
-                      placeholder="Enter amount"
-                      value={customAmount}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        onCustomAmountChange(value);
-                        onAmountChange(value);
+                    <TokenAmountInput
+                      amount={customAmount}
+                      setAmount={(value) => {
+                        onCustomAmountChange(value || "");
+                        onAmountChange(value || "");
 
                         // Validate amount against balance
                         if (
@@ -300,11 +338,15 @@ export function StellarWithdraw({
                           onAmountErrorChange("");
                         }
                       }}
-                      min="0"
-                      step="0.01"
+                      isLoading={false}
+                      token={{
+                        symbol: "USDC",
+                        decimals: 6,
+                      }}
                       className={`h-10 ${
                         amountError ? "border-red-500 focus:border-red-500" : ""
                       }`}
+                      disabled={!stellarConnected || !trustlineStatus.exists}
                     />
                     {amountError && (
                       <p className="text-xs text-red-500">{amountError}</p>
@@ -361,7 +403,7 @@ export function StellarWithdraw({
                   </div>
                 )}
 
-              {amount && parseFloat(amount) > 1000 && (
+              {amount && parseFloat(amount) > 500 && (
                 <div className="p-4 rounded-lg border bg-yellow-50 dark:bg-yellow-950/20">
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
@@ -370,7 +412,7 @@ export function StellarWithdraw({
                         Bridge Amount Limit
                       </p>
                       <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                        The bridge amount is upper bounded $1000 for alpha. Join
+                        The bridge amount is upper bounded $500 for alpha. Join
                         our Discord (
                         <a
                           href="https://discord.com/invite/EfWejgTbuU"

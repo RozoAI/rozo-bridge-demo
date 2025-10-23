@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import {
@@ -10,6 +9,7 @@ import {
   DEFAULT_INTENT_PAY_CONFIG,
   IntentPayConfig,
 } from "@/lib/intentPay";
+import { PaymentCompletedEvent } from "@rozoai/intent-common";
 import { RozoPayButton, useRozoPayUI } from "@rozoai/intent-pay";
 import {
   AlertTriangle,
@@ -23,6 +23,8 @@ import { toast } from "sonner";
 import { getAddress } from "viem";
 import ChainsStacked from "../chains-stacked";
 import { USDC } from "../icons/chains";
+import { TokenAmountInput } from "../TokenAmountInput";
+import { saveStellarHistory } from "./utils/history";
 
 interface StellarDepositProps {
   destinationStellarAddress: string;
@@ -180,17 +182,17 @@ export function StellarDeposit({
               {isCustomizeSelected && (
                 <div className="grid grid-cols-1 gap-3">
                   <div className="space-y-2">
-                    <Input
-                      id="amount"
-                      type="number"
-                      placeholder="Enter amount"
-                      value={customAmount}
-                      onChange={(e) => {
-                        setCustomAmount(e.target.value);
-                        setAmount(e.target.value);
+                    <TokenAmountInput
+                      token={{
+                        symbol: "USDC",
+                        decimals: 6,
                       }}
-                      min="0"
-                      step="0.01"
+                      amount={customAmount}
+                      setAmount={(value) => {
+                        setCustomAmount(value || "");
+                        setAmount(value || "");
+                      }}
+                      isLoading={false}
                       className="h-10"
                     />
                   </div>
@@ -250,7 +252,7 @@ export function StellarDeposit({
                   </div>
                 )}
 
-              {amount && parseFloat(amount) > 1000 && (
+              {amount && parseFloat(amount) > 500 && (
                 <div className="p-4 rounded-lg border bg-yellow-50 dark:bg-yellow-950/20">
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
@@ -259,7 +261,7 @@ export function StellarDeposit({
                         Bridge Amount Limit
                       </p>
                       <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                        The bridge amount is upper bounded $1000 for alpha. Join
+                        The bridge amount is upper bounded $500 for alpha. Join
                         our Discord (
                         <a
                           href="https://discord.com/invite/EfWejgTbuU"
@@ -321,12 +323,40 @@ export function StellarDeposit({
                     toStellarAddress={intentConfig.toStellarAddress}
                     toUnits={intentConfig.toUnits}
                     metadata={intentConfig.metadata as never}
-                    onPaymentCompleted={() => {
+                    onPaymentCompleted={(
+                      paymentData: PaymentCompletedEvent
+                    ) => {
                       toast.success(`Deposit is in progress! 🎉`, {
                         description:
                           "Your USDC is being transferred. It may take a moment to appear in your wallet.",
                         duration: 5000,
                       });
+
+                      // Save transaction history
+                      if (stellarAddress && paymentData.rozoPaymentId) {
+                        try {
+                          saveStellarHistory(
+                            stellarAddress,
+                            paymentData.rozoPaymentId,
+                            amount,
+                            stellarAddress || destinationStellarAddress,
+                            "deposit",
+                            "Base", // From Base (or other chains)
+                            "Stellar" // To Stellar
+                          );
+
+                          // Dispatch custom event to update history
+                          window.dispatchEvent(
+                            new CustomEvent("stellar-payment-completed")
+                          );
+                        } catch (error) {
+                          console.error(
+                            "Failed to save transaction history:",
+                            error
+                          );
+                        }
+                      }
+
                       setAmount("");
                       checkTrustline(); // Refresh USDC balance
                       checkXlmBalance(); // Refresh XLM balance
