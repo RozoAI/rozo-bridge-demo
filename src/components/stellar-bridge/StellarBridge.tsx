@@ -44,6 +44,20 @@ export function StellarBridge() {
         <StellarWalletConnect />
       </div>
 
+      <div className="mx-auto mb-4 flex w-fit max-w-xl items-center justify-center gap-2 rounded-lg">
+        <div className="text-center text-sm sm:text-base">
+          <p
+            className="text-sm leading-relaxed"
+            style={{ color: "var(--color-warning-text)" }}
+          >
+            This bridge is currently in <b>Alpha Phase</b> and may contain
+            unexpected behavior. Start with a small amount first to verify
+            everything works as expected. Use at your own risk. Please contact
+            our team if you encounter issues.
+          </p>
+        </div>
+      </div>
+
       {/* Fixed Tab List - Truly Fixed Position */}
       <div className="sticky top-8 z-10 flex w-full justify-center mb-6 bg-background/80 backdrop-blur-sm">
         <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground grid grid-cols-2">
@@ -101,12 +115,6 @@ export function StellarBridge() {
       <div className="container mx-auto w-full mt-auto">
         <div className="flex flex-col md:flex-row items-center md:justify-between gap-4 py-6">
           <div className="flex flex-row items-center gap-4">
-            <Link
-              href="/faq"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              FAQ
-            </Link>
             <div className="flex">
               <a
                 href="https://x.com/i/broadcasts/1djGXWBqdVdKZ"
@@ -208,6 +216,14 @@ export function StellarBridge() {
                 ></path>
               </svg>
             </a>
+
+            <Link
+              href="/faq"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              FAQs
+            </Link>
+
             <Link
               href="/terms"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
