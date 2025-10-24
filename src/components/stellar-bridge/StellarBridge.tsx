@@ -62,7 +62,7 @@ export function StellarBridge() {
       </div>
 
       {/* Fixed Tab List - Truly Fixed Position */}
-      <div className="sticky top-8 z-10 flex w-full justify-center mb-6 bg-background/80 backdrop-blur-sm">
+      <div className="flex w-full justify-center mb-6 bg-background/80 backdrop-blur-sm">
         <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground grid grid-cols-2">
           <button
             className={cn(
@@ -93,7 +93,7 @@ export function StellarBridge() {
 
       {/* Content Area - More Responsive Width */}
       <div className="flex w-full flex-1">
-        <div className="mx-auto w-full max-w-2xl px-4">
+        <div className="mx-auto w-full max-w-2xl">
           <div className="space-y-6">
             {flowType === "deposit" ? (
               <StellarDeposit
@@ -231,14 +231,14 @@ export function StellarBridge() {
 
             <Link
               href="/faq"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               FAQs
             </Link>
 
             <Link
               href="/terms"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               Terms of Service
             </Link>
