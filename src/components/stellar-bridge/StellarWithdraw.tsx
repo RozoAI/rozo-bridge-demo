@@ -63,6 +63,27 @@ export function StellarWithdraw({
   const [isCustomizeSelected, setIsCustomizeSelected] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // Auto-select Customize when balance is below 1 USDC
+  useEffect(() => {
+    if (
+      stellarConnected &&
+      trustlineStatus.exists &&
+      parseFloat(trustlineStatus.balance) < 1
+    ) {
+      setIsCustomizeSelected(true);
+      onAmountChange("");
+      onCustomAmountChange("");
+      onAmountErrorChange("");
+    }
+  }, [
+    stellarConnected,
+    trustlineStatus.exists,
+    trustlineStatus.balance,
+    onAmountChange,
+    onCustomAmountChange,
+    onAmountErrorChange,
+  ]);
+
   const handleWithdraw = async () => {
     // Clear any existing toasts and reset queue
     clearQueue();

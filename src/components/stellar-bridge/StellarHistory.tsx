@@ -123,7 +123,7 @@ export const StellarHistory = ({ walletAddress }: StellarHistoryProps) => {
         <p className="text-muted-foreground text-sm">
           No transaction history yet
         </p>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-muted-foreground text-xs text-center">
           Your completed deposits and withdrawals will appear here
         </p>
       </div>
@@ -161,9 +161,6 @@ export const StellarHistory = ({ walletAddress }: StellarHistoryProps) => {
                 <span className="text-foreground text-sm font-medium">
                   {item.amount} USDC
                 </span>
-                <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">
-                  {item.type === "deposit" ? "Deposit" : "Withdraw"}
-                </span>
               </div>
               <span className="text-muted-foreground text-xs">
                 {formatDate(item.completedAt)}
@@ -180,7 +177,7 @@ export const StellarHistory = ({ walletAddress }: StellarHistoryProps) => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground text-xs">
-                    ID: {item.paymentId}
+                    ID: {formatAddress(item.paymentId)}
                   </span>
                 </div>
               </div>

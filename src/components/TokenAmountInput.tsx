@@ -32,7 +32,7 @@ export const TokenAmountInput = ({
 
   return (
     <Input
-      className={cn("w-full bg-transparent text-3xl leading-none", className)}
+      className={cn("w-full bg-transparent leading-none", className)}
       type="text"
       value={amount !== undefined ? formatNumber(amount) : ""}
       onChange={(e) => {
