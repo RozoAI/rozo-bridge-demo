@@ -3,12 +3,15 @@
 import { checkUSDCTrustline, USDC_ASSET } from "@/lib/stellar";
 import { setupCryptoPolyfill } from "@/utils/polyfills";
 import {
+  AlbedoModule,
   allowAllModules,
+  HotWalletModule,
   ISupportedWallet,
   LOBSTR_ID,
   StellarWalletsKit,
   WalletNetwork,
   XBULL_ID,
+  xBullModule,
 } from "@creit.tech/stellar-wallets-kit";
 import {
   WalletConnectAllowedMethods,
@@ -268,19 +271,21 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
     const walletConnectProjectId =
       process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ||
       "7440dd8acf85933ffcc775ec6675d4a9";
-
+    console.log("isMobile", isMobile);
     const modules = [
-      ...allowAllModules(),
+      ...(!isMobile
+        ? allowAllModules()
+        : [new AlbedoModule(), new HotWalletModule(), new xBullModule()]),
       new WalletConnectModule({
         url:
           typeof window !== "undefined"
             ? window.location.origin
-            : "https://rozo-bridge-demo.vercel.app",
+            : "https://bridge.rozo.ai",
         projectId: walletConnectProjectId,
         method: WalletConnectAllowedMethods.SIGN,
         description: "Rozo Bridge - Transfer USDC across chains",
         name: "Rozo Bridge",
-        icons: ["/logos/USDC.png"],
+        icons: ["https://bridge.rozo.ai/rozo-logo.png"],
         network: WalletNetwork.PUBLIC,
       }),
     ];

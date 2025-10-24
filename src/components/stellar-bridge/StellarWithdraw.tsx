@@ -210,8 +210,8 @@ export function StellarWithdraw({
     <Card className="gap-2 p-6">
       <CardHeader className="p-0">
         <CardTitle className="flex items-center justify-between gap-2">
-          <div className="font-bold flex items-center gap-2">
-            <ArrowDownLeft className="size-5" />
+          <div className="text-sm sm:text-lg font-bold flex items-center gap-2">
+            <ArrowDownLeft className="size-4 sm:size-5" />
             Withdraw to Base
           </div>
         </CardTitle>
@@ -220,8 +220,8 @@ export function StellarWithdraw({
         {!stellarConnected ? (
           <div className="text-center py-8">
             <div className="text-muted-foreground mb-4">
-              <Wallet className="size-12 mx-auto mb-3 opacity-50" />
-              <p className="text-lg font-medium">
+              <Wallet className="size-10 sm:size-12 mx-auto mb-3 opacity-50" />
+              <p className="text-sm sm:text-lg font-medium">
                 Connect your Stellar wallet for withdrawal
               </p>
             </div>

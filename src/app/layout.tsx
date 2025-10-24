@@ -35,13 +35,13 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         <CryptoPolyfillSetup />
-        <Providers>
-          <StellarWalletProvider>
+        <StellarWalletProvider>
+          <Providers>
             {children}
             <CryptoLogoPreloader />
             <IntercomInitializer appId="kpfdpai7" />
-          </StellarWalletProvider>
-        </Providers>
+          </Providers>
+        </StellarWalletProvider>
       </body>
     </html>
   );

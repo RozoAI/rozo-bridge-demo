@@ -54,10 +54,9 @@ export function StellarBridge() {
             className="text-sm leading-relaxed"
             style={{ color: "var(--color-warning-text)" }}
           >
-            This bridge is currently in <b>Alpha Phase</b> and may contain
-            unexpected behavior. Start with a small amount first to verify
-            everything works as expected. Use at your own risk. Please contact
-            our team if you encounter issues.
+            This bridge is currently in Alpha Phase and may contain unexpected
+            behavior. Start with a small amount. Please contact us if you
+            encounter issues.
           </p>
         </div>
       </div>
