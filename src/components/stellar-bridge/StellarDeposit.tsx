@@ -28,12 +28,10 @@ import { saveStellarHistory } from "./utils/history";
 
 interface StellarDepositProps {
   destinationStellarAddress: string;
-  onDestinationAddressChange: (address: string) => void;
 }
 
 export function StellarDeposit({
   destinationStellarAddress,
-  onDestinationAddressChange,
 }: StellarDepositProps) {
   const [amount, setAmount] = useState("");
   const [customAmount, setCustomAmount] = useState("");

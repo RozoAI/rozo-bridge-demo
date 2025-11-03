@@ -76,15 +76,9 @@ export const connectWalletConnect = async (): Promise<SessionTypes.Struct> => {
   const client = await initWalletConnect();
 
   try {
-    const { uri, approval } = await client.connect({
+    const { approval } = await client.connect({
       requiredNamespaces: WALLETCONNECT_CONFIG.requiredNamespaces,
     });
-
-    if (uri) {
-      // Show QR code or handle deep linking
-      console.log("WalletConnect URI:", uri);
-      // You can use this URI to show QR code or trigger deep linking
-    }
 
     const session = await approval();
     return session;
@@ -119,8 +113,6 @@ export const disconnectWalletConnect = async (topic: string): Promise<void> => {
         message: "User disconnected",
       },
     });
-
-    console.log(`WalletConnect session ${topic} disconnected successfully`);
   } catch (error) {
     console.error("Failed to disconnect WalletConnect:", error);
     // Don't throw error to prevent blocking the disconnect flow

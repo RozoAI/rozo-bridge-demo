@@ -271,7 +271,7 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
     const walletConnectProjectId =
       process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ||
       "7440dd8acf85933ffcc775ec6675d4a9";
-    console.log("isMobile", isMobile);
+
     const modules = [
       ...(!isMobile
         ? allowAllModules()
@@ -327,13 +327,11 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
           setStellarAddress(address);
           setStellarConnected(true);
           setStellarWalletName(storedData.walletName);
-          console.log("Auto-reconnected to", storedData.walletName);
         } else {
           // Address mismatch or connection failed, clear stored data
           clearStoredWallet();
         }
       } catch (error) {
-        console.log("Auto-reconnect failed:", error);
         // Clear stored data if auto-reconnect fails
         clearStoredWallet();
       }
@@ -370,7 +368,6 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
       await stellarKit.openModal({
         modalTitle: "Select Stellar Wallet",
         onWalletSelected: async (option: ISupportedWallet) => {
-          console.log("Selected wallet:", option.name, option.id);
           stellarKit.setWallet(option.id);
           setSelectedWallet(option);
 
@@ -381,7 +378,6 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
 
           try {
             const publicKey = await stellarKit.getAddress();
-            console.log("Stellar publicKey response:", publicKey);
 
             // Handle both string and object response formats
             const address =

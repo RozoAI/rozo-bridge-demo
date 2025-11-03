@@ -112,21 +112,12 @@ export const useStellarWallet = create<StellarWalletStore>()(
             await disconnectWalletConnect(wcSession);
           }
 
-          // For Freighter and xBull wallets, we just clear the state
-          // as these wallets don't have explicit disconnect methods
-          if (walletId === "freighter" || walletId === "xbull") {
-            // Clear any wallet-specific state if needed
-            console.log(`Disconnecting ${walletId} wallet`);
-          }
-
           // Always reset to default state regardless of wallet type
           set({
             ...defaultStellarWalletState,
             wcSession: null,
             error: null,
           });
-
-          console.log("Stellar wallet disconnected successfully");
         } catch (error) {
           console.error("Failed to disconnect Stellar wallet:", error);
           // Even if disconnect fails, we should clear the local state

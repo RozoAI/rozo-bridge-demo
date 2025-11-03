@@ -1,15 +1,15 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Badge } from '@/components/ui/badge'
-import { ArrowRight, Star, Wallet } from 'lucide-react'
-import { StellarWalletConnect } from './StellarWalletConnect'
-import { StellarAddressInput } from './StellarAddressInput'
-import { StellarMemoInput } from './StellarMemoInput'
-import { useStellarWalletConnection } from '@/store/stellar'
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { useStellarWalletConnection } from "@/store/stellar";
+import { ArrowRight, Star, Wallet } from "lucide-react";
+import { useState } from "react";
+import { StellarAddressInput } from "./StellarAddressInput";
+import { StellarMemoInput } from "./StellarMemoInput";
+import { StellarWalletConnect } from "./StellarWalletConnect";
 // Define MemoType enum locally to avoid dependency issues
 enum MemoType {
   MemoNone = 0,
@@ -20,28 +20,19 @@ enum MemoType {
 }
 
 export function StellarBridgeDemo() {
-  const [destinationAddress, setDestinationAddress] = useState('')
-  const [memo, setMemo] = useState<{ type: MemoType; value: string } | null>(null)
-  const [amount, setAmount] = useState('')
-  
-  const { isConnected, publicKey, network } = useStellarWalletConnection()
+  const [destinationAddress, setDestinationAddress] = useState("");
+  const [memo, setMemo] = useState<{ type: MemoType; value: string } | null>(
+    null
+  );
+  const [amount, setAmount] = useState("");
+
+  const { isConnected, publicKey, network } = useStellarWalletConnection();
 
   const handleTransfer = async () => {
     if (!isConnected || !destinationAddress || !amount) {
-      return
+      return;
     }
-
-    console.log('Stellar Transfer:', {
-      from: publicKey,
-      to: destinationAddress,
-      amount,
-      memo,
-      network,
-    })
-
-    // Here you would integrate with your bridge logic
-    // For example, using the Stellar SDK to create and sign transactions
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -52,7 +43,8 @@ export function StellarBridgeDemo() {
           Stellar Bridge Demo
         </h2>
         <p className="text-muted-foreground">
-          Complete Stellar wallet integration with memo validation and muxed address support
+          Complete Stellar wallet integration with memo validation and muxed
+          address support
         </p>
       </div>
 
@@ -72,9 +64,11 @@ export function StellarBridgeDemo() {
               </p>
               {isConnected && (
                 <div className="mt-2 space-y-1">
-                  <p className="text-sm font-medium">Connected: {publicKey?.slice(0, 8)}...{publicKey?.slice(-8)}</p>
+                  <p className="text-sm font-medium">
+                    Connected: {publicKey?.slice(0, 8)}...{publicKey?.slice(-8)}
+                  </p>
                   <Badge variant="outline" className="text-xs">
-                    {network === 'PUBLIC' ? 'Mainnet' : 'Testnet'}
+                    {network === "PUBLIC" ? "Mainnet" : "Testnet"}
                   </Badge>
                 </div>
               )}
@@ -109,7 +103,8 @@ export function StellarBridgeDemo() {
           <CardHeader>
             <CardTitle>Stellar Transfer</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Send assets with automatic memo validation and muxed address support
+              Send assets with automatic memo validation and muxed address
+              support
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -155,29 +150,36 @@ export function StellarBridgeDemo() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">From:</span>
-                  <span className="font-mono">{publicKey?.slice(0, 8)}...{publicKey?.slice(-8)}</span>
+                  <span className="font-mono">
+                    {publicKey?.slice(0, 8)}...{publicKey?.slice(-8)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">To:</span>
                   <span className="font-mono">
-                    {destinationAddress ? `${destinationAddress.slice(0, 8)}...${destinationAddress.slice(-8)}` : 'Not set'}
+                    {destinationAddress
+                      ? `${destinationAddress.slice(
+                          0,
+                          8
+                        )}...${destinationAddress.slice(-8)}`
+                      : "Not set"}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Amount:</span>
-                  <span>{amount || '0'} XLM</span>
+                  <span>{amount || "0"} XLM</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Network:</span>
-                  <span>{network === 'PUBLIC' ? 'Mainnet' : 'Testnet'}</span>
+                  <span>{network === "PUBLIC" ? "Mainnet" : "Testnet"}</span>
                 </div>
                 {memo && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Memo:</span>
                     <span className="font-mono text-xs">
-                      {memo.type === MemoType.MemoText && 'TEXT: '}
-                      {memo.type === MemoType.MemoId && 'ID: '}
-                      {memo.type === MemoType.MemoHash && 'HASH: '}
+                      {memo.type === MemoType.MemoText && "TEXT: "}
+                      {memo.type === MemoType.MemoId && "ID: "}
+                      {memo.type === MemoType.MemoHash && "HASH: "}
                       {memo.value}
                     </span>
                   </div>
@@ -188,7 +190,9 @@ export function StellarBridgeDemo() {
             {/* Transfer Button */}
             <Button
               onClick={handleTransfer}
-              disabled={!destinationAddress || !amount || parseFloat(amount) <= 0}
+              disabled={
+                !destinationAddress || !amount || parseFloat(amount) <= 0
+              }
               className="w-full"
               size="lg"
             >
@@ -237,5 +241,5 @@ export function StellarBridgeDemo() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

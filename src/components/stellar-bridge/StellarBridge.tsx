@@ -98,7 +98,6 @@ export function StellarBridge() {
             {flowType === "deposit" ? (
               <StellarDeposit
                 destinationStellarAddress={destinationStellarAddress}
-                onDestinationAddressChange={setDestinationStellarAddress}
               />
             ) : (
               <StellarWithdraw

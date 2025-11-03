@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "^4.3.7",
-    "@creit.tech/stellar-wallets-kit": "^1.8.0",
+    "@creit.tech/stellar-wallets-kit": "^1.9.5",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-label": "^2.1.7",
@@ -29,7 +29,7 @@
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@rozoai/intent-common": "0.0.25-beta.1",
-    "@rozoai/intent-pay": "0.0.32-beta.4",
+    "@rozoai/intent-pay": "0.0.32-beta.16",
     "@stellar/stellar-sdk": "^14.1.0",
     "@tailwindcss/postcss": "^4.1.12",
     "@tanstack/react-query": "^5.85.5",
