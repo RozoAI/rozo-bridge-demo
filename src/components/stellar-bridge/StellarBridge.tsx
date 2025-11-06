@@ -10,7 +10,7 @@ import { PoweredBy } from "../PoweredBy";
 import { StellarWalletConnect } from "../StellarWalletConnect";
 import { StellarDeposit } from "./StellarDeposit";
 import { StellarHistory } from "./StellarHistory";
-import { StellarWithdraw } from "./StellarWithdraw";
+import { StellarWithdrawSep24 } from "./StellarWithdrawSep24";
 
 type FlowType = "deposit" | "withdraw";
 
@@ -100,7 +100,8 @@ export function StellarBridge() {
                 destinationStellarAddress={destinationStellarAddress}
               />
             ) : (
-              <StellarWithdraw
+              <StellarWithdrawSep24
+                anchorDomain="testanchor.stellar.org"
                 amount={amount}
                 onAmountChange={setAmount}
                 customAmount={customAmount}
