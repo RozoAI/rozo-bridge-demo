@@ -17,6 +17,7 @@ import {
   Loader2,
   Wallet,
 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { USDC } from "../icons/chains";
 import { saveStellarHistory } from "./utils/history";
@@ -32,6 +33,8 @@ interface StellarWithdrawProps {
   onAmountErrorChange: (error: string) => void;
 }
 
+const AMOUNT_LIMIT = 500;
+
 export function StellarWithdraw({
   amount,
   onAmountChange,
@@ -42,6 +45,9 @@ export function StellarWithdraw({
   amountError,
   onAmountErrorChange,
 }: StellarWithdrawProps) {
+  const searchParams = useSearchParams();
+  const isAdmin = searchParams.get("admin") === "rozo";
+
   const {
     stellarConnected,
     stellarAddress,
@@ -424,7 +430,7 @@ export function StellarWithdraw({
                   </div>
                 )}
 
-              {amount && parseFloat(amount) > 500 && (
+              {!isAdmin && amount && parseFloat(amount) > AMOUNT_LIMIT && (
                 <div className="p-4 rounded-lg border bg-yellow-50 dark:bg-yellow-950/20">
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
@@ -433,8 +439,8 @@ export function StellarWithdraw({
                         Bridge Amount Limit
                       </p>
                       <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                        The bridge amount is upper bounded $500 for alpha. Join
-                        our Discord (
+                        The bridge amount is upper bounded ${AMOUNT_LIMIT} for
+                        alpha. Join our Discord (
                         <a
                           href="https://discord.com/invite/EfWejgTbuU"
                           target="_blank"
