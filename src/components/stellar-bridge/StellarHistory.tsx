@@ -171,8 +171,7 @@ export const StellarHistory = ({ walletAddress }: StellarHistoryProps) => {
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground text-xs">
-                    {item.type === "deposit" ? "To" : "From"}:{" "}
-                    {formatAddress(item.destinationAddress)}
+                    To: {formatAddress(item.destinationAddress)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
