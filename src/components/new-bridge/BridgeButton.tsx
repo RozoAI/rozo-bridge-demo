@@ -64,7 +64,7 @@ export function BridgeButton({
       onClick={handleClick}
       disabled={isDisabled}
       size="lg"
-      className="w-full h-14 text-lg rounded-2xl"
+      className="w-full h-12 sm:h-14 text-base sm:text-lg rounded-2xl"
     >
       {loading && <Loader2 className="size-5 animate-spin" />}
       {buttonText}

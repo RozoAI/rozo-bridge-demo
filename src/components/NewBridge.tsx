@@ -120,19 +120,21 @@ export function NewBridge() {
 
   return (
     <div className="w-full max-w-xl mx-auto">
-      <div className="rounded-3xl p-8 bg-neutral-900 border border-neutral-800">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Bridge</h1>
+      <div className="rounded-3xl p-4 sm:p-6 md:p-8 bg-neutral-900 border border-neutral-800">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold">Bridge</h1>
           {stellarConnected && hasHistory ? (
             <Button
               variant="secondary"
               size="sm"
               onClick={() => setHistoryDialogOpen(true)}
+              className="text-xs sm:text-sm h-8 sm:h-9"
             >
-              Show History
+              <Clock className="size-3 sm:size-4 sm:mr-2" />
+              <span>Show History</span>
             </Button>
           ) : stellarConnected ? (
-            <span className="text-sm text-muted-foreground">
+            <span className="text-xs sm:text-sm text-muted-foreground">
               No history found
             </span>
           ) : null}
@@ -167,7 +169,7 @@ export function NewBridge() {
 
         {/* Base Address Input - Only show when withdrawing (Stellar to Base) */}
         {isSwitched && (
-          <div className="mt-6">
+          <div className="mt-4 sm:mt-6">
             <BaseAddressInput
               value={baseAddress}
               onChange={setBaseAddress}
@@ -179,14 +181,14 @@ export function NewBridge() {
 
         {/* Trustline Warning - Only show when depositing (Base to Stellar) */}
         {!isSwitched && (
-          <div className="mt-6">
+          <div className="mt-4 sm:mt-6">
             <TrustlineWarning />
           </div>
         )}
 
         {/* Amount Limit Warning */}
         {(exceedsLimit || depositExceedsLimit) && (
-          <div className="mt-6">
+          <div className="mt-4 sm:mt-6">
             <AmountLimitWarning limit={AMOUNT_LIMIT} />
           </div>
         )}
@@ -195,16 +197,16 @@ export function NewBridge() {
           amount &&
           parseFloat(amount) > 0 &&
           !(exceedsLimit || depositExceedsLimit) && (
-            <div className="mt-6 flex items-center gap-2 text-sm text-neutral-500">
-              <Clock className="size-4" />
+            <div className="mt-4 sm:mt-6 flex items-center gap-2 text-xs sm:text-sm text-neutral-500">
+              <Clock className="size-3 sm:size-4" />
               <p>Estimated time: ~2 minutes</p>
             </div>
           )}
 
         {/* Connect Wallet / Bridge Button */}
-        <div className="mt-6">
+        <div className="mt-4 sm:mt-6">
           {!stellarConnected ? (
-            <StellarWalletConnect className="w-full h-14 text-lg" />
+            <StellarWalletConnect className="w-full h-12 sm:h-14 text-base sm:text-lg" />
           ) : isSwitched ? (
             // Withdraw Button (Stellar to Base)
             <BridgeButton

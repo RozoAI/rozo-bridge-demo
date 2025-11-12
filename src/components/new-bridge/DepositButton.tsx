@@ -24,7 +24,7 @@ export function DepositButton({
     return (
       <Button
         size="lg"
-        className="w-full h-14 text-lg rounded-2xl cursor-not-allowed"
+        className="w-full h-12 sm:h-14 text-base sm:text-lg rounded-2xl cursor-not-allowed"
         disabled
       >
         {isPreparingConfig && <Loader2 className="size-5 animate-spin" />}
@@ -53,7 +53,7 @@ export function DepositButton({
           <Button
             onClick={show}
             size="lg"
-            className="w-full h-14 text-lg rounded-2xl cursor-pointer"
+            className="w-full h-12 sm:h-14 text-base sm:text-lg rounded-2xl cursor-pointer"
           >
             Bridge USDC to Stellar
           </Button>

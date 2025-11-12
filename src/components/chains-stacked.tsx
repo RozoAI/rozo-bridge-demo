@@ -12,17 +12,17 @@ export default function ChainsStacked({
 }) {
   // CSS classes for logo container
   const logoContainerClasses =
-    "border overflow-hidden rounded-full border-background";
+    "border overflow-hidden rounded-full border-background w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center";
 
   const chainLogos: ChainLogo[] = [
-    { type: "base", component: <Base width={24} height={24} /> },
-    { type: "polygon", component: <Polygon width={24} height={24} /> },
-    { type: "solana", component: <Solana width={24} height={24} /> },
-    { type: "stellar", component: <Stellar width={24} height={24} /> },
+    { type: "base", component: <Base className="w-full h-full" /> },
+    { type: "polygon", component: <Polygon className="w-full h-full" /> },
+    { type: "solana", component: <Solana className="w-full h-full" /> },
+    { type: "stellar", component: <Stellar className="w-full h-full" /> },
   ];
 
   return (
-    <div className="-space-x-2 flex *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background">
+    <div className="-space-x-1.5 sm:-space-x-2 flex *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background">
       {chainLogos
         .filter((logo) => !excludeChains?.includes(logo.type))
         .map((logo, index) => (

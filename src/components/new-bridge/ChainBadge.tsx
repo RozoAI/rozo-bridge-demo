@@ -23,10 +23,10 @@ export function ChainBadge({ isSwitched, isFrom }: ChainBadgeProps) {
   };
 
   return (
-    <div className="flex items-center gap-2 bg-neutral-700/50 rounded-full px-3 py-2 border border-neutral-600/30">
-      <USDC width={24} height={24} />
-      <span className="font-medium text-white text-sm">USDC</span>
-      <span className="text-neutral-400 text-xs">on</span>
+    <div className="flex items-center gap-1.5 sm:gap-2 bg-neutral-700/50 rounded-full px-2 sm:px-3 py-1.5 sm:py-2 border border-neutral-600/30">
+      <USDC className="w-5 h-5 sm:w-6 sm:h-6" />
+      <span className="font-medium text-white text-xs sm:text-sm">USDC</span>
+      <span className="text-neutral-400 text-[10px] sm:text-xs">on</span>
       <ChainsStacked excludeChains={getExcludeChains()} />
     </div>
   );

@@ -16,7 +16,7 @@ export default function NewPageLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col py-8 px-8">
+    <div className="min-h-screen flex flex-col p-4 sm:p-8">
       {/* Header */}
       <div className="container mx-auto flex items-start justify-between h-min mb-8">
         <div className="flex items-center gap-2">
