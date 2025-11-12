@@ -96,13 +96,12 @@ export function StellarWalletConnect({ className }: StellarWalletConnectProps) {
   if (!stellarConnected) {
     return (
       <Button
-        variant="outline"
         className={cn("flex items-center gap-2", className)}
         onClick={handleConnect}
         disabled={stellarConnecting}
       >
         <Wallet className="size-4" />
-        {stellarConnecting ? "Connecting..." : "Connect Stellar"}
+        {stellarConnecting ? "Connecting..." : "Connect Wallet"}
       </Button>
     );
   }
@@ -110,10 +109,7 @@ export function StellarWalletConnect({ className }: StellarWalletConnectProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          className={cn("flex items-center gap-2", className)}
-        >
+        <Button className={cn("flex items-center gap-2", className)}>
           <div className="flex items-center gap-2">
             <Wallet className="size-4" />
             <span className="font-mono">
