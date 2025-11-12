@@ -22,7 +22,11 @@ export function DepositButton({
   // Show disabled button while preparing config
   if (isPreparingConfig || !intentConfig) {
     return (
-      <Button size="lg" className="w-full h-14 text-lg rounded-2xl" disabled>
+      <Button
+        size="lg"
+        className="w-full h-14 text-lg rounded-2xl cursor-not-allowed"
+        disabled
+      >
         {isPreparingConfig && <Loader2 className="size-5 animate-spin" />}
         {isPreparingConfig ? "Preparing..." : "Bridge USDC to Stellar"}
       </Button>
@@ -49,7 +53,7 @@ export function DepositButton({
           <Button
             onClick={show}
             size="lg"
-            className="w-full h-14 text-lg rounded-2xl"
+            className="w-full h-14 text-lg rounded-2xl cursor-pointer"
           >
             Bridge USDC to Stellar
           </Button>
@@ -60,7 +64,11 @@ export function DepositButton({
 
   // Show disabled button when not ready
   return (
-    <Button size="lg" className="w-full h-14 text-lg rounded-2xl" disabled>
+    <Button
+      size="lg"
+      className="w-full h-14 text-lg rounded-2xl cursor-not-allowed"
+      disabled
+    >
       Bridge USDC to Stellar
     </Button>
   );

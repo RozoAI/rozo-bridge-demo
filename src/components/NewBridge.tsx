@@ -1,8 +1,9 @@
 "use client";
 
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
+import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AmountLimitWarning } from "./new-bridge/AmountLimitWarning";
 import { BaseAddressInput } from "./new-bridge/BaseAddressInput";
 import { BridgeButton } from "./new-bridge/BridgeButton";
@@ -10,14 +11,17 @@ import { BridgeCard } from "./new-bridge/BridgeCard";
 import { BridgeSwapButton } from "./new-bridge/BridgeSwapButton";
 import { ChainBadge } from "./new-bridge/ChainBadge";
 import { DepositButton } from "./new-bridge/DepositButton";
+import { HistoryDialog } from "./new-bridge/HistoryDialog";
 import { useDepositLogic } from "./new-bridge/hooks/useDepositLogic";
 import { useWithdrawLogic } from "./new-bridge/hooks/useWithdrawLogic";
 import { StellarBalanceCard } from "./new-bridge/StellarBalanceCard";
 import { TokenAmountInput } from "./new-bridge/TokenAmountInput";
 import { TrustlineWarning } from "./new-bridge/TrustlineWarning";
+import { getStellarHistoryForWallet } from "./stellar-bridge/utils/history";
 import { StellarWalletConnect } from "./StellarWalletConnect";
+import { Button } from "./ui/button";
 
-const AMOUNT_LIMIT = 500;
+export const AMOUNT_LIMIT = 500;
 
 export function NewBridge() {
   const [amount, setAmount] = useState<string | undefined>("");
@@ -26,11 +30,39 @@ export function NewBridge() {
   const [baseAddress, setBaseAddress] = useState<string>("");
   const [addressError, setAddressError] = useState<string>("");
   const [withdrawLoading, setWithdrawLoading] = useState(false);
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
 
   const searchParams = useSearchParams();
   const isAdmin = searchParams.get("admin") === "rozo";
 
-  const { stellarConnected, trustlineStatus } = useStellarWallet();
+  const { stellarConnected, stellarAddress, trustlineStatus } =
+    useStellarWallet();
+
+  // State to track history updates
+  const [historyUpdateTrigger, setHistoryUpdateTrigger] = useState(0);
+
+  // Check if there's any history for the current wallet
+  const hasHistory = useMemo(() => {
+    if (!stellarConnected || !stellarAddress) return false;
+    const history = getStellarHistoryForWallet(stellarAddress);
+    return history.length > 0;
+  }, [stellarConnected, stellarAddress, historyUpdateTrigger]);
+
+  // Listen for history updates
+  useEffect(() => {
+    const handleHistoryUpdate = () => {
+      setHistoryUpdateTrigger((prev) => prev + 1);
+    };
+
+    window.addEventListener("stellar-payment-completed", handleHistoryUpdate);
+
+    return () => {
+      window.removeEventListener(
+        "stellar-payment-completed",
+        handleHistoryUpdate
+      );
+    };
+  }, []);
 
   // Use withdraw logic hook (when isSwitched = true)
   const { handleWithdraw } = useWithdrawLogic({
@@ -89,6 +121,23 @@ export function NewBridge() {
   return (
     <div className="w-full max-w-xl mx-auto">
       <div className="rounded-3xl p-8 bg-neutral-900 border border-neutral-800">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Bridge</h1>
+          {stellarConnected && hasHistory ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setHistoryDialogOpen(true)}
+            >
+              Show History
+            </Button>
+          ) : stellarConnected ? (
+            <span className="text-sm text-muted-foreground">
+              No history found
+            </span>
+          ) : null}
+        </div>
+
         {/* Stellar USDC Balance */}
         <StellarBalanceCard />
 
@@ -142,6 +191,16 @@ export function NewBridge() {
           </div>
         )}
 
+        {stellarConnected &&
+          amount &&
+          parseFloat(amount) > 0 &&
+          !(exceedsLimit || depositExceedsLimit) && (
+            <div className="mt-6 flex items-center gap-2 text-sm text-neutral-500">
+              <Clock className="size-4" />
+              <p>Estimated time: ~2 minutes</p>
+            </div>
+          )}
+
         {/* Connect Wallet / Bridge Button */}
         <div className="mt-6">
           {!stellarConnected ? (
@@ -169,6 +228,15 @@ export function NewBridge() {
           )}
         </div>
       </div>
+
+      {/* History Dialog */}
+      {stellarConnected && stellarAddress && (
+        <HistoryDialog
+          open={historyDialogOpen}
+          onOpenChange={setHistoryDialogOpen}
+          walletAddress={stellarAddress}
+        />
+      )}
     </div>
   );
 }

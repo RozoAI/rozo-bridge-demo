@@ -50,7 +50,7 @@ export function TokenAmountInput({
         value={amount !== undefined ? formatNumber(amount) : ""}
         onChange={(e) => handleAmountChange(e.target.value)}
         placeholder="0"
-        className="text-5xl font-light text-white w-full outline-none bg-transparent placeholder:text-neutral-600"
+        className="text-5xl font-medium text-white w-full outline-none bg-transparent placeholder:text-neutral-600"
       />
       <div className="text-sm text-neutral-500 mt-2">{getUsdValue()}</div>
     </div>

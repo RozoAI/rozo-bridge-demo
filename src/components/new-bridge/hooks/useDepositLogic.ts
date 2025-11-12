@@ -1,5 +1,6 @@
 "use client";
 
+import { AMOUNT_LIMIT } from "@/components/NewBridge";
 import { saveStellarHistory } from "@/components/stellar-bridge/utils/history";
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import {
@@ -55,7 +56,8 @@ export function useDepositLogic({
     (!!stellarAddress || !!destinationStellarAddress) &&
     trustlineStatus.exists &&
     !!intentConfig &&
-    !isPreparingConfig;
+    !isPreparingConfig &&
+    parseFloat(amount) <= AMOUNT_LIMIT;
 
   // Debounced config preparation
   useEffect(() => {
@@ -90,10 +92,11 @@ export function useDepositLogic({
           toStellarAddress: stellarAddress || destinationStellarAddress,
           toUnits: amount,
           metadata: {
+            intent: "Deposit",
             items: [
               {
                 name: "Rozo Bridge",
-                description: "Deposit USDC to Stellar",
+                description: "Bridge USDC to Stellar",
               },
             ],
           },

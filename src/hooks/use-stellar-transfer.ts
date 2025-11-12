@@ -68,8 +68,8 @@ export const useStellarTransfer = () => {
               intent: "Withdraw",
               items: [
                 {
-                  name: "Withdraw",
-                  description: "Transfer USDC Stellar to Base",
+                  name: "Rozo Bridge",
+                  description: "Bridge USDC to Stellar",
                 },
               ],
               payer: {},
