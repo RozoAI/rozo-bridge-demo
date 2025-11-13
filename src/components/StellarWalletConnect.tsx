@@ -101,7 +101,7 @@ export function StellarWalletConnect({ className }: StellarWalletConnectProps) {
         disabled={stellarConnecting}
       >
         <Wallet className="size-4" />
-        {stellarConnecting ? "Connecting..." : "Connect Wallet"}
+        {stellarConnecting ? "Connecting..." : "Connect Stellar Wallet"}
       </Button>
     );
   }
