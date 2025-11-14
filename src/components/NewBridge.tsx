@@ -226,8 +226,7 @@ export function NewBridge() {
             </div>
           )}
 
-        {stellarConnected &&
-          amount &&
+        {amount &&
           parseFloat(amount) > 0 &&
           !(exceedsLimit || depositExceedsLimit) && (
             <div className="flex items-center justify-between">
