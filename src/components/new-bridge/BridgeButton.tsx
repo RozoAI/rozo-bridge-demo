@@ -3,6 +3,7 @@
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { AMOUNT_LIMIT } from "../NewBridge";
 import { Button } from "../ui/button";
 
 interface BridgeButtonProps {
@@ -15,8 +16,6 @@ interface BridgeButtonProps {
   onWithdraw: () => void;
   onDeposit: () => void;
 }
-
-const AMOUNT_LIMIT = 500;
 
 export function BridgeButton({
   amount,

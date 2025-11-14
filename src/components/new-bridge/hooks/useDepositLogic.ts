@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { getAddress } from "viem";
 
 interface UseDepositLogicProps {
+  isAdmin: boolean;
   amount: string | undefined;
   destinationStellarAddress?: string;
 }
@@ -24,6 +25,7 @@ const DEBOUNCE_DELAY = 500; // 500ms debounce
 export function useDepositLogic({
   amount,
   destinationStellarAddress,
+  isAdmin = false,
 }: UseDepositLogicProps) {
   const {
     stellarConnected,
@@ -57,7 +59,7 @@ export function useDepositLogic({
     trustlineStatus.exists &&
     !!intentConfig &&
     !isPreparingConfig &&
-    parseFloat(amount) <= AMOUNT_LIMIT;
+    (isAdmin || parseFloat(amount) <= AMOUNT_LIMIT);
 
   // Debounced config preparation
   useEffect(() => {

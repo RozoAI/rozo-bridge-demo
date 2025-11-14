@@ -75,6 +75,8 @@ export function NewBridge() {
   const { intentConfig, ableToPay, isPreparingConfig, handlePaymentCompleted } =
     useDepositLogic({
       amount,
+      isAdmin,
+      destinationStellarAddress: stellarAddress,
     });
 
   const handleSwitch = () => {
@@ -187,7 +189,7 @@ export function NewBridge() {
         )}
 
         {/* Amount Limit Warning */}
-        {(exceedsLimit || depositExceedsLimit) && (
+        {!isAdmin && (exceedsLimit || depositExceedsLimit) && (
           <div className="mt-4 sm:mt-6">
             <AmountLimitWarning limit={AMOUNT_LIMIT} />
           </div>
