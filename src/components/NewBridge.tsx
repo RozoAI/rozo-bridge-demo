@@ -113,6 +113,29 @@ export function NewBridge() {
     }
   }, [amount, isSwitched, stellarConnected, trustlineStatus.balance]);
 
+  const feeValue = useMemo(() => {
+    if (!amount || amount === "" || parseFloat(amount) === 0) {
+      return 0;
+    }
+    const calculatedFee = Math.max(parseFloat(amount) * 0.001, 0.1);
+    return parseFloat(calculatedFee.toFixed(2));
+  }, [amount]);
+
+  const fees = useMemo(() => {
+    if (feeValue === 0) {
+      return "0 USDC";
+    }
+    return feeValue + " USDC";
+  }, [feeValue]);
+
+  const toAmountWithFees = useMemo(() => {
+    if (!amount || amount === "" || parseFloat(amount) === 0) {
+      return "";
+    }
+    const result = Math.max(parseFloat(amount) - feeValue, 0);
+    return String(parseFloat(result.toFixed(2)));
+  }, [amount, feeValue]);
+
   // Check if amount exceeds limit (only for withdraw)
   const exceedsLimit =
     !isAdmin && isSwitched && amount && parseFloat(amount) > AMOUNT_LIMIT;
@@ -166,13 +189,18 @@ export function NewBridge() {
 
         {/* To Section */}
         <BridgeCard>
-          <TokenAmountInput label="To" amount={amount} setAmount={setAmount} />
+          <TokenAmountInput
+            label="To"
+            amount={toAmountWithFees}
+            setAmount={setAmount}
+            readonly={true}
+          />
           <ChainBadge isSwitched={isSwitched} isFrom={false} />
         </BridgeCard>
 
         {/* Base Address Input - Only show when withdrawing (Stellar to Base) */}
         {isSwitched && (
-          <div className="mt-4 sm:mt-6">
+          <div className="my-4 sm:my-6">
             <BaseAddressInput
               value={baseAddress}
               onChange={setBaseAddress}
@@ -190,19 +218,27 @@ export function NewBridge() {
         )}
 
         {/* Amount Limit Warning */}
-        {!isAdmin && (exceedsLimit || depositExceedsLimit) && (
-          <div className="mt-4 sm:mt-6">
-            <AmountLimitWarning limit={AMOUNT_LIMIT} />
-          </div>
-        )}
+        {stellarConnected &&
+          !isAdmin &&
+          (exceedsLimit || depositExceedsLimit) && (
+            <div className="mt-4 sm:mt-6">
+              <AmountLimitWarning limit={AMOUNT_LIMIT} />
+            </div>
+          )}
 
         {stellarConnected &&
           amount &&
           parseFloat(amount) > 0 &&
           !(exceedsLimit || depositExceedsLimit) && (
-            <div className="mt-4 sm:mt-6 flex items-center gap-2 text-xs sm:text-sm text-neutral-500">
-              <Clock className="size-3 sm:size-4" />
-              <p>Estimated time: ~2 minutes</p>
+            <div className="flex items-center justify-between">
+              <div className="text-xs sm:text-sm">
+                <p className="text-neutral-500">Fees:</p>
+                <b>{fees}</b>
+              </div>
+              <div className="text-xs sm:text-sm text-right">
+                <p className="text-neutral-500">Estimated time:</p>
+                <b>{"<"}1 minute</b>
+              </div>
             </div>
           )}
 
@@ -214,6 +250,7 @@ export function NewBridge() {
             // Withdraw Button (Stellar to Base)
             <BridgeButton
               amount={amount}
+              toAmount={toAmountWithFees}
               baseAddress={baseAddress}
               isSwitched={isSwitched}
               balanceError={balanceError}
@@ -226,7 +263,11 @@ export function NewBridge() {
             // Deposit Button (Base to Stellar)
             <DepositButton
               intentConfig={intentConfig}
-              ableToPay={ableToPay}
+              ableToPay={
+                ableToPay &&
+                toAmountWithFees !== "" &&
+                parseFloat(toAmountWithFees) > 0
+              }
               isPreparingConfig={isPreparingConfig}
               onPaymentCompleted={handlePaymentCompleted}
             />

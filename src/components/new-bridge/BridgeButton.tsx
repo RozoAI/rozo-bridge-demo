@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 
 interface BridgeButtonProps {
   amount: string | undefined;
+  toAmount: string;
   baseAddress: string;
   isSwitched: boolean;
   balanceError: string;
@@ -19,6 +20,7 @@ interface BridgeButtonProps {
 
 export function BridgeButton({
   amount,
+  toAmount,
   baseAddress,
   isSwitched,
   balanceError,
@@ -47,6 +49,9 @@ export function BridgeButton({
       !amount ||
       amount === "" ||
       parseFloat(amount) <= 0 ||
+      !toAmount ||
+      toAmount === "" ||
+      parseFloat(toAmount) <= 0 ||
       !baseAddress ||
       !!addressError ||
       !!balanceError ||

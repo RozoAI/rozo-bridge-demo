@@ -6,12 +6,14 @@ interface TokenAmountInputProps {
   label: string;
   amount: string | undefined;
   setAmount: (v: string | undefined) => void;
+  readonly?: boolean;
 }
 
 export function TokenAmountInput({
   label,
   amount,
   setAmount,
+  readonly = false,
 }: TokenAmountInputProps) {
   // Remove all non-numeric characters except decimal point
   const cleanValue = (value: string): string => {
@@ -51,6 +53,7 @@ export function TokenAmountInput({
         onChange={(e) => handleAmountChange(e.target.value)}
         placeholder="0"
         className="text-5xl font-medium text-white w-full outline-none bg-transparent placeholder:text-neutral-600"
+        readOnly={readonly}
       />
       <div className="text-sm text-neutral-500 mt-2">{getUsdValue()}</div>
     </div>
