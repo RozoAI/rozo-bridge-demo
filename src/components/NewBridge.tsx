@@ -69,6 +69,7 @@ export function NewBridge() {
     amount,
     baseAddress,
     onLoadingChange: setWithdrawLoading,
+    isAdmin,
   });
 
   // Use deposit logic hook (when isSwitched = false)

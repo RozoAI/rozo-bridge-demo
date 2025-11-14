@@ -19,7 +19,7 @@ type Payload = {
   payload: { amount: string; address: string };
 };
 
-export const useStellarTransfer = () => {
+export const useStellarTransfer = (isAdmin: boolean = false) => {
   const { stellarAddress: publicKey, server, stellarKit } = useStellarWallet();
 
   const [step, setStep] = useState<TransferStep>(null);
@@ -51,7 +51,9 @@ export const useStellarTransfer = () => {
           setStep("create-payment");
 
           const paymentPayload: PaymentPayload = {
-            appId: DEFAULT_INTENT_PAY_CONFIG.appId,
+            appId: isAdmin
+              ? "rozoBridgeStellarAdmin"
+              : DEFAULT_INTENT_PAY_CONFIG.appId,
             display: {
               intent: "Withdraw",
               paymentValue: payload.payload.amount,

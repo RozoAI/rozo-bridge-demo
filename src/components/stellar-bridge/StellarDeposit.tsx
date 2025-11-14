@@ -90,7 +90,9 @@ export function StellarDeposit({
     const fetchConfig = async () => {
       if (ableToPay) {
         const config = {
-          appId: DEFAULT_INTENT_PAY_CONFIG.appId,
+          appId: isAdmin
+            ? "rozoBridgeStellarAdmin"
+            : DEFAULT_INTENT_PAY_CONFIG.appId,
           toChain: BASE_USDC.chainId,
           toAddress: getAddress("0x0000000000000000000000000000000000000000"),
           toToken: getAddress(BASE_USDC.token),

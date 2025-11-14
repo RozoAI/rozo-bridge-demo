@@ -55,7 +55,7 @@ export function StellarWithdraw({
     checkTrustline,
     checkXlmBalance,
   } = useStellarWallet();
-  const { transfer, step, paymentId, setStep } = useStellarTransfer();
+  const { transfer, step, paymentId, setStep } = useStellarTransfer(isAdmin);
   const {
     currentToastId,
     updateCurrentToast,

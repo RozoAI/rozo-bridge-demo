@@ -87,7 +87,9 @@ export function useDepositLogic({
     debounceTimerRef.current = setTimeout(async () => {
       try {
         const config: IntentPayConfig = {
-          appId: DEFAULT_INTENT_PAY_CONFIG.appId,
+          appId: isAdmin
+            ? "rozoBridgeStellarAdmin"
+            : DEFAULT_INTENT_PAY_CONFIG.appId,
           toChain: BASE_USDC.chainId,
           toAddress: getAddress("0x0000000000000000000000000000000000000000"),
           toToken: getAddress(BASE_USDC.token),

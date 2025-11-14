@@ -1,25 +1,27 @@
 "use client";
 
+import { saveStellarHistory } from "@/components/stellar-bridge/utils/history";
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { useStellarTransfer } from "@/hooks/use-stellar-transfer";
 import { useToastQueue } from "@/hooks/use-toast-queue";
-import { saveStellarHistory } from "@/components/stellar-bridge/utils/history";
 import { useEffect, useRef } from "react";
 
 interface UseWithdrawLogicProps {
   amount: string | undefined;
   baseAddress: string;
   onLoadingChange: (loading: boolean) => void;
+  isAdmin?: boolean;
 }
 
 export function useWithdrawLogic({
   amount,
   baseAddress,
   onLoadingChange,
+  isAdmin = false,
 }: UseWithdrawLogicProps) {
   const { stellarAddress, checkTrustline, checkXlmBalance } =
     useStellarWallet();
-  const { transfer, step, paymentId, setStep } = useStellarTransfer();
+  const { transfer, step, paymentId, setStep } = useStellarTransfer(isAdmin);
   const {
     currentToastId,
     updateCurrentToast,
@@ -173,4 +175,3 @@ export function useWithdrawLogic({
 
   return { handleWithdraw };
 }
-
