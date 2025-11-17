@@ -1,6 +1,7 @@
 "use client";
 
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
+import { formatNumber } from "@/lib/formatNumber";
 import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -146,7 +147,7 @@ export function NewBridge() {
 
   return (
     <div className="w-full max-w-xl mx-auto">
-      <div className="rounded-3xl p-4 sm:p-6 md:p-8 bg-neutral-50 border border-neutral-200 dark:bg-neutral-900 dark:border-neutral-800">
+      <div className="rounded-3xl p-4 sm:p-6 md:p-8 bg-neutral-50 border border-neutral-200 dark:bg-neutral-900 dark:border-neutral-800 shadow-lg">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-neutral-50">
             Bridge
@@ -236,7 +237,9 @@ export function NewBridge() {
             <div className="flex items-center justify-between">
               <div className="text-xs sm:text-sm">
                 <p className="text-neutral-500 dark:text-neutral-400">Fees:</p>
-                <b className="text-neutral-900 dark:text-neutral-50">{fees}</b>
+                <b className="text-neutral-900 dark:text-neutral-50">
+                  {formatNumber(fees)}
+                </b>
               </div>
               <div className="text-xs sm:text-sm text-right">
                 <p className="text-neutral-500 dark:text-neutral-400">
