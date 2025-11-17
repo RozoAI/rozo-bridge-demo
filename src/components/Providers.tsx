@@ -42,9 +42,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <RozoPayProvider
-            // stellarKit={stellarKit}
-            debugMode
-            // stellarWalletPersistence={true}
+            stellarKit={stellarKit}
+            debugMode={false}
+            stellarWalletPersistence={true}
           >
             {children}
             <Toaster
