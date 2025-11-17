@@ -146,9 +146,11 @@ export function NewBridge() {
 
   return (
     <div className="w-full max-w-xl mx-auto">
-      <div className="rounded-3xl p-4 sm:p-6 md:p-8 bg-neutral-900 border border-neutral-800">
+      <div className="rounded-3xl p-4 sm:p-6 md:p-8 bg-neutral-50 border border-neutral-200 dark:bg-neutral-900 dark:border-neutral-800">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
-          <h1 className="text-xl sm:text-2xl font-bold">Bridge</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-neutral-50">
+            Bridge
+          </h1>
           {stellarConnected && hasHistory ? (
             <Button
               variant="secondary"
@@ -178,7 +180,9 @@ export function NewBridge() {
               setAmount={setAmount}
             />
             {balanceError && (
-              <div className="text-xs text-red-400 mt-1">{balanceError}</div>
+              <div className="text-xs text-red-500 dark:text-red-400 mt-1">
+                {balanceError}
+              </div>
             )}
           </div>
           <ChainBadge isSwitched={isSwitched} isFrom={true} />
@@ -231,12 +235,16 @@ export function NewBridge() {
           !(exceedsLimit || depositExceedsLimit) && (
             <div className="flex items-center justify-between">
               <div className="text-xs sm:text-sm">
-                <p className="text-neutral-500">Fees:</p>
-                <b>{fees}</b>
+                <p className="text-neutral-500 dark:text-neutral-400">Fees:</p>
+                <b className="text-neutral-900 dark:text-neutral-50">{fees}</b>
               </div>
               <div className="text-xs sm:text-sm text-right">
-                <p className="text-neutral-500">Estimated time:</p>
-                <b>{"<"}1 minute</b>
+                <p className="text-neutral-500 dark:text-neutral-400">
+                  Estimated time:
+                </p>
+                <b className="text-neutral-900 dark:text-neutral-50">
+                  {"<"}1 minute
+                </b>
               </div>
             </div>
           )}

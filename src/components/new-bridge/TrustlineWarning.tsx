@@ -38,15 +38,15 @@ export function TrustlineWarning() {
 
   if (hasEnoughXLM) {
     return (
-      <div className="p-4 rounded-xl border border-red-500/20 bg-red-500/10">
+      <div className="p-4 rounded-xl border border-red-500/20 bg-red-50 dark:bg-red-500/10">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+          <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
           <div className="space-y-3 flex-1">
             <div>
-              <p className="font-medium text-red-100 text-sm">
+              <p className="font-medium text-red-900 dark:text-red-100 text-sm">
                 USDC Trustline Required
               </p>
-              <p className="text-xs text-red-200/80 mt-1">
+              <p className="text-xs text-red-700 dark:text-red-200/80 mt-1">
                 Your Stellar wallet needs to establish a trustline for USDC to
                 receive deposits. This is a one-time setup.
               </p>
@@ -68,14 +68,14 @@ export function TrustlineWarning() {
   }
 
   return (
-    <div className="p-4 rounded-xl border border-orange-500/20 bg-orange-500/10">
+    <div className="p-4 rounded-xl border border-orange-500/20 bg-orange-50 dark:bg-orange-500/10">
       <div className="flex items-start gap-3">
-        <AlertTriangle className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+        <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
         <div className="space-y-1">
-          <p className="font-medium text-orange-100 text-sm">
+          <p className="font-medium text-orange-900 dark:text-orange-100 text-sm">
             Insufficient XLM Balance
           </p>
-          <p className="text-xs text-orange-200/80">
+          <p className="text-xs text-orange-700 dark:text-orange-200/80">
             You need at least 1.5 XLM to create a USDC trustline. Current
             balance: {xlmBalance.balance} XLM
           </p>

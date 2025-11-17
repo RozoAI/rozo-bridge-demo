@@ -1,5 +1,6 @@
 import { PoweredBy } from "@/components/PoweredBy";
 import { StellarWalletConnect } from "@/components/StellarWalletConnect";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,7 +31,10 @@ export default function NewPageLayout({
           <span className="text-2xl font-bold">ROZO</span>
         </div>
 
-        <StellarWalletConnect />
+        <div className="flex items-center gap-2">
+          <ThemeSwitcher />
+          <StellarWalletConnect />
+        </div>
       </div>
 
       <div className="mx-auto mb-4 flex w-fit max-w-xl items-center justify-center gap-2 rounded-lg">
@@ -54,7 +58,7 @@ export default function NewPageLayout({
                   alt="Stellar"
                   className="h-4 w-auto transition-opacity group-hover:opacity-80"
                 />
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
                   Stellar Community Fund
                 </div>
               </a>
@@ -72,7 +76,7 @@ export default function NewPageLayout({
                   alt="Base"
                   className="h-4 w-auto transition-opacity group-hover:opacity-80"
                 />
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
                   Base - Coinbase&apos;s L2 Network
                 </div>
               </a>
@@ -90,7 +94,7 @@ export default function NewPageLayout({
                   alt="Draper University"
                   className="h-4 w-auto transition-opacity group-hover:opacity-80"
                 />
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
                   Draper University - Entrepreneurship Program
                 </div>
               </a>
@@ -108,7 +112,7 @@ export default function NewPageLayout({
                   alt="Circle"
                   className="h-4 w-auto transition-opacity group-hover:opacity-80"
                 />
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
                   Circle - USDC Issuer & Partner
                 </div>
               </a>

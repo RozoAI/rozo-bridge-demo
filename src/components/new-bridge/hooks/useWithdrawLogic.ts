@@ -102,12 +102,10 @@ export function useWithdrawLogic({
           dismissible: true,
         });
       } else if (step === "error") {
-        errorToastRef.current("❌ Withdrawal failed. Please try again.");
-        setStep(null);
-      }
-    } else {
-      if (currentToastId) {
-        dismissToastRef.current();
+        errorToastRef.current("❌ Withdrawal failed. Please try again.", {
+          duration: 5000,
+          closeButton: true,
+        });
         setStep(null);
       }
     }
@@ -147,8 +145,11 @@ export function useWithdrawLogic({
         checkTrustline();
         checkXlmBalance();
       } else {
-        errorToastRef.current("Failed to withdraw");
-        setStep("error");
+        errorToastRef.current("Failed to withdraw", {
+          duration: 5000,
+          closeButton: true,
+        });
+        setStep(null);
       }
     } catch (error) {
       console.error("Failed to withdraw:", error);
@@ -166,8 +167,11 @@ export function useWithdrawLogic({
         }
       }
 
-      errorToastRef.current(errorMessage);
-      setStep("error");
+      errorToastRef.current(errorMessage, {
+        duration: 5000,
+        closeButton: true,
+      });
+      setStep(null);
     } finally {
       onLoadingChange(false);
     }

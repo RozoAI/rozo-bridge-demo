@@ -163,21 +163,21 @@ export function HistoryDialog({
                 {history.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-neutral-900/50 hover:bg-neutral-900 border-neutral-800 flex flex-col gap-3 rounded-lg border p-2 transition-colors"
+                    className="bg-neutral-100 hover:bg-neutral-200 border-neutral-200 dark:bg-neutral-900/50 dark:hover:bg-neutral-900 dark:border-neutral-800 flex flex-col gap-3 rounded-lg border p-2 transition-colors"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5">
                         {item.type === "deposit" ? (
-                          <div className="rounded-full bg-green-500/10 p-2">
-                            <ArrowUpRight className="h-4 w-4 text-green-500" />
+                          <div className="rounded-full bg-green-500/20 dark:bg-green-500/10 p-2">
+                            <ArrowUpRight className="h-4 w-4 text-green-600 dark:text-green-500" />
                           </div>
                         ) : (
-                          <div className="rounded-full bg-blue-500/10 p-2">
-                            <ArrowDownLeft className="h-4 w-4 text-blue-500" />
+                          <div className="rounded-full bg-blue-500/20 dark:bg-blue-500/10 p-2">
+                            <ArrowDownLeft className="h-4 w-4 text-blue-600 dark:text-blue-500" />
                           </div>
                         )}
                         <div className="flex flex-col">
-                          <span className="text-sm font-semibold">
+                          <span className="text-sm font-semibold text-neutral-900 dark:text-white">
                             {item.amount} USDC
                           </span>
                           <span className="text-xs text-muted-foreground">
@@ -192,13 +192,13 @@ export function HistoryDialog({
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-neutral-800">
+                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-neutral-200 dark:border-neutral-800">
                       <div className="flex flex-col gap-1.5 flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-muted-foreground">
                             To:
                           </span>
-                          <span className="text-xs font-medium truncate">
+                          <span className="text-xs font-medium text-neutral-900 dark:text-neutral-100 truncate">
                             {formatAddress(item.destinationAddress)} on{" "}
                             {item.toChain}
                           </span>
@@ -208,7 +208,7 @@ export function HistoryDialog({
                         href={`https://invoice.rozo.ai/receipt?id=${item.paymentId}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-xs transition-colors whitespace-nowrap px-3 py-2 rounded-md hover:bg-neutral-800"
+                        className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-xs transition-colors whitespace-nowrap px-3 py-2 rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-800"
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
                         View Receipt

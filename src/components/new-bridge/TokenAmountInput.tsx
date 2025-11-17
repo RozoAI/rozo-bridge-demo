@@ -46,16 +46,16 @@ export function TokenAmountInput({
 
   return (
     <div className="flex-1">
-      <label className="text-sm text-neutral-400 mb-2 block">{label}</label>
+      <label className="text-sm text-neutral-600 dark:text-neutral-400 mb-2 block">{label}</label>
       <input
         type="text"
         value={amount !== undefined ? formatNumber(amount) : ""}
         onChange={(e) => handleAmountChange(e.target.value)}
         placeholder="0"
-        className="text-5xl font-medium text-white w-full outline-none bg-transparent placeholder:text-neutral-600"
+        className="text-5xl font-medium text-neutral-900 dark:text-white w-full outline-none bg-transparent placeholder:text-neutral-300 dark:placeholder:text-neutral-600"
         readOnly={readonly}
       />
-      <div className="text-sm text-neutral-500 mt-2">{getUsdValue()}</div>
+      <div className="text-sm text-neutral-500 dark:text-neutral-500 mt-2">{getUsdValue()}</div>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { config } from "@/lib/wagmi";
 import { setupCryptoPolyfill } from "@/utils/polyfills";
 import { RozoPayProvider } from "@rozoai/intent-pay";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "next-themes";
 import { useState } from "react";
 import { WagmiProvider } from "wagmi";
 
@@ -32,22 +33,29 @@ export function Providers({ children }: { children: React.ReactNode }) {
   if (!stellarKit) return null;
 
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RozoPayProvider
-          stellarKit={stellarKit}
-          debugMode={false}
-          stellarWalletPersistence={true}
-        >
-          {children}
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-            }}
-          />
-        </RozoPayProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="light"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <RozoPayProvider
+            // stellarKit={stellarKit}
+            debugMode
+            // stellarWalletPersistence={true}
+          >
+            {children}
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+              }}
+            />
+          </RozoPayProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </ThemeProvider>
   );
 }
