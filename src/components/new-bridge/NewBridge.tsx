@@ -3,6 +3,7 @@
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { GetFeeError, useGetFee } from "@/hooks/use-get-fee";
 import { formatNumber } from "@/lib/formatNumber";
+import { DEFAULT_INTENT_PAY_CONFIG } from "@/lib/intentPay";
 import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -41,7 +42,9 @@ export function NewBridge() {
     useStellarWallet();
 
   // Determine appId based on isAdmin
-  const appId = isAdmin ? "rozoBridgeStellarAdmin" : "rozodemo";
+  const appId = isAdmin
+    ? "rozoBridgeStellarAdmin"
+    : DEFAULT_INTENT_PAY_CONFIG.appId;
 
   // State to track history updates
   const [historyUpdateTrigger, setHistoryUpdateTrigger] = useState(0);
@@ -54,6 +57,7 @@ export function NewBridge() {
   }, [stellarConnected, stellarAddress, historyUpdateTrigger]);
 
   // Listen for history updates
+
   useEffect(() => {
     const handleHistoryUpdate = () => {
       setHistoryUpdateTrigger((prev) => prev + 1);
