@@ -4,6 +4,7 @@ import IntercomInitializer from "@/components/IntercomInitializer";
 import { Providers } from "@/components/Providers";
 import { StellarWalletProvider } from "@/contexts/StellarWalletContext";
 import type { Metadata } from "next";
+import { ThemeProvider } from "next-themes";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -35,11 +36,18 @@ export default function RootLayout({
       >
         <CryptoPolyfillSetup />
         <StellarWalletProvider>
-          <Providers>
-            {children}
-            <CryptoLogoPreloader />
-            <IntercomInitializer appId="kpfdpai7" />
-          </Providers>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Providers>
+              {children}
+              <CryptoLogoPreloader />
+              <IntercomInitializer appId="kpfdpai7" />
+            </Providers>
+          </ThemeProvider>
         </StellarWalletProvider>
       </body>
     </html>

@@ -6,7 +6,7 @@ import { config } from "@/lib/wagmi";
 import { setupCryptoPolyfill } from "@/utils/polyfills";
 import { RozoPayProvider } from "@rozoai/intent-pay";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ThemeProvider } from "next-themes";
+import { useTheme } from "next-themes";
 import { useState } from "react";
 import { WagmiProvider } from "wagmi";
 
@@ -17,6 +17,8 @@ if (typeof window !== "undefined") {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const { stellarKit } = useStellarWallet();
+
+  const { resolvedTheme } = useTheme();
 
   const [queryClient] = useState(
     () =>
@@ -33,29 +35,23 @@ export function Providers({ children }: { children: React.ReactNode }) {
   if (!stellarKit) return null;
 
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="light"
-      enableSystem
-      disableTransitionOnChange
-    >
-      <WagmiProvider config={config}>
-        <QueryClientProvider client={queryClient}>
-          <RozoPayProvider
-            stellarKit={stellarKit}
-            debugMode={false}
-            stellarWalletPersistence={true}
-          >
-            {children}
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-              }}
-            />
-          </RozoPayProvider>
-        </QueryClientProvider>
-      </WagmiProvider>
-    </ThemeProvider>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <RozoPayProvider
+          stellarKit={stellarKit}
+          debugMode={false}
+          stellarWalletPersistence={true}
+          mode={resolvedTheme === "dark" ? "dark" : "light"}
+        >
+          {children}
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+            }}
+          />
+        </RozoPayProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
