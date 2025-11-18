@@ -123,19 +123,22 @@ export function NewBridge() {
   }, [amount]);
 
   const fees = useMemo(() => {
-    if (feeValue === 0) {
+    if (feeValue === 0 || isAdmin) {
       return "0 USDC";
     }
     return feeValue + " USDC";
-  }, [feeValue]);
+  }, [feeValue, isAdmin]);
 
   const toAmountWithFees = useMemo(() => {
     if (!amount || amount === "" || parseFloat(amount) === 0) {
       return "";
     }
+    if (isAdmin) {
+      return amount;
+    }
     const result = Math.max(parseFloat(amount) - feeValue, 0);
     return String(parseFloat(result.toFixed(2)));
-  }, [amount, feeValue]);
+  }, [amount, feeValue, isAdmin]);
 
   // Check if amount exceeds limit (only for withdraw)
   const exceedsLimit =
@@ -238,7 +241,7 @@ export function NewBridge() {
               <div className="text-xs sm:text-sm">
                 <p className="text-neutral-500 dark:text-neutral-400">Fees:</p>
                 <b className="text-neutral-900 dark:text-neutral-50">
-                  {formatNumber(fees)}
+                  {isAdmin ? "Free" : formatNumber(fees)}
                 </b>
               </div>
               <div className="text-xs sm:text-sm text-right">
