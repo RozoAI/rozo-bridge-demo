@@ -7,27 +7,30 @@ import { DEFAULT_INTENT_PAY_CONFIG } from "@/lib/intentPay";
 import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { AmountLimitWarning } from "./new-bridge/AmountLimitWarning";
-import { BaseAddressInput } from "./new-bridge/BaseAddressInput";
-import { BridgeCard } from "./new-bridge/BridgeCard";
-import { BridgeSwapButton } from "./new-bridge/BridgeSwapButton";
-import { ChainBadge } from "./new-bridge/ChainBadge";
-import { DepositButton } from "./new-bridge/DepositButton";
-import { HistoryDialog } from "./new-bridge/HistoryDialog";
-import { useDepositLogic } from "./new-bridge/hooks/useDepositLogic";
-import { useWithdrawLogic } from "./new-bridge/hooks/useWithdrawLogic";
-import { StellarBalanceCard } from "./new-bridge/StellarBalanceCard";
-import { TokenAmountInput } from "./new-bridge/TokenAmountInput";
-import { TrustlineWarning } from "./new-bridge/TrustlineWarning";
-import { WithdrawButton } from "./new-bridge/WithdrawButton";
-import { getStellarHistoryForWallet } from "./stellar-bridge/utils/history";
-import { StellarWalletConnect } from "./StellarWalletConnect";
-import { Button } from "./ui/button";
+import { getStellarHistoryForWallet } from "../stellar-bridge/utils/history";
+import { StellarWalletConnect } from "../StellarWalletConnect";
+import { Button } from "../ui/button";
+import { AmountLimitWarning } from "./AmountLimitWarning";
+import { BaseAddressInput } from "./BaseAddressInput";
+import { BridgeCard } from "./BridgeCard";
+import { BridgeSwapButton } from "./BridgeSwapButton";
+import { ChainBadge } from "./ChainBadge";
+import { DepositButton } from "./DepositButton";
+import { HistoryDialog } from "./HistoryDialog";
+import { useDepositLogic } from "./hooks/useDepositLogic";
+import { useWithdrawLogic } from "./hooks/useWithdrawLogic";
+import { StellarBalanceCard } from "./StellarBalanceCard";
+import { TokenAmountInput } from "./TokenAmountInput";
+import { TrustlineWarning } from "./TrustlineWarning";
+import { WithdrawButton } from "./WithdrawButton";
 
 export const AMOUNT_LIMIT = 500;
 
 export function NewBridge() {
   const [amount, setAmount] = useState<string | undefined>("");
+  const [debouncedAmount, setDebouncedAmount] = useState<string | undefined>(
+    ""
+  );
   const [isSwitched, setIsSwitched] = useState(false);
   const [balanceError, setBalanceError] = useState<string>("");
   const [baseAddress, setBaseAddress] = useState<string>("");
@@ -48,6 +51,22 @@ export function NewBridge() {
 
   // State to track history updates
   const [historyUpdateTrigger, setHistoryUpdateTrigger] = useState(0);
+
+  // Debounce amount input
+  useEffect(() => {
+    // If amount is empty or zero, update immediately
+    if (!amount || amount === "" || parseFloat(amount) === 0) {
+      setDebouncedAmount(amount);
+      return;
+    }
+
+    // Otherwise, debounce the update
+    const timer = setTimeout(() => {
+      setDebouncedAmount(amount);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [amount]);
 
   // Check if there's any history for the current wallet
   const hasHistory = useMemo(() => {
@@ -73,20 +92,20 @@ export function NewBridge() {
     };
   }, []);
 
-  // Fetch fee from API
+  // Fetch fee from API using debounced amount
   const {
     data: feeData,
     isLoading: isFeeLoading,
     error: feeError,
   } = useGetFee(
     {
-      amount: parseFloat(amount || "0"),
+      amount: parseFloat(debouncedAmount || "0"),
       appId,
       currency: "USDC",
     },
     {
-      enabled: !!amount && parseFloat(amount) > 0,
-      debounceMs: 500,
+      enabled: !!debouncedAmount && parseFloat(debouncedAmount) > 0,
+      debounceMs: 0, // No additional debounce needed since we're using debouncedAmount
     }
   );
 
@@ -104,7 +123,7 @@ export function NewBridge() {
   // Use deposit logic hook (when isSwitched = false)
   const { intentConfig, ableToPay, isPreparingConfig, handlePaymentCompleted } =
     useDepositLogic({
-      amount,
+      amount: debouncedAmount,
       isAdmin,
       destinationStellarAddress: stellarAddress,
     });
@@ -157,15 +176,39 @@ export function NewBridge() {
     return `${formatNumber(feeData.fee.toString())} USDC`;
   }, [feeData, isFeeLoading]);
 
+  // Only show fee data if it matches the current input
+  const validFeeData = useMemo(() => {
+    // Check if feeData matches the current debounced amount
+    if (
+      feeData &&
+      debouncedAmount &&
+      parseFloat(debouncedAmount) > 0 &&
+      feeData.amount === parseFloat(debouncedAmount)
+    ) {
+      return feeData;
+    }
+    return null;
+  }, [feeData, debouncedAmount]);
+
   const toAmountWithFees = useMemo(() => {
+    // If no amount, clear the output
     if (!amount || amount === "" || parseFloat(amount) === 0) {
       return "";
     }
-    if (!feeData) {
-      return amount;
+
+    // If amount is different from debounced amount, don't show anything (user is still typing)
+    if (amount !== debouncedAmount) {
+      return "";
     }
-    return String(feeData.amount_out);
-  }, [amount, feeData]);
+
+    // Only show result if we have valid fee data that matches
+    if (validFeeData) {
+      return String(validFeeData.amount_out);
+    }
+
+    // Still loading or no data yet
+    return "";
+  }, [amount, debouncedAmount, validFeeData]);
 
   // Check if amount exceeds limit (only for withdraw)
   const exceedsLimit =
@@ -227,7 +270,6 @@ export function NewBridge() {
           <TokenAmountInput
             label="To"
             amount={toAmountWithFees}
-            setAmount={setAmount}
             readonly={true}
           />
           <ChainBadge isSwitched={isSwitched} isFrom={false} />
@@ -263,6 +305,7 @@ export function NewBridge() {
 
         {amount &&
           parseFloat(amount) > 0 &&
+          validFeeData &&
           !(exceedsLimit || depositExceedsLimit) && (
             <div className="flex items-center justify-between">
               <div className="text-xs sm:text-sm">
@@ -279,22 +322,6 @@ export function NewBridge() {
               </div>
             </div>
           )}
-
-        {/* Fee Error Message */}
-        {feeErrorData && amount && parseFloat(amount) > 0 && (
-          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-            <div className="flex items-start gap-2">
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-red-900 dark:text-red-100">
-                  {feeErrorData.error}
-                </p>
-                <p className="text-xs text-red-700 dark:text-red-300 mt-1">
-                  {feeErrorData.message}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Connect Wallet / Bridge Button */}
         <div className="mt-4 sm:mt-6">

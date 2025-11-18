@@ -3,8 +3,8 @@
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { AMOUNT_LIMIT } from "../NewBridge";
 import { Button } from "../ui/button";
+import { AMOUNT_LIMIT } from "./NewBridge";
 
 interface WithdrawButtonProps {
   amount: string | undefined;

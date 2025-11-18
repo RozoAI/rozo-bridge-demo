@@ -1,5 +1,5 @@
 import { ContactSupport } from "@/components/ContactSupport";
-import { NewBridge } from "@/components/NewBridge";
+import { NewBridge } from "@/components/new-bridge/NewBridge";
 import { PoweredBy } from "@/components/PoweredBy";
 import { SupportedBy } from "@/components/SupportedBy";
 import Image from "next/image";

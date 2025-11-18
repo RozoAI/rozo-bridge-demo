@@ -125,5 +125,5 @@ export const isRouteSupported = (
 
 // Default app configuration (you should replace with your actual app ID)
 export const DEFAULT_INTENT_PAY_CONFIG = {
-  appId: process.env.NEXT_PUBLIC_INTENT_PAY_APP_ID || "rozoBridge",
+  appId: process.env.NEXT_PUBLIC_INTENT_PAY_APP_ID || "rozodemo",
 };

@@ -1,4 +1,4 @@
-import { NewBridge } from "@/components/NewBridge";
+import { NewBridge } from "@/components/new-bridge/NewBridge";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

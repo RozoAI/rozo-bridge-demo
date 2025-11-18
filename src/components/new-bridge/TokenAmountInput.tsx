@@ -5,7 +5,7 @@ import { formatNumber } from "@/lib/formatNumber";
 interface TokenAmountInputProps {
   label: string;
   amount: string | undefined;
-  setAmount: (v: string | undefined) => void;
+  setAmount?: (v: string | undefined) => void;
   readonly?: boolean;
 }
 
@@ -21,6 +21,8 @@ export function TokenAmountInput({
   };
 
   const handleAmountChange = (value: string) => {
+    if (!setAmount) return;
+
     const rawValue = cleanValue(value);
     // Allow only numbers and decimal point
     if (rawValue === "" || /^\d*\.?\d*$/.test(rawValue)) {
@@ -46,7 +48,9 @@ export function TokenAmountInput({
 
   return (
     <div className="flex-1">
-      <label className="text-sm text-neutral-600 dark:text-neutral-400 mb-2 block">{label}</label>
+      <label className="text-sm text-neutral-600 dark:text-neutral-400 mb-2 block">
+        {label}
+      </label>
       <input
         type="text"
         value={amount !== undefined ? formatNumber(amount) : ""}
@@ -55,7 +59,9 @@ export function TokenAmountInput({
         className="text-5xl font-medium text-neutral-900 dark:text-white w-full outline-none bg-transparent placeholder:text-neutral-300 dark:placeholder:text-neutral-600"
         readOnly={readonly}
       />
-      <div className="text-sm text-neutral-500 dark:text-neutral-500 mt-2">{getUsdValue()}</div>
+      <div className="text-sm text-neutral-500 dark:text-neutral-500 mt-2">
+        {getUsdValue()}
+      </div>
     </div>
   );
 }

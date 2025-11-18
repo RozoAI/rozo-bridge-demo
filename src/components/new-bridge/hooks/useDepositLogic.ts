@@ -1,6 +1,6 @@
 "use client";
 
-import { AMOUNT_LIMIT } from "@/components/NewBridge";
+import { AMOUNT_LIMIT } from "@/components/new-bridge/NewBridge";
 import { saveStellarHistory } from "@/components/stellar-bridge/utils/history";
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import {
@@ -19,8 +19,6 @@ interface UseDepositLogicProps {
   amount: string | undefined;
   destinationStellarAddress?: string;
 }
-
-const DEBOUNCE_DELAY = 500; // 500ms debounce
 
 export function useDepositLogic({
   amount,
@@ -42,8 +40,6 @@ export function useDepositLogic({
   );
   const [isPreparingConfig, setIsPreparingConfig] = useState(false);
 
-  // Refs for debounce
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const resetPaymentRef = useRef(resetPayment);
 
   // Update ref when resetPayment changes
@@ -61,13 +57,8 @@ export function useDepositLogic({
     !isPreparingConfig &&
     (isAdmin || parseFloat(amount) <= AMOUNT_LIMIT);
 
-  // Debounced config preparation
+  // Config preparation (no debounce needed - handled in parent)
   useEffect(() => {
-    // Clear previous timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
     // If no amount or trustline doesn't exist, clear config
     if (
       !amount ||
@@ -80,11 +71,10 @@ export function useDepositLogic({
       return;
     }
 
-    // Set preparing state immediately
+    // Set preparing state and prepare config
     setIsPreparingConfig(true);
 
-    // Debounce the config preparation
-    debounceTimerRef.current = setTimeout(async () => {
+    const prepareConfig = async () => {
       try {
         const config: IntentPayConfig = {
           appId: isAdmin
@@ -114,19 +104,15 @@ export function useDepositLogic({
       } finally {
         setIsPreparingConfig(false);
       }
-    }, DEBOUNCE_DELAY);
-
-    // Cleanup on unmount
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
     };
+
+    prepareConfig();
   }, [
     amount,
     stellarAddress,
     destinationStellarAddress,
     trustlineStatus.exists,
+    isAdmin,
   ]);
 
   const handlePaymentCompleted = (paymentData: PaymentCompletedEvent) => {
