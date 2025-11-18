@@ -10,6 +10,8 @@ interface DepositButtonProps {
   intentConfig: IntentPayConfig | null;
   ableToPay: boolean;
   isPreparingConfig: boolean;
+  isFeeLoading?: boolean;
+  hasFeeError?: boolean;
   onPaymentCompleted: (paymentData: PaymentCompletedEvent) => void;
 }
 
@@ -17,18 +19,26 @@ export function DepositButton({
   intentConfig,
   ableToPay,
   isPreparingConfig,
+  isFeeLoading = false,
+  hasFeeError = false,
   onPaymentCompleted,
 }: DepositButtonProps) {
-  // Show disabled button while preparing config
-  if (isPreparingConfig || !intentConfig) {
+  // Show disabled button while preparing config, loading fee, or has fee error
+  if (isPreparingConfig || isFeeLoading || hasFeeError || !intentConfig) {
     return (
       <Button
         size="lg"
         className="w-full h-12 sm:h-14 text-base sm:text-lg rounded-2xl cursor-not-allowed"
         disabled
       >
-        {isPreparingConfig && <Loader2 className="size-5 animate-spin" />}
-        {isPreparingConfig ? "Preparing..." : "Bridge USDC to Stellar"}
+        {(isPreparingConfig || isFeeLoading) && (
+          <Loader2 className="size-5 animate-spin" />
+        )}
+        {isFeeLoading
+          ? "Loading fee..."
+          : isPreparingConfig
+          ? "Preparing..."
+          : "Bridge USDC to Stellar"}
       </Button>
     );
   }

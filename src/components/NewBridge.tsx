@@ -1,13 +1,13 @@
 "use client";
 
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
+import { GetFeeError, useGetFee } from "@/hooks/use-get-fee";
 import { formatNumber } from "@/lib/formatNumber";
 import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { AmountLimitWarning } from "./new-bridge/AmountLimitWarning";
 import { BaseAddressInput } from "./new-bridge/BaseAddressInput";
-import { BridgeButton } from "./new-bridge/BridgeButton";
 import { BridgeCard } from "./new-bridge/BridgeCard";
 import { BridgeSwapButton } from "./new-bridge/BridgeSwapButton";
 import { ChainBadge } from "./new-bridge/ChainBadge";
@@ -18,6 +18,7 @@ import { useWithdrawLogic } from "./new-bridge/hooks/useWithdrawLogic";
 import { StellarBalanceCard } from "./new-bridge/StellarBalanceCard";
 import { TokenAmountInput } from "./new-bridge/TokenAmountInput";
 import { TrustlineWarning } from "./new-bridge/TrustlineWarning";
+import { WithdrawButton } from "./new-bridge/WithdrawButton";
 import { getStellarHistoryForWallet } from "./stellar-bridge/utils/history";
 import { StellarWalletConnect } from "./StellarWalletConnect";
 import { Button } from "./ui/button";
@@ -38,6 +39,9 @@ export function NewBridge() {
 
   const { stellarConnected, stellarAddress, trustlineStatus } =
     useStellarWallet();
+
+  // Determine appId based on isAdmin
+  const appId = isAdmin ? "rozoBridgeStellarAdmin" : "rozodemo";
 
   // State to track history updates
   const [historyUpdateTrigger, setHistoryUpdateTrigger] = useState(0);
@@ -64,6 +68,26 @@ export function NewBridge() {
       );
     };
   }, []);
+
+  // Fetch fee from API
+  const {
+    data: feeData,
+    isLoading: isFeeLoading,
+    error: feeError,
+  } = useGetFee(
+    {
+      amount: parseFloat(amount || "0"),
+      appId,
+      currency: "USDC",
+    },
+    {
+      enabled: !!amount && parseFloat(amount) > 0,
+      debounceMs: 500,
+    }
+  );
+
+  // Extract fee error details
+  const feeErrorData = feeError as GetFeeError | null;
 
   // Use withdraw logic hook (when isSwitched = true)
   const { handleWithdraw } = useWithdrawLogic({
@@ -114,31 +138,30 @@ export function NewBridge() {
     }
   }, [amount, isSwitched, stellarConnected, trustlineStatus.balance]);
 
-  const feeValue = useMemo(() => {
-    if (!amount || amount === "" || parseFloat(amount) === 0) {
-      return 0;
-    }
-    const calculatedFee = Math.max(parseFloat(amount) * 0.001, 0.1);
-    return parseFloat(calculatedFee.toFixed(2));
-  }, [amount]);
-
   const fees = useMemo(() => {
-    if (feeValue === 0 || isAdmin) {
+    if (isFeeLoading) {
+      return "Calculating...";
+    }
+    if (!feeData) {
       return "0 USDC";
     }
-    return feeValue + " USDC";
-  }, [feeValue, isAdmin]);
+
+    if (feeData.fee === 0) {
+      return "Free";
+    }
+
+    return `${formatNumber(feeData.fee.toString())} USDC`;
+  }, [feeData, isFeeLoading]);
 
   const toAmountWithFees = useMemo(() => {
     if (!amount || amount === "" || parseFloat(amount) === 0) {
       return "";
     }
-    if (isAdmin) {
+    if (!feeData) {
       return amount;
     }
-    const result = Math.max(parseFloat(amount) - feeValue, 0);
-    return String(parseFloat(result.toFixed(2)));
-  }, [amount, feeValue, isAdmin]);
+    return String(feeData.amount_out);
+  }, [amount, feeData]);
 
   // Check if amount exceeds limit (only for withdraw)
   const exceedsLimit =
@@ -240,9 +263,7 @@ export function NewBridge() {
             <div className="flex items-center justify-between">
               <div className="text-xs sm:text-sm">
                 <p className="text-neutral-500 dark:text-neutral-400">Fees:</p>
-                <b className="text-neutral-900 dark:text-neutral-50">
-                  {isAdmin ? "Free" : formatNumber(fees)}
-                </b>
+                <b className="text-neutral-900 dark:text-neutral-50">{fees}</b>
               </div>
               <div className="text-xs sm:text-sm text-right">
                 <p className="text-neutral-500 dark:text-neutral-400">
@@ -255,13 +276,29 @@ export function NewBridge() {
             </div>
           )}
 
+        {/* Fee Error Message */}
+        {feeErrorData && amount && parseFloat(amount) > 0 && (
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+            <div className="flex items-start gap-2">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-red-900 dark:text-red-100">
+                  {feeErrorData.error}
+                </p>
+                <p className="text-xs text-red-700 dark:text-red-300 mt-1">
+                  {feeErrorData.message}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Connect Wallet / Bridge Button */}
         <div className="mt-4 sm:mt-6">
           {!stellarConnected ? (
             <StellarWalletConnect className="w-full h-12 sm:h-14 text-base sm:text-lg" />
           ) : isSwitched ? (
             // Withdraw Button (Stellar to Base)
-            <BridgeButton
+            <WithdrawButton
               amount={amount}
               toAmount={toAmountWithFees}
               baseAddress={baseAddress}
@@ -269,6 +306,8 @@ export function NewBridge() {
               balanceError={balanceError}
               addressError={addressError}
               loading={withdrawLoading}
+              isFeeLoading={isFeeLoading}
+              hasFeeError={!!feeErrorData}
               onWithdraw={handleWithdraw}
               onDeposit={() => {}}
             />
@@ -282,6 +321,8 @@ export function NewBridge() {
                 parseFloat(toAmountWithFees) > 0
               }
               isPreparingConfig={isPreparingConfig}
+              isFeeLoading={isFeeLoading}
+              hasFeeError={!!feeErrorData}
               onPaymentCompleted={handlePaymentCompleted}
             />
           )}

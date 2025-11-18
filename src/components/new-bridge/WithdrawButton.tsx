@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { AMOUNT_LIMIT } from "../NewBridge";
 import { Button } from "../ui/button";
 
-interface BridgeButtonProps {
+interface WithdrawButtonProps {
   amount: string | undefined;
   toAmount: string;
   baseAddress: string;
@@ -14,11 +14,13 @@ interface BridgeButtonProps {
   balanceError: string;
   addressError: string;
   loading: boolean;
+  isFeeLoading?: boolean;
+  hasFeeError?: boolean;
   onWithdraw: () => void;
   onDeposit: () => void;
 }
 
-export function BridgeButton({
+export function WithdrawButton({
   amount,
   toAmount,
   baseAddress,
@@ -26,9 +28,11 @@ export function BridgeButton({
   balanceError,
   addressError,
   loading,
+  isFeeLoading = false,
+  hasFeeError = false,
   onWithdraw,
   onDeposit,
-}: BridgeButtonProps) {
+}: WithdrawButtonProps) {
   const { stellarConnected, trustlineStatus } = useStellarWallet();
   const searchParams = useSearchParams();
   const isAdmin = searchParams.get("admin") === "rozo";
@@ -56,12 +60,14 @@ export function BridgeButton({
       !!addressError ||
       !!balanceError ||
       loading ||
+      isFeeLoading ||
+      hasFeeError ||
       (!isAdmin && parseFloat(amount) > AMOUNT_LIMIT)
-    : !!balanceError || !!addressError || loading;
-
-  const buttonText = isSwitched
-    ? `Bridge USDC to Base`
-    : `Bridge USDC to Stellar`;
+    : !!balanceError ||
+      !!addressError ||
+      loading ||
+      isFeeLoading ||
+      hasFeeError;
 
   return (
     <Button
@@ -70,8 +76,8 @@ export function BridgeButton({
       size="lg"
       className="w-full h-12 sm:h-14 text-base sm:text-lg rounded-2xl"
     >
-      {loading && <Loader2 className="size-5 animate-spin" />}
-      {buttonText}
+      {(loading || isFeeLoading) && <Loader2 className="size-5 animate-spin" />}
+      {isFeeLoading ? "Loading fee..." : "Bridge USDC to Base"}
     </Button>
   );
 }
