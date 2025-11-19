@@ -1,26 +1,23 @@
 "use client";
 
-import { AMOUNT_LIMIT } from "@/components/new-bridge/NewBridge";
 import { saveStellarHistory } from "@/components/stellar-bridge/utils/history";
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
-import {
-  BASE_USDC,
-  DEFAULT_INTENT_PAY_CONFIG,
-  IntentPayConfig,
-} from "@/lib/intentPay";
+import { BASE_USDC, IntentPayConfig } from "@/lib/intentPay";
 import { PaymentCompletedEvent } from "@rozoai/intent-common";
 import { useRozoPayUI } from "@rozoai/intent-pay";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { getAddress } from "viem";
 
 interface UseDepositLogicProps {
+  appId: string;
   isAdmin: boolean;
   amount: string | undefined;
   destinationStellarAddress?: string;
 }
 
 export function useDepositLogic({
+  appId,
   amount,
   destinationStellarAddress,
   isAdmin = false,
@@ -40,13 +37,6 @@ export function useDepositLogic({
   );
   const [isPreparingConfig, setIsPreparingConfig] = useState(false);
 
-  const resetPaymentRef = useRef(resetPayment);
-
-  // Update ref when resetPayment changes
-  useEffect(() => {
-    resetPaymentRef.current = resetPayment;
-  });
-
   // Check if able to pay
   const ableToPay =
     !!amount &&
@@ -54,8 +44,7 @@ export function useDepositLogic({
     (!!stellarAddress || !!destinationStellarAddress) &&
     trustlineStatus.exists &&
     !!intentConfig &&
-    !isPreparingConfig &&
-    (isAdmin || parseFloat(amount) <= AMOUNT_LIMIT);
+    !isPreparingConfig;
 
   // Config preparation (no debounce needed - handled in parent)
   useEffect(() => {
@@ -77,9 +66,7 @@ export function useDepositLogic({
     const prepareConfig = async () => {
       try {
         const config: IntentPayConfig = {
-          appId: isAdmin
-            ? "rozoBridgeStellarAdmin"
-            : DEFAULT_INTENT_PAY_CONFIG.appId,
+          appId: appId,
           toChain: BASE_USDC.chainId,
           toAddress: getAddress("0x0000000000000000000000000000000000000000"),
           toToken: getAddress(BASE_USDC.token),
@@ -96,7 +83,7 @@ export function useDepositLogic({
           },
         };
 
-        await resetPaymentRef.current(config as never);
+        await resetPayment(config as any);
         setIntentConfig(config);
       } catch (error) {
         console.error("Failed to prepare payment config:", error);

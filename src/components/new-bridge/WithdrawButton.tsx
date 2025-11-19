@@ -2,9 +2,7 @@
 
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { Loader2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { Button } from "../ui/button";
-import { AMOUNT_LIMIT } from "./NewBridge";
 
 interface WithdrawButtonProps {
   amount: string | undefined;
@@ -34,8 +32,6 @@ export function WithdrawButton({
   onDeposit,
 }: WithdrawButtonProps) {
   const { stellarConnected, trustlineStatus } = useStellarWallet();
-  const searchParams = useSearchParams();
-  const isAdmin = searchParams.get("admin") === "rozo";
 
   const handleClick = () => {
     if (isSwitched) {
@@ -61,8 +57,7 @@ export function WithdrawButton({
       !!balanceError ||
       loading ||
       isFeeLoading ||
-      hasFeeError ||
-      (!isAdmin && parseFloat(amount) > AMOUNT_LIMIT)
+      hasFeeError
     : !!balanceError ||
       !!addressError ||
       loading ||

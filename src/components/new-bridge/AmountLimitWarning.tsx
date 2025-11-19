@@ -4,9 +4,10 @@ import { AlertTriangle } from "lucide-react";
 
 interface AmountLimitWarningProps {
   limit: number;
+  message?: string;
 }
 
-export function AmountLimitWarning({ limit }: AmountLimitWarningProps) {
+export function AmountLimitWarning({ limit, message }: AmountLimitWarningProps) {
   return (
     <div className="p-4 rounded-xl border border-yellow-500/20 bg-yellow-50 dark:bg-yellow-500/10">
       <div className="flex items-start gap-3">
@@ -16,7 +17,7 @@ export function AmountLimitWarning({ limit }: AmountLimitWarningProps) {
             Bridge Amount Limit
           </p>
           <p className="text-xs text-yellow-700 dark:text-yellow-200/80">
-            The bridge amount is upper bounded ${limit} for alpha. Join our
+            {message || `Maximum amount to bridge is $${limit}`}. Join our
             Discord (
             <a
               href="https://discord.com/invite/EfWejgTbuU"

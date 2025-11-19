@@ -24,7 +24,13 @@ export interface GetFeeError {
   maxAllowed: number;
 }
 
-const fetchFee = async (params: GetFeeParams): Promise<GetFeeResponse> => {
+const fetchFee = async (
+  params: GetFeeParams
+): Promise<GetFeeResponse | undefined> => {
+  if (params.amount <= 0) {
+    return;
+  }
+
   const queryParams = new URLSearchParams({
     amount: params.amount.toString(),
     ...(params.appId && { appId: params.appId }),

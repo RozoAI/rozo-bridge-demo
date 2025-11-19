@@ -24,8 +24,6 @@ import { TokenAmountInput } from "./TokenAmountInput";
 import { TrustlineWarning } from "./TrustlineWarning";
 import { WithdrawButton } from "./WithdrawButton";
 
-export const AMOUNT_LIMIT = 500;
-
 export function NewBridge() {
   const [amount, setAmount] = useState<string | undefined>("");
   const [debouncedAmount, setDebouncedAmount] = useState<string | undefined>(
@@ -123,6 +121,7 @@ export function NewBridge() {
   // Use deposit logic hook (when isSwitched = false)
   const { intentConfig, ableToPay, isPreparingConfig, handlePaymentCompleted } =
     useDepositLogic({
+      appId,
       amount: debouncedAmount,
       isAdmin,
       destinationStellarAddress: stellarAddress,
@@ -210,13 +209,21 @@ export function NewBridge() {
     return "";
   }, [amount, debouncedAmount, validFeeData]);
 
-  // Check if amount exceeds limit (only for withdraw)
-  const exceedsLimit =
-    !isAdmin && isSwitched && amount && parseFloat(amount) > AMOUNT_LIMIT;
+  // Determine if amount exceeds limit based on fee error
+  const limitError = useMemo(() => {
+    if (!amount || parseFloat(amount) === 0) return null;
 
-  // Check if deposit amount exceeds limit
-  const depositExceedsLimit =
-    !isAdmin && !isSwitched && amount && parseFloat(amount) > AMOUNT_LIMIT;
+    // Check if fee error is a limit error
+    if (feeErrorData) {
+      return {
+        maxAllowed: feeErrorData.maxAllowed,
+        received: feeErrorData.received,
+        message: feeErrorData.message,
+      };
+    }
+
+    return null;
+  }, [amount, feeErrorData]);
 
   return (
     <div className="w-full max-w-xl mx-auto">
@@ -295,33 +302,31 @@ export function NewBridge() {
         )}
 
         {/* Amount Limit Warning */}
-        {stellarConnected &&
-          !isAdmin &&
-          (exceedsLimit || depositExceedsLimit) && (
-            <div className="mt-4 sm:mt-6">
-              <AmountLimitWarning limit={AMOUNT_LIMIT} />
-            </div>
-          )}
+        {stellarConnected && limitError && (
+          <div className="mt-4 sm:mt-6">
+            <AmountLimitWarning
+              limit={limitError.maxAllowed}
+              message={limitError.message}
+            />
+          </div>
+        )}
 
-        {amount &&
-          parseFloat(amount) > 0 &&
-          validFeeData &&
-          !(exceedsLimit || depositExceedsLimit) && (
-            <div className="flex items-center justify-between">
-              <div className="text-xs sm:text-sm">
-                <p className="text-neutral-500 dark:text-neutral-400">Fees:</p>
-                <b className="text-neutral-900 dark:text-neutral-50">{fees}</b>
-              </div>
-              <div className="text-xs sm:text-sm text-right">
-                <p className="text-neutral-500 dark:text-neutral-400">
-                  Estimated time:
-                </p>
-                <b className="text-neutral-900 dark:text-neutral-50">
-                  {"<"}1 minute
-                </b>
-              </div>
+        {amount && parseFloat(amount) > 0 && validFeeData && !limitError && (
+          <div className="flex items-center justify-between">
+            <div className="text-xs sm:text-sm">
+              <p className="text-neutral-500 dark:text-neutral-400">Fees:</p>
+              <b className="text-neutral-900 dark:text-neutral-50">{fees}</b>
             </div>
-          )}
+            <div className="text-xs sm:text-sm text-right">
+              <p className="text-neutral-500 dark:text-neutral-400">
+                Estimated time:
+              </p>
+              <b className="text-neutral-900 dark:text-neutral-50">
+                {"<"}1 minute
+              </b>
+            </div>
+          </div>
+        )}
 
         {/* Connect Wallet / Bridge Button */}
         <div className="mt-4 sm:mt-6">
