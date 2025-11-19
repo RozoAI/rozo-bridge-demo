@@ -1,6 +1,6 @@
 # Rozo Bridge - Terms of Service
 
-**Last Updated:** September 16, 2025
+**Last Updated:** Nov 19th, 2025
 
 ## 1. Introduction and Acceptance
 
@@ -203,10 +203,7 @@ TO THE MAXIMUM EXTENT PERMITTED BY LAW, ROZO BRIDGE AND ITS AFFILIATES, OFFICERS
 
 ### 10.2 Maximum Liability
 
-OUR TOTAL LIABILITY TO YOU FOR ANY CLAIMS ARISING FROM OR RELATED TO THESE TERMS OR THE BRIDGE SHALL NOT EXCEED THE LESSER OF:
-
-- The total fees you paid to us in the three (3) months preceding the claim, or
-- $100 USD
+Our total liability is limited to the total fees paid by you to us in the three (3) months prior to the claim, as this helps us keep the service non-custodial and low-fee for all users.
 
 ### 10.3 Basis of the Bargain
 
@@ -254,4 +251,4 @@ Your continued use of the Bridge after changes become effective constitutes acce
 For questions about these Terms, please contact us at:
 
 **Email:** hi@rozo.ai
-**Website:** https://rozo.ai
+**Website:** https://bridge.rozo.ai
