@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { IntentPayConfig } from "@/lib/intentPay";
-import { PaymentCompletedEvent } from "@rozoai/intent-common";
+import { PaymentCompletedEvent, worldchain } from "@rozoai/intent-common";
 import { RozoPayButton } from "@rozoai/intent-pay";
 import { Loader2 } from "lucide-react";
 
@@ -57,6 +57,7 @@ export function DepositButton({
         toUnits={intentConfig.toUnits}
         metadata={intentConfig.metadata as never}
         onPaymentCompleted={onPaymentCompleted}
+        preferredChains={[worldchain.chainId]}
         showProcessingPayout
       >
         {({ show }) => (
