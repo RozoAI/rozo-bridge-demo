@@ -1,17 +1,17 @@
-# ROZO intents - Any chain. Any stablecoin. Seconds.
+# ROZO Intents - Any chain. Any stablecoin. Seconds.
 
-A production-quality React/Next.js frontend for bridging stablecoins across chains using the Intent Pay SDK. This demo showcases lightning-fast cross-chain transfers with a modern, accessible UI.
+Intent-based USDC transfers between Base and Stellar, with more chains soon.
 
 ## Features
 
-- 🌐 **Any Chain**: Bridge stablecoins between Ethereum, Polygon, Arbitrum, Optimism, Base, Stellar, and more
+- 🌐 **Any Chain**: Transfer stablecoins between Ethereum, Polygon, Arbitrum, Optimism, Base, Stellar, and more
 - 💰 **Any Stablecoin**: Support for USDC, USDT, DAI and other major stablecoins
 - ⚡ **Seconds**: Lightning-fast transfers with intent-based technology
 - 🔒 **Secure**: Native token burning and minting - no wrapped tokens
 - 📱 **Mobile-Friendly**: Responsive design that works on all devices
 - 🌙 **Dark Mode**: Beautiful dark theme by default
 - ♿ **Accessible**: Full keyboard navigation and screen reader support
-- 🔄 **Real-time Status**: Live tracking of bridge transactions with detailed stepper UI
+- 🔄 **Real-time Status**: Live tracking of intent transactions with detailed stepper UI
 
 ## Tech Stack
 
@@ -54,7 +54,7 @@ NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id_here
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd rozo-bridge-demo
+   cd rozo-intents-demo
    ```
 
 2. **Install dependencies**

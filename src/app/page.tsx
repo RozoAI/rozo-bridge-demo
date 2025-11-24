@@ -21,7 +21,7 @@ export default function Home() {
                 className="rounded-lg"
               />
               <div>
-                <h1 className="text-xl font-bold">ROZO Bridge</h1>
+                <h1 className="text-xl font-bold">ROZO Intents</h1>
                 <p className="text-sm text-muted-foreground">
                   Any chain. Any stablecoin. Seconds.
                 </p>

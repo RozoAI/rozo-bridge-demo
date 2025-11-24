@@ -1,28 +1,28 @@
-# Rozo Bridge - Terms of Service
+# ROZO Intents - Terms of Service
 
 **Last Updated:** Nov 19th, 2025
 
 ## 1. Introduction and Acceptance
 
-By accessing or using the Rozo Bridge platform ("Bridge," "Service," "we," "us," or "our"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you may not access or use the Bridge.
+By accessing or using the ROZO Intents platform ("Intents," "Service," "we," "us," or "our"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you may not access or use the Intents.
 
-Rozo Bridge provides a non-custodial cross-chain bridge interface that enables users to transfer digital assets between different blockchain networks. The Bridge is a decentralized tool that facilitates peer-to-peer transactions through smart contracts.
+ROZO Intents provides a non-custodial cross-chain intent-based interface that enables users to transfer digital assets between different blockchain networks. The Intents is a decentralized tool that facilitates peer-to-peer transactions through smart contracts.
 
 ## 2. Eligibility
 
-By using the Bridge, you represent and warrant that:
+By using the Intents, you represent and warrant that:
 
 - You are at least 18 years of age
 - You have the legal capacity to enter into these Terms
-- You are not located in, or a resident of, any jurisdiction where the use of decentralized bridges or cryptocurrency services is prohibited or restricted
+- You are not located in, or a resident of, any jurisdiction where the use of decentralized intents or cryptocurrency services is prohibited or restricted
 - You are not subject to any sanctions administered by the U.S. Treasury Department's Office of Foreign Assets Control (OFAC), the United Nations, the European Union, or any other applicable sanctions authority
-- Your use of the Bridge complies with all applicable laws and regulations in your jurisdiction
+- Your use of the Intents complies with all applicable laws and regulations in your jurisdiction
 
 ## 3. Description of Services
 
-### 3.1 Bridge Functionality
+### 3.1 Intents Functionality
 
-Rozo Bridge enables cross-chain asset transfers between supported blockchain networks. The Service provides:
+ROZO Intents enables cross-chain asset transfers between supported blockchain networks. The Service provides:
 
 - A user interface for initiating cross-chain transfers
 - Integration with smart contracts that execute bridging operations
@@ -30,7 +30,7 @@ Rozo Bridge enables cross-chain asset transfers between supported blockchain net
 
 ### 3.2 Non-Custodial Nature
 
-**IMPORTANT:** Rozo Bridge is a non-custodial service. We do not:
+**IMPORTANT:** ROZO Intents is a non-custodial service. We do not:
 
 - Hold, custody, or control your digital assets
 - Have access to your private keys or wallet credentials
@@ -54,7 +54,7 @@ You are solely responsible for:
 
 ### 4.2 Transaction Verification
 
-Before initiating any transaction through the Bridge, you must:
+Before initiating any transaction through the Intents, you must:
 
 - Verify all transaction details including destination address, amount, and network
 - Ensure you have sufficient native tokens for gas fees on both source and destination networks
@@ -66,8 +66,8 @@ Before initiating any transaction through the Bridge, you must:
 You agree to:
 
 - Comply with all applicable laws, regulations, and tax obligations in your jurisdiction
-- Not use the Bridge for any illegal activities including money laundering, terrorism financing, fraud, or market manipulation
-- Not use the Bridge to transfer proceeds of illegal activities
+- Not use the Intents for any illegal activities including money laundering, terrorism financing, fraud, or market manipulation
+- Not use the Intents to transfer proceeds of illegal activities
 - Not engage in any activity that violates sanctions regulations
 - Maintain accurate records of your transactions for tax and regulatory purposes
 
@@ -87,24 +87,24 @@ You acknowledge and accept the following risks:
 
 **Protocol Changes:** Underlying blockchain protocols may undergo changes, forks, or upgrades that affect functionality.
 
-**Bridge-Specific Risks:** Cross-chain transfers involve additional complexity and risk compared to single-chain transactions. Assets may be temporarily locked during transfer processes.
+**Intent-Specific Risks:** Cross-chain transfers involve additional complexity and risk compared to single-chain transactions. Assets may be temporarily locked during transfer processes.
 
-**Regulatory Risk:** Cryptocurrency regulations are evolving. Future regulatory changes may impact your ability to use the Bridge or access your assets.
+**Regulatory Risk:** Cryptocurrency regulations are evolving. Future regulatory changes may impact your ability to use the Intents or access your assets.
 
 ### 5.2 No Investment Advice
 
-The Bridge provides technical infrastructure only. We do not provide:
+The Intents provides technical infrastructure only. We do not provide:
 
 - Investment, financial, legal, or tax advice
-- Recommendations on which assets to bridge or when to transact
+- Recommendations on which assets to transfer or when to transact
 - Suitability assessments for your financial situation
 - Guarantees of profitability or asset appreciation
 
-All transactions are unsolicited and self-directed. You should consult appropriate professional advisors before using the Bridge.
+All transactions are unsolicited and self-directed. You should consult appropriate professional advisors before using the Intents.
 
 ### 5.3 Third-Party Dependencies
 
-The Bridge relies on third-party infrastructure including:
+The Intents relies on third-party infrastructure including:
 
 - Blockchain networks and their validators
 - Wallet providers
@@ -116,9 +116,9 @@ We are not responsible for failures, downtime, or issues with any third-party se
 
 ## 6. Fees
 
-### 6.1 Bridge Fees
+### 6.1 Intent Fees
 
-The Bridge may charge fees for cross-chain transfers. All applicable fees will be displayed before you confirm a transaction.
+The Intents may charge fees for cross-chain transfers. All applicable fees will be displayed before you confirm a transaction.
 
 ### 6.2 Network Fees
 
@@ -132,20 +132,20 @@ Gas fees and other network costs can vary significantly based on network congest
 
 ### 7.1 No Uptime Guarantee
 
-The Bridge is provided on an "as available" basis. We do not guarantee:
+The Intents is provided on an "as available" basis. We do not guarantee:
 
 - Continuous, uninterrupted, or error-free operation
 - Availability of any specific blockchain network or asset
 - Specific transaction processing times
-- That the Bridge will meet your requirements
+- That the Intents will meet your requirements
 
 ### 7.2 Maintenance and Updates
 
-We may perform maintenance, updates, or modifications to the Bridge at any time, with or without notice. Such activities may temporarily limit or prevent access to the Bridge.
+We may perform maintenance, updates, or modifications to the Intents at any time, with or without notice. Such activities may temporarily limit or prevent access to the Intents.
 
 ### 7.3 Right to Modify or Discontinue
 
-We reserve the right to modify, suspend, or discontinue any aspect of the Bridge at any time, including:
+We reserve the right to modify, suspend, or discontinue any aspect of the Intents at any time, including:
 
 - Adding or removing supported networks or assets
 - Changing fee structures
@@ -156,41 +156,41 @@ We reserve the right to modify, suspend, or discontinue any aspect of the Bridge
 
 ### 8.1 Ownership
 
-All intellectual property rights in the Bridge interface, including but not limited to software, text, graphics, logos, and trademarks, are owned by Rozo or our licensors.
+All intellectual property rights in the Intents interface, including but not limited to software, text, graphics, logos, and trademarks, are owned by Rozo or our licensors.
 
 ### 8.2 License
 
-We grant you a limited, non-exclusive, non-transferable, revocable license to access and use the Bridge interface for its intended purpose, subject to these Terms.
+We grant you a limited, non-exclusive, non-transferable, revocable license to access and use the Intents interface for its intended purpose, subject to these Terms.
 
 ### 8.3 Restrictions
 
 You may not:
 
-- Copy, modify, or create derivative works of the Bridge
+- Copy, modify, or create derivative works of the Intents
 - Reverse engineer, decompile, or disassemble any software
 - Remove or alter any proprietary notices
-- Use the Bridge for any commercial purpose without authorization
-- Frame or mirror any part of the Bridge without written permission
+- Use the Intents for any commercial purpose without authorization
+- Frame or mirror any part of the Intents without written permission
 
 ## 9. Prohibited Activities
 
 You agree not to:
 
-- Use the Bridge to violate any laws, regulations, or these Terms
-- Interfere with or disrupt the Bridge or its infrastructure
-- Attempt to gain unauthorized access to the Bridge or related systems
-- Use automated tools (bots, scripts, crawlers) to access the Bridge without permission
+- Use the Intents to violate any laws, regulations, or these Terms
+- Interfere with or disrupt the Intents or its infrastructure
+- Attempt to gain unauthorized access to the Intents or related systems
+- Use automated tools (bots, scripts, crawlers) to access the Intents without permission
 - Transmit viruses, malware, or other malicious code
 - Impersonate any person or entity
 - Engage in wash trading, spoofing, or market manipulation
-- Use the Bridge to transfer assets you do not lawfully own
+- Use the Intents to transfer assets you do not lawfully own
 - Circumvent any security features or access controls
 
 ## 10. Limitation of Liability
 
 ### 10.1 No Liability
 
-TO THE MAXIMUM EXTENT PERMITTED BY LAW, ROZO BRIDGE AND ITS AFFILIATES, OFFICERS, DIRECTORS, EMPLOYEES, AND AGENTS SHALL NOT BE LIABLE FOR:
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, ROZO INTENTS AND ITS AFFILIATES, OFFICERS, DIRECTORS, EMPLOYEES, AND AGENTS SHALL NOT BE LIABLE FOR:
 
 - Any indirect, incidental, special, consequential, or punitive damages
 - Loss of profits, revenue, data, or use
@@ -199,7 +199,7 @@ TO THE MAXIMUM EXTENT PERMITTED BY LAW, ROZO BRIDGE AND ITS AFFILIATES, OFFICERS
 - Smart contract bugs, exploits, or vulnerabilities
 - Transaction delays, failures, or incorrect routing
 - Unauthorized access to your wallet or accounts
-- Any damages arising from your use of or inability to use the Bridge
+- Any damages arising from your use of or inability to use the Intents
 
 ### 10.2 Maximum Liability
 
@@ -207,48 +207,48 @@ Our total liability is limited to the total fees paid by you to us in the three 
 
 ### 10.3 Basis of the Bargain
 
-You acknowledge that the disclaimers and limitations in this Section 10 are fundamental elements of the agreement between you and us, and that we would not provide the Bridge without these limitations.
+You acknowledge that the disclaimers and limitations in this Section 10 are fundamental elements of the agreement between you and us, and that we would not provide the Intents without these limitations.
 
 ## 11. Indemnification
 
-You agree to indemnify, defend, and hold harmless Rozo Bridge and its affiliates, officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses (including reasonable attorneys' fees) arising from:
+You agree to indemnify, defend, and hold harmless ROZO Intents and its affiliates, officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses (including reasonable attorneys' fees) arising from:
 
-- Your use of the Bridge
+- Your use of the Intents
 - Your violation of these Terms
 - Your violation of any laws or regulations
 - Your violation of any third-party rights
-- Any transactions you initiate through the Bridge
+- Any transactions you initiate through the Intents
 
 ## 12. Disclaimer of Warranties
 
-THE BRIDGE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO:
+THE INTENTS IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO:
 
 - Warranties of merchantability, fitness for a particular purpose, or non-infringement
 - Warranties regarding security, accuracy, reliability, or availability
-- Warranties that the Bridge will be error-free or that defects will be corrected
-- Warranties regarding the results of using the Bridge
+- Warranties that the Intents will be error-free or that defects will be corrected
+- Warranties regarding the results of using the Intents
 
-We make no representations or warranties regarding the accuracy, completeness, or timeliness of any information displayed through the Bridge.
+We make no representations or warranties regarding the accuracy, completeness, or timeliness of any information displayed through the Intents.
 
 ## 13. Privacy
 
-Your use of the Bridge is also governed by our Privacy Policy. By using the Bridge, you consent to the practices described in the Privacy Policy.
+Your use of the Intents is also governed by our Privacy Policy. By using the Intents, you consent to the practices described in the Privacy Policy.
 
-Rozo Bridge does not collect personal data related to your blockchain transactions. Any data we collect is limited to technical information necessary for Service operation.
+ROZO Intents does not collect personal data related to your blockchain transactions. Any data we collect is limited to technical information necessary for Service operation.
 
 ## 14. Modifications to Terms
 
 We reserve the right to modify these Terms at any time. We will provide notice of material changes by:
 
 - Posting updated Terms with a new "Last Updated" date
-- Displaying a notice through the Bridge interface
+- Displaying a notice through the Intents interface
 - Sending notice to any contact information you have provided
 
-Your continued use of the Bridge after changes become effective constitutes acceptance of the modified Terms. If you do not agree to the changes, you must stop using the Bridge.
+Your continued use of the Intents after changes become effective constitutes acceptance of the modified Terms. If you do not agree to the changes, you must stop using the Intents.
 
 ## 15. Contact Information
 
 For questions about these Terms, please contact us at:
 
 **Email:** hi@rozo.ai
-**Website:** https://bridge.rozo.ai
+**Website:** https://intents.rozo.ai

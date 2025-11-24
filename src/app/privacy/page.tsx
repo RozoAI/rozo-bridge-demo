@@ -39,8 +39,8 @@ export default async function PrivacyPolicyPage() {
 
 export async function generateMetadata() {
   return {
-    title: "Privacy Policy - Rozo Bridge",
+    title: "Privacy Policy - ROZO Intents",
     description:
-      "Rozo Bridge Privacy Policy - Learn how we protect your privacy and handle data in our cross-chain bridge service.",
+      "ROZO Intents Privacy Policy - Learn how we protect your privacy and handle data in our cross-chain intent service.",
   };
 }

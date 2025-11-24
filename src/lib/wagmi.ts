@@ -80,10 +80,10 @@ const payinSupportedChains = [
 // Use Intent Pay SDK's default configuration with Wagmi's createConfig
 export const config = createConfig(
   getDefaultConfig({
-    appName: "Rozo Bridge",
-    appDescription: "Multi-chain USDC bridge powered by Intent Pay",
-    appUrl: "https://bridge.rozo.ai",
-    appIcon: "https://bridge.rozo.ai/icon.png",
+    appName: "ROZO Intents",
+    appDescription: "Intent-based USDC transfers between Base and Stellar",
+    appUrl: "https://intents.rozo.ai",
+    appIcon: "https://imagedelivery.net/AKLvTMvIg6yc9W08fHl1Tg/fdfef53e-91c2-4abc-aec0-6902a26d6c00/80x",
     chains: requiredChains,
     ssr: true,
   })

@@ -2,7 +2,7 @@ import { StellarBridge } from "@/components/stellar-bridge/StellarBridge";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Rozo Bridge - Stellar",
+  title: "ROZO Intents - Stellar",
   description:
     "Transfer USDC between Stellar and other chains with fast, secure, and gasless transactions",
 };

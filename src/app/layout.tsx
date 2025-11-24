@@ -19,9 +19,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rozo Bridge - Multi-Chain USDC Transfer",
+  title: "ROZO Intents - Multi-Chain USDC Transfer",
   description:
-    "Bridge USDC across chains with Intent Pay - fast, secure, and decentralized",
+    "Transfer USDC across chains with Intent Pay - fast, secure, and decentralized",
 };
 
 export default function RootLayout({

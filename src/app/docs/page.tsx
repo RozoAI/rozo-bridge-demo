@@ -40,10 +40,10 @@ export default function DocsHomePage() {
           </div>
         </div>
         <h1 className="text-4xl font-bold tracking-tight">
-          Rozo Bridge Documentation
+          ROZO Intents Documentation
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl">
-          Build seamless cross-chain applications with Intent Pay. Bridge USDC
+          Build seamless cross-chain applications with Intent Pay. Transfer USDC
           across multiple blockchains with our powerful API and SDK — fast,
           secure, and developer-friendly. Uses local optimized chain/token logos
           with a globe fallback for unknown networks.
@@ -93,7 +93,7 @@ export default function DocsHomePage() {
 
       {/* Features */}
       <div className="space-y-6">
-        <h2 className="text-2xl font-semibold">Why Choose Rozo Bridge?</h2>
+        <h2 className="text-2xl font-semibold">Why Choose ROZO Intents?</h2>
         <div className="grid md:grid-cols-3 gap-6">
           <Card>
             <CardHeader>

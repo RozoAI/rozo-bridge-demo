@@ -76,8 +76,8 @@ export function useDepositLogic({
             intent: "Deposit",
             items: [
               {
-                name: "Rozo Bridge",
-                description: "Bridge USDC to Stellar",
+                name: "ROZO Intents",
+                description: "Transfer USDC to Stellar",
               },
             ],
           },

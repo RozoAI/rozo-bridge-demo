@@ -1,10 +1,10 @@
-# Rozo Bridge - Privacy Policy
+# ROZO Intents - Privacy Policy
 
 **Last Updated:** September 16, 2025
 
 ## 1. Introduction
 
-Rozo Bridge ("we," "us," "our") is committed to protecting your privacy. This Privacy Policy explains our practices regarding the collection, use, and disclosure of information when you use our cross-chain bridge service.
+ROZO Intents ("we," "us," "our") is committed to protecting your privacy. This Privacy Policy explains our practices regarding the collection, use, and disclosure of information when you use our cross-chain intent service.
 
 **Key Privacy Principles:**
 
@@ -13,13 +13,13 @@ Rozo Bridge ("we," "us," "our") is committed to protecting your privacy. This Pr
 - We collect minimal technical data necessary for Service operation
 - We do not sell your information to third parties
 
-By using Rozo Bridge, you agree to the data practices described in this Privacy Policy.
+By using ROZO Intents, you agree to the data practices described in this Privacy Policy.
 
 ## 2. Information We Do NOT Collect
 
 ### 2.1 Blockchain Transaction Data
 
-**Rozo Bridge does not collect, store, or track personal data related to your blockchain transactions**
+**ROZO Intents does not collect, store, or track personal data related to your blockchain transactions**
 
 All blockchain transactions are recorded on public blockchains, not by us. Any transaction information that exists is publicly available on the respective blockchain networks.
 
@@ -38,7 +38,7 @@ We do not collect:
 
 ### 3.1 Technical and Usage Data
 
-To operate and improve the Bridge, we may automatically collect limited technical information:
+To operate and improve the Intents, we may automatically collect limited technical information:
 
 **Device and Browser Information:**
 - Browser type and version
@@ -54,7 +54,7 @@ To operate and improve the Bridge, we may automatically collect limited technica
 - General geographic location (country/region level only)
 
 **Usage Statistics:**
-- Pages visited within the Bridge interface
+- Pages visited within the Intents interface
 - Features used
 - Time spent on the Service
 - Referral source
@@ -80,7 +80,7 @@ We may use cookies, local storage, and similar technologies to:
 - Accept only certain cookies
 - Delete cookies after your session
 
-Disabling cookies may limit some functionality but will not prevent you from using core Bridge features.
+Disabling cookies may limit some functionality but will not prevent you from using core Intents features.
 
 ### 3.3 Information You Voluntarily Provide
 
@@ -98,7 +98,7 @@ We use this information solely to respond to your inquiry and improve the Servic
 
 We use collected information to:
 
-- Provide, maintain, and improve the Bridge interface
+- Provide, maintain, and improve the Intents interface
 - Process and display transaction status
 - Ensure Service security and integrity
 - Diagnose and fix technical issues
@@ -116,7 +116,7 @@ We do not send marketing communications. We may use contact information you prov
 
 We analyze usage data to:
 
-- Understand how users interact with the Bridge
+- Understand how users interact with the Intents
 - Identify and prioritize feature improvements
 - Optimize performance and user experience
 - Make data-driven development decisions
@@ -150,7 +150,7 @@ We may disclose information if required by law or legal process, including to:
 
 ### 5.3 Business Transfers
 
-If Rozo Bridge is involved in a merger, acquisition, or sale of assets, your information may be transferred as part of that transaction. We will provide notice before your information becomes subject to a different privacy policy.
+If ROZO Intents is involved in a merger, acquisition, or sale of assets, your information may be transferred as part of that transaction. We will provide notice before your information becomes subject to a different privacy policy.
 
 ### 5.4 No Sale of Data
 
@@ -160,17 +160,17 @@ If Rozo Bridge is involved in a merger, acquisition, or sale of assets, your inf
 
 ### 6.1 Public Nature of Blockchains
 
-Blockchain transactions are public by design. When you use the Bridge, your transactions are:
+Blockchain transactions are public by design. When you use the Intents, your transactions are:
 
 - Recorded on public blockchains
 - Permanently visible to anyone
 - Attributed to your wallet addresses
 
-**This data is not controlled by Rozo Bridge.** We cannot delete, modify, or hide blockchain transaction data.
+**This data is not controlled by ROZO Intents.** We cannot delete, modify, or hide blockchain transaction data.
 
 ### 6.2 Wallet Connections
 
-When you connect a wallet to the Bridge, the connection is established directly between your wallet and the blockchain networks. We do not intercept, store, or have access to:
+When you connect a wallet to the Intents, the connection is established directly between your wallet and the blockchain networks. We do not intercept, store, or have access to:
 
 - Your wallet private keys
 - Wallet seed phrases or recovery codes
@@ -195,7 +195,7 @@ We implement reasonable technical, administrative, and physical safeguards to pr
 
 - Transmission of data over the internet carries inherent risks
 - Unauthorized access or data breaches may occur despite our efforts
-- You use the Bridge at your own risk
+- You use the Intents at your own risk
 
 ### 7.3 Your Responsibility
 
@@ -273,7 +273,7 @@ We will respond to verified requests within the timeframes required by applicabl
 
 ### 10.1 Global Service
 
-The Bridge is accessible globally. Information we collect may be processed in countries other than your residence, including countries that may not provide the same level of data protection.
+The Intents is accessible globally. Information we collect may be processed in countries other than your residence, including countries that may not provide the same level of data protection.
 
 ### 10.2 Safeguards
 
@@ -285,7 +285,7 @@ When transferring data internationally, we implement appropriate safeguards incl
 
 ## 11. Children's Privacy
 
-The Bridge is not intended for individuals under 18 years of age. We do not knowingly collect personal information from children.
+The Intents is not intended for individuals under 18 years of age. We do not knowingly collect personal information from children.
 
 If we learn that we have collected personal information from a child under 18, we will take steps to delete that information promptly.
 
@@ -293,7 +293,7 @@ If we learn that we have collected personal information from a child under 18, w
 
 ### 12.1 External Links
 
-The Bridge may contain links to third-party websites, services, or resources. This Privacy Policy does not apply to those external sites.
+The Intents may contain links to third-party websites, services, or resources. This Privacy Policy does not apply to those external sites.
 
 We are not responsible for the privacy practices of:
 
@@ -325,10 +325,10 @@ We may update this Privacy Policy from time to time to reflect:
 
 Material changes will be announced through:
 - Updating the "Last Updated" date at the top of this policy
-- Displaying a notice through the Bridge interface
+- Displaying a notice through the Intents interface
 - Sending notice to any email addresses you have provided
 
-**Continued Use:** Your continued use of the Bridge after changes become effective constitutes acceptance of the updated Privacy Policy.
+**Continued Use:** Your continued use of the Intents after changes become effective constitutes acceptance of the updated Privacy Policy.
 
 ## 15. Contact Us
 

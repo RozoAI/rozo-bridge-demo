@@ -39,8 +39,8 @@ export default async function TermsOfServicePage() {
 
 export async function generateMetadata() {
   return {
-    title: "Terms of Service - Rozo Bridge",
+    title: "Terms of Service - ROZO Intents",
     description:
-      "Rozo Bridge Terms of Service - Legal terms and conditions for using our cross-chain bridge service.",
+      "ROZO Intents Terms of Service - Legal terms and conditions for using our cross-chain intent service.",
   };
 }

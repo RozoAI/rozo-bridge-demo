@@ -101,7 +101,7 @@ export function StellarDeposit({
           metadata: {
             items: [
               {
-                name: "Rozo Bridge",
+                name: "ROZO Intents",
                 description: "Deposit USDC to Stellar",
               },
             ],

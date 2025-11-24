@@ -4,24 +4,24 @@ import Link from "next/link";
 
 const faqs = [
   {
-    question: "What is Rozo Bridge?",
+    question: "What is ROZO Intents?",
     answer:
-      "Rozo Bridge is an intent-based stablecoin SDK that enables users to transfer USDC and other stablecoins between chains like Stellar, Base, Polygon, and Solana with zero confusion and near-zero error. It is designed for real-world payment speed and reliability, combining stablecoin abstraction, automatic route selection for the fastest bridge path, and optimized capital flow with transparent status tracking. Rozo approaches bridging as both a technical and user-experience problem — making crypto payments feel as simple as Visa. Rozo is supported by Stellar Community Fund, Base, Draper and Circle Alliance.",
+      "ROZO Intents is an intent-based stablecoin SDK that enables users to transfer USDC and other stablecoins between chains like Stellar, Base, Polygon, and Solana with zero confusion and near-zero error. It is designed for real-world payment speed and reliability, combining stablecoin abstraction, automatic route selection for the fastest route, and optimized capital flow with transparent status tracking. ROZO Intents approaches cross-chain transfers as both a technical and user-experience problem — making crypto payments feel as simple as Visa. Rozo is supported by Stellar Community Fund, Base, Draper and Circle Alliance.",
   },
   {
     question: "How long does it take to receive my funds?",
     answer:
-      "Most Rozo Bridge transfers complete in under few seconds. Fast route available on destination chain: 5 seconds. Requires liquidity rebalance from another chain: 10–20 minutes. Network-level fallback route: up to 1–2 hours. If your transfer takes longer than the quoted time, you can contact our support team via Discord.",
+      "Most ROZO Intents transfers complete in under few seconds. Fast route available on destination chain: 5 seconds. Requires liquidity rebalance from another chain: 10–20 minutes. Network-level fallback route: up to 1–2 hours. If your transfer takes longer than the quoted time, you can contact our support team via Discord.",
   },
   {
-    question: "Which blockchains does Rozo Bridge support?",
+    question: "Which blockchains does ROZO Intents support?",
     answer:
-      "Rozo currently supports transfers between: Stellar, Base, Polygon, Solana, BNB Chain (coming soon), and Arbitrum & Polygon (coming soon).",
+      "ROZO Intents currently supports transfers between: Stellar, Base, Polygon, Solana, BNB Chain (coming soon), and Arbitrum & Polygon (coming soon).",
   },
   {
-    question: "What tokens can I bridge?",
+    question: "What tokens can I transfer?",
     answer:
-      "Rozo supports stablecoins and assets including: USDC, USDT (coming soon), and other stablecoins (coming soon).",
+      "ROZO Intents supports stablecoins and assets including: USDC, USDT (coming soon), and other stablecoins (coming soon).",
   },
   {
     question: "What if my transfer is stuck or delayed?",
@@ -32,8 +32,8 @@ const faqs = [
 
 export async function generateMetadata() {
   return {
-    title: "FAQ - Rozo Bridge",
-    description: "Rozo Bridge FAQ - Frequently asked questions.",
+    title: "FAQ - ROZO Intents",
+    description: "ROZO Intents FAQ - Frequently asked questions.",
   };
 }
 

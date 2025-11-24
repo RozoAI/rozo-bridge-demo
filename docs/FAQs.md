@@ -1,14 +1,14 @@
-Rozo Bridge — Frequently Asked Questions (FAQ)
+ROZO Intents — Frequently Asked Questions (FAQ)
 
-1. What is Rozo Bridge?
+1. What is ROZO Intents?
 
-Rozo Bridge is an intent-based stablecoin SDK that enables users to transfer USDC and other stablecoins between chains like Stellar, Base, Polygon, and Solana with zero confusion and near-zero error.
+ROZO Intents is an intent-based stablecoin SDK that enables users to transfer USDC and other stablecoins between chains like Stellar, Base, Polygon, and Solana with zero confusion and near-zero error.
 It is designed for real-world payment speed and reliability, combining:
 	•	Stablecoin abstraction — transfer any stablecoin, on any chain
 	•	Automatic route selection for the fastest bridge path
 	•	Optimized capital flow and transparent status tracking
 
-Rozo Bridge approaches bridging as both a technical and user-experience problem — making crypto payments feel as simple as Visa.
+ROZO Intents approaches cross-chain transfers as both a technical and user-experience problem — making crypto payments feel as simple as Visa.
 
 Rozo is supported by [Stellar Community Fund](https://x.com/i/broadcasts/1djGXWBqdVdKZ), [Base](https://www.coinbase.com/developer-platform/discover/launches/summer-builder-grants), [Draper](https://x.com/draper_u/status/1940908242412183926) and [Circle Alliance](https://partners.circle.com/partner/rozo).
 
@@ -16,7 +16,7 @@ Rozo is supported by [Stellar Community Fund](https://x.com/i/broadcasts/1djGXWB
 
 2. How long does it take to receive my funds?
 
-Most Rozo Bridge transfers complete in under few seconds.
+Most ROZO Intents transfers complete in under few seconds.
 
 Condition	Typical Time
 Fast route available on destination chain	5 seconds
@@ -27,9 +27,9 @@ If your transfer takes longer than the quoted time, you can contact our support 
 
 ⸻
 
-3. Which blockchains does Rozo Bridge support?
+3. Which blockchains does ROZO Intents support?
 
-Rozo currently supports transfers between:
+ROZO Intents currently supports transfers between:
 	•	Stellar
 	•	Base
 	•	Polygon
@@ -39,9 +39,9 @@ Rozo currently supports transfers between:
 
 ⸻
 
-4. What tokens can I bridge?
+4. What tokens can I transfer?
 
-Rozo supports stablecoins and assets including:
+ROZO Intents supports stablecoins and assets including:
 	•	USDC
 	•	USDT  (coming soon)
 	•	Other stablecoins (coming soon)

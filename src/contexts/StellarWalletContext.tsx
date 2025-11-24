@@ -280,12 +280,12 @@ export function StellarWalletProvider({ children }: { children: ReactNode }) {
         url:
           typeof window !== "undefined"
             ? window.location.origin
-            : "https://bridge.rozo.ai",
+            : "https://intents.rozo.ai",
         projectId: walletConnectProjectId,
         method: WalletConnectAllowedMethods.SIGN,
-        description: "Rozo Bridge - Transfer USDC across chains",
-        name: "Rozo Bridge",
-        icons: ["https://bridge.rozo.ai/rozo-logo.png"],
+        description: "ROZO Intents - Transfer USDC across chains",
+        name: "ROZO Intents",
+        icons: ["https://imagedelivery.net/AKLvTMvIg6yc9W08fHl1Tg/fdfef53e-91c2-4abc-aec0-6902a26d6c00/80x"],
         network: WalletNetwork.PUBLIC,
       }),
     ];

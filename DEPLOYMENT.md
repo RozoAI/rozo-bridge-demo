@@ -1,6 +1,6 @@
 # Vercel Deployment Guide
 
-This guide will help you deploy the Rozo Bridge Demo to Vercel.
+This guide will help you deploy the ROZO Intents Demo to Vercel.
 
 ## 🚀 Quick Deployment
 
@@ -77,9 +77,9 @@ In your Vercel project dashboard, go to **Settings > Environment Variables** and
    - Add your custom domain if using one
 
 ### Recommended Domains
-- `rozo-bridge.vercel.app`
-- `bridge.yourdomain.com`
-- `usdc-bridge.yourdomain.com`
+- `rozo-intents.vercel.app`
+- `intents.yourdomain.com`
+- `usdc-intents.yourdomain.com`
 
 ## 🔒 Security Configuration
 
@@ -179,7 +179,7 @@ Expected response:
 {
   "status": "healthy",
   "timestamp": "2024-01-01T00:00:00.000Z",
-  "service": "rozo-bridge-demo",
+  "service": "rozo-intents-demo",
   "version": "0.1.0",
   "environment": "production",
   "uptime": 123.456

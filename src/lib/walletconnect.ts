@@ -6,10 +6,10 @@ export const WALLETCONNECT_CONFIG = {
   projectId:
     process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "dummy-project-id",
   metadata: {
-    name: "Rozo Bridge",
-    description: "Multi-chain USDC bridge powered by Intent Pay",
-    url: "https://bridge.rozo.ai",
-    icons: ["https://bridge.rozo.ai/icon.png"],
+    name: "ROZO Intents",
+    description: "Intent-based USDC transfers between Base and Stellar",
+    url: "https://intents.rozo.ai",
+    icons: ["https://imagedelivery.net/AKLvTMvIg6yc9W08fHl1Tg/fdfef53e-91c2-4abc-aec0-6902a26d6c00/80x"],
   },
   // Required namespaces for both EVM and Stellar
   requiredNamespaces: {

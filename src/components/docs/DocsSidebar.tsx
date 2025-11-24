@@ -35,7 +35,7 @@ const docSections: DocSection[] = [
       {
         title: "Overview",
         href: "/docs",
-        description: "Welcome to Rozo Bridge",
+        description: "Welcome to ROZO Intents",
       },
       {
         title: "Quick Start",
@@ -123,7 +123,7 @@ export function DocsSidebar() {
             className="rounded-lg"
           />
           <div>
-            <h2 className="font-semibold text-foreground">Rozo Bridge</h2>
+            <h2 className="font-semibold text-foreground">ROZO Intents</h2>
             <p className="text-xs text-muted-foreground">Documentation</p>
           </div>
         </div>

@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Rozo Bridge - Stellar",
+  title: "ROZO Intents - Stellar",
   description:
     "Transfer USDC between Stellar and other chains with fast, secure, and gasless transactions",
 };

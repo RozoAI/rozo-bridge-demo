@@ -1,7 +1,7 @@
 
 # Environment Setup Guide
 
-This guide will help you set up the environment variables needed for the Rozo Bridge Demo.
+This guide will help you set up the environment variables needed for the ROZO Intents Demo.
 
 ## Quick Setup
 
@@ -43,8 +43,8 @@ NEXT_PUBLIC_AVALANCHE_RPC_URL=https://api.avax.network/ext/bc/C/rpc
 2. Sign up or log in
 3. Click "Create New Project"
 4. Enter project details:
-   - **Name**: Rozo Bridge Demo
-   - **Description**: Multi-chain USDC bridge
+   - **Name**: ROZO Intents Demo
+   - **Description**: Multi-chain USDC intents
    - **URL**: Your domain (or localhost for development)
 5. Copy the **Project ID** from your dashboard
 6. Replace `your_walletconnect_project_id_here` in your env files

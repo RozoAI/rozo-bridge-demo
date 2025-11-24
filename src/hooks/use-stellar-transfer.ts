@@ -70,8 +70,8 @@ export const useStellarTransfer = (isAdmin: boolean = false) => {
               intent: "Withdraw",
               items: [
                 {
-                  name: "Rozo Bridge",
-                  description: "Bridge USDC to Stellar",
+                  name: "ROZO Intents",
+                  description: "Transfer USDC to Stellar",
                 },
               ],
               payer: {},
