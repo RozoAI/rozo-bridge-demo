@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 export interface GetFeeParams {
   amount: number;
+  type?: "exactin" | "exactout";
   appId?: string;
   currency?: string;
 }
@@ -14,7 +15,8 @@ export interface GetFeeResponse {
   fee: number;
   feePercentage: string;
   minimumFee: string;
-  amount_out: number;
+  amountIn: number;
+  amountOut: number;
 }
 
 export interface GetFeeError {
@@ -24,15 +26,14 @@ export interface GetFeeError {
   maxAllowed: number;
 }
 
-const fetchFee = async (
-  params: GetFeeParams
-): Promise<GetFeeResponse | undefined> => {
+const fetchFee = async (params: GetFeeParams): Promise<GetFeeResponse> => {
   if (params.amount <= 0) {
-    return;
+    throw new Error("Amount must be greater than 0");
   }
 
   const queryParams = new URLSearchParams({
     amount: params.amount.toString(),
+    type: params.type ?? "exactout",
     ...(params.appId && { appId: params.appId }),
     ...(params.currency && { currency: params.currency }),
   });
@@ -54,7 +55,13 @@ const fetchFee = async (
     );
   }
 
-  return response.json();
+  const data = await response.json();
+
+  if (!data) {
+    throw new Error("Invalid response: data is undefined");
+  }
+
+  return data;
 };
 
 export const useGetFee = (
@@ -76,7 +83,7 @@ export const useGetFee = (
     return () => {
       clearTimeout(handler);
     };
-  }, [params.amount, params.appId, params.currency, debounceMs]);
+  }, [params.amount, params.appId, params.currency, params.type, debounceMs]);
 
   return useQuery({
     queryKey: [
@@ -84,9 +91,10 @@ export const useGetFee = (
       debouncedParams.amount,
       debouncedParams.appId,
       debouncedParams.currency,
+      debouncedParams.type,
     ],
     queryFn: () => fetchFee(debouncedParams),
-    enabled: options?.enabled ?? true,
+    enabled: (options?.enabled ?? true) && debouncedParams.amount > 0,
     refetchInterval: options?.refetchInterval,
     staleTime: 30000, // 30 seconds
     retry: false, // Don't retry on error

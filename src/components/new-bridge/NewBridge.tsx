@@ -25,6 +25,7 @@ import { TrustlineWarning } from "./TrustlineWarning";
 import { WithdrawButton } from "./WithdrawButton";
 
 export function NewBridge() {
+  const feeType = "exactout";
   const [amount, setAmount] = useState<string | undefined>("");
   const [debouncedAmount, setDebouncedAmount] = useState<string | undefined>(
     ""
@@ -35,20 +36,39 @@ export function NewBridge() {
   const [addressError, setAddressError] = useState<string>("");
   const [withdrawLoading, setWithdrawLoading] = useState(false);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+  // State to track history updates
+  const [historyUpdateTrigger, setHistoryUpdateTrigger] = useState(0);
 
   const searchParams = useSearchParams();
   const isAdmin = searchParams.get("admin") === "rozo";
 
   const { stellarConnected, stellarAddress, trustlineStatus } =
     useStellarWallet();
-
   // Determine appId based on isAdmin
   const appId = isAdmin
     ? "rozoBridgeStellarAdmin"
     : DEFAULT_INTENT_PAY_CONFIG.appId;
 
-  // State to track history updates
-  const [historyUpdateTrigger, setHistoryUpdateTrigger] = useState(0);
+  // Fetch fee from API using debounced amount
+  const {
+    data: feeData,
+    isLoading: isFeeLoading,
+    error: feeError,
+  } = useGetFee(
+    {
+      amount: parseFloat(debouncedAmount || "0"),
+      appId,
+      currency: "USDC",
+      type: feeType,
+    },
+    {
+      enabled: !!debouncedAmount && parseFloat(debouncedAmount) > 0,
+      debounceMs: 0, // No additional debounce needed since we're using debouncedAmount
+    }
+  );
+
+  // Extract fee error details
+  const feeErrorData = feeError as GetFeeError | null;
 
   // Debounce amount input
   useEffect(() => {
@@ -72,93 +92,6 @@ export function NewBridge() {
     const history = getStellarHistoryForWallet(stellarAddress);
     return history.length > 0;
   }, [stellarConnected, stellarAddress, historyUpdateTrigger]);
-
-  // Listen for history updates
-
-  useEffect(() => {
-    const handleHistoryUpdate = () => {
-      setHistoryUpdateTrigger((prev) => prev + 1);
-    };
-
-    window.addEventListener("stellar-payment-completed", handleHistoryUpdate);
-
-    return () => {
-      window.removeEventListener(
-        "stellar-payment-completed",
-        handleHistoryUpdate
-      );
-    };
-  }, []);
-
-  // Fetch fee from API using debounced amount
-  const {
-    data: feeData,
-    isLoading: isFeeLoading,
-    error: feeError,
-  } = useGetFee(
-    {
-      amount: parseFloat(debouncedAmount || "0"),
-      appId,
-      currency: "USDC",
-    },
-    {
-      enabled: !!debouncedAmount && parseFloat(debouncedAmount) > 0,
-      debounceMs: 0, // No additional debounce needed since we're using debouncedAmount
-    }
-  );
-
-  // Extract fee error details
-  const feeErrorData = feeError as GetFeeError | null;
-
-  // Use withdraw logic hook (when isSwitched = true)
-  const { handleWithdraw } = useWithdrawLogic({
-    amount,
-    baseAddress,
-    onLoadingChange: setWithdrawLoading,
-    isAdmin,
-  });
-
-  // Use deposit logic hook (when isSwitched = false)
-  const { intentConfig, ableToPay, isPreparingConfig, handlePaymentCompleted } =
-    useDepositLogic({
-      appId,
-      amount: debouncedAmount,
-      isAdmin,
-      destinationStellarAddress: stellarAddress,
-    });
-
-  const handleSwitch = () => {
-    setIsSwitched(!isSwitched);
-    setBalanceError("");
-    setAddressError("");
-    setBaseAddress("");
-  };
-
-  // Validate balance when amount changes and user is bridging from Stellar
-  useEffect(() => {
-    if (isSwitched && stellarConnected && amount && amount !== "") {
-      const amountNum = parseFloat(amount);
-      const balanceNum = parseFloat(trustlineStatus.balance);
-
-      if (!isNaN(amountNum) && !isNaN(balanceNum)) {
-        if (amountNum > balanceNum) {
-          setBalanceError(
-            `Insufficient balance. You have ${balanceNum.toLocaleString(
-              "en-US",
-              {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              }
-            )} USDC`
-          );
-        } else {
-          setBalanceError("");
-        }
-      }
-    } else {
-      setBalanceError("");
-    }
-  }, [amount, isSwitched, stellarConnected, trustlineStatus.balance]);
 
   const fees = useMemo(() => {
     if (isFeeLoading) {
@@ -202,12 +135,22 @@ export function NewBridge() {
 
     // Only show result if we have valid fee data that matches
     if (validFeeData) {
-      return String(validFeeData.amount_out);
+      return String(
+        feeType === "exactout" ? validFeeData.amountOut : validFeeData.amountIn
+      );
     }
 
     // Still loading or no data yet
     return "";
   }, [amount, debouncedAmount, validFeeData]);
+
+  const toUnitsWithFees = useMemo(() => {
+    if (!toAmountWithFees || toAmountWithFees === "" || !validFeeData)
+      return "";
+    return String(
+      feeType === "exactout" ? validFeeData.amountIn : validFeeData.amountOut
+    );
+  }, [toAmountWithFees, validFeeData]);
 
   // Determine if amount exceeds limit based on fee error
   const limitError = useMemo(() => {
@@ -224,6 +167,72 @@ export function NewBridge() {
 
     return null;
   }, [amount, feeErrorData]);
+
+  // Listen for history updates
+  useEffect(() => {
+    const handleHistoryUpdate = () => {
+      setHistoryUpdateTrigger((prev) => prev + 1);
+    };
+
+    window.addEventListener("stellar-payment-completed", handleHistoryUpdate);
+
+    return () => {
+      window.removeEventListener(
+        "stellar-payment-completed",
+        handleHistoryUpdate
+      );
+    };
+  }, []);
+
+  // Use withdraw logic hook (when isSwitched = true)
+  const { handleWithdraw } = useWithdrawLogic({
+    amount: toUnitsWithFees,
+    baseAddress,
+    onLoadingChange: setWithdrawLoading,
+    isAdmin,
+  });
+
+  // Use deposit logic hook (when isSwitched = false)
+  const { intentConfig, ableToPay, isPreparingConfig, handlePaymentCompleted } =
+    useDepositLogic({
+      appId,
+      amount: toUnitsWithFees,
+      isAdmin,
+      destinationStellarAddress: stellarAddress,
+    });
+
+  const handleSwitch = () => {
+    setIsSwitched(!isSwitched);
+    setBalanceError("");
+    setAddressError("");
+    setBaseAddress("");
+  };
+
+  // Validate balance when amount changes and user is bridging from Stellar
+  useEffect(() => {
+    if (isSwitched && stellarConnected && amount && amount !== "") {
+      const amountNum = parseFloat(amount);
+      const balanceNum = parseFloat(trustlineStatus.balance);
+
+      if (!isNaN(amountNum) && !isNaN(balanceNum)) {
+        if (amountNum > balanceNum) {
+          setBalanceError(
+            `Insufficient balance. You have ${balanceNum.toLocaleString(
+              "en-US",
+              {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }
+            )} USDC`
+          );
+        } else {
+          setBalanceError("");
+        }
+      }
+    } else {
+      setBalanceError("");
+    }
+  }, [amount, isSwitched, stellarConnected, trustlineStatus.balance]);
 
   return (
     <div className="w-full max-w-xl mx-auto">
@@ -336,7 +345,7 @@ export function NewBridge() {
             // Withdraw Button (Stellar to Base)
             <WithdrawButton
               amount={amount}
-              toAmount={toAmountWithFees}
+              toAmount={toUnitsWithFees}
               baseAddress={baseAddress}
               isSwitched={isSwitched}
               balanceError={balanceError}
@@ -353,8 +362,8 @@ export function NewBridge() {
               intentConfig={intentConfig}
               ableToPay={
                 ableToPay &&
-                toAmountWithFees !== "" &&
-                parseFloat(toAmountWithFees) > 0
+                toUnitsWithFees !== "" &&
+                parseFloat(toUnitsWithFees) > 0
               }
               isPreparingConfig={isPreparingConfig}
               isFeeLoading={isFeeLoading}
