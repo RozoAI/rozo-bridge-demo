@@ -45,7 +45,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         >
           {children}
           <Toaster
-            position="top-right"
+            position="bottom-center"
             toastOptions={{
               duration: 4000,
             }}

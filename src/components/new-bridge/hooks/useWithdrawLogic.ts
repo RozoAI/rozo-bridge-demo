@@ -134,11 +134,8 @@ export function useWithdrawLogic({
     try {
       onLoadingChange(true);
       const result = await transfer({
-        bridge: true,
-        payload: {
-          amount: Number(amount).toFixed(2),
-          address: baseAddress,
-        },
+        amount: Number(amount).toFixed(2),
+        address: baseAddress,
       });
 
       if (result) {

@@ -14,12 +14,12 @@ export function ChainBadge({ isSwitched, isFrom }: ChainBadgeProps) {
   const getExcludeChains = () => {
     if (!isSwitched) {
       // From: Base/Solana/Polygon, To: Stellar
-      return isFrom ? ["stellar"] : ["base", "solana", "ethereum"];
+      return isFrom ? ["stellar"] : ["base", "solana", "ethereum", "bsc"];
     } else {
       // From: Stellar, To: Base (ONLY)
       return isFrom
-        ? ["base", "solana", "ethereum"]
-        : ["stellar", "solana", "ethereum"];
+        ? ["base", "solana", "ethereum", "bsc"]
+        : ["stellar", "solana", "ethereum", "bsc"];
     }
   };
 
