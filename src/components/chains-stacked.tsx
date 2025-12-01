@@ -1,4 +1,4 @@
-import { Base, Polygon, Solana, Stellar } from "./icons/chains";
+import { Base, Ethereum, Solana, Stellar } from "./icons/chains";
 
 interface ChainLogo {
   type: string;
@@ -16,7 +16,8 @@ export default function ChainsStacked({
 
   const chainLogos: ChainLogo[] = [
     { type: "base", component: <Base className="w-full h-full" /> },
-    { type: "polygon", component: <Polygon className="w-full h-full" /> },
+    // { type: "polygon", component: <Polygon className="w-full h-full" /> },
+    { type: "ethereum", component: <Ethereum className="w-full h-full" /> },
     { type: "solana", component: <Solana className="w-full h-full" /> },
     { type: "stellar", component: <Stellar className="w-full h-full" /> },
   ];
