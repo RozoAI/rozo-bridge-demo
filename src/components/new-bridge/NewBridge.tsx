@@ -25,7 +25,7 @@ import { TrustlineWarning } from "./TrustlineWarning";
 import { WithdrawButton } from "./WithdrawButton";
 
 export function NewBridge() {
-  const feeType = "exactout";
+  const feeType = "exactin";
   const [amount, setAmount] = useState<string | undefined>("");
   const [debouncedAmount, setDebouncedAmount] = useState<string | undefined>(
     ""
@@ -136,7 +136,7 @@ export function NewBridge() {
     // Only show result if we have valid fee data that matches
     if (validFeeData) {
       return String(
-        feeType === "exactout" ? validFeeData.amountOut : validFeeData.amountIn
+        feeType == "exactin" ? validFeeData.amountOut : validFeeData.amountIn
       );
     }
 
@@ -148,7 +148,7 @@ export function NewBridge() {
     if (!toAmountWithFees || toAmountWithFees === "" || !validFeeData)
       return "";
     return String(
-      feeType === "exactout" ? validFeeData.amountIn : validFeeData.amountOut
+      feeType == "exactin" ? validFeeData.amountIn : validFeeData.amountOut
     );
   }, [toAmountWithFees, validFeeData]);
 
@@ -186,7 +186,7 @@ export function NewBridge() {
 
   // Use withdraw logic hook (when isSwitched = true)
   const { handleWithdraw } = useWithdrawLogic({
-    amount: toUnitsWithFees,
+    amount: debouncedAmount,
     baseAddress,
     onLoadingChange: setWithdrawLoading,
     isAdmin,
@@ -196,7 +196,7 @@ export function NewBridge() {
   const { intentConfig, ableToPay, isPreparingConfig, handlePaymentCompleted } =
     useDepositLogic({
       appId,
-      amount: toUnitsWithFees,
+      amount: debouncedAmount,
       isAdmin,
       destinationStellarAddress: stellarAddress,
     });
