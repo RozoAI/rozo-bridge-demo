@@ -10,13 +10,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { StellarHistoryItem } from "../stellar-bridge/types/history";
-import {
-  clearStellarHistoryForWallet,
-  getStellarHistoryForWallet,
-  removeDuplicateStellarPayments,
-  ROZO_STELLAR_HISTORY_STORAGE_KEY,
-} from "../stellar-bridge/utils/history";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +17,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+import {
+  clearStellarHistoryForWallet,
+  getStellarHistoryForWallet,
+  removeDuplicateStellarPayments,
+  ROZO_STELLAR_HISTORY_STORAGE_KEY,
+  StellarHistoryItem,
+} from "./utils/history";
 
 interface HistoryDialogProps {
   open: boolean;

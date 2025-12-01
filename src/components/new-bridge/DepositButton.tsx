@@ -50,10 +50,7 @@ export function DepositButton({
         appId={intentConfig.appId}
         toChain={intentConfig.toChain}
         toToken={intentConfig.toToken}
-        toAddress={
-          intentConfig.toAddress || "0x0000000000000000000000000000000000000000"
-        }
-        toStellarAddress={intentConfig.toStellarAddress}
+        toAddress={intentConfig.toAddress}
         toUnits={intentConfig.toUnits}
         metadata={intentConfig.metadata as never}
         onPaymentCompleted={onPaymentCompleted}
