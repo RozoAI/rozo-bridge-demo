@@ -7,7 +7,6 @@ import { DEFAULT_INTENT_PAY_CONFIG } from "@/lib/intentPay";
 import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { getStellarHistoryForWallet } from "../stellar-bridge/utils/history";
 import { StellarWalletConnect } from "../StellarWalletConnect";
 import { Button } from "../ui/button";
 import { AmountLimitWarning } from "./AmountLimitWarning";
@@ -22,6 +21,7 @@ import { useWithdrawLogic } from "./hooks/useWithdrawLogic";
 import { StellarBalanceCard } from "./StellarBalanceCard";
 import { TokenAmountInput } from "./TokenAmountInput";
 import { TrustlineWarning } from "./TrustlineWarning";
+import { getStellarHistoryForWallet } from "./utils/history";
 import { WithdrawButton } from "./WithdrawButton";
 
 export function NewBridge() {

@@ -14,16 +14,14 @@ export {
   RozoPayButton,
   RozoPayProvider,
   type RozoPayButtonProps,
-  type RozoPayment,
 } from "@rozoai/intent-pay";
 
 // Unified Intent Pay configuration for all transfer types
 export interface IntentPayConfig {
   appId: string;
   toChain: number;
-  toToken: Address; // USDC token address on destination chain
-  toAddress?: Address; // Destination EVM address
-  toStellarAddress?: string; // Destination Stellar address
+  toToken: string; // USDC token address on destination chain
+  toAddress: string; // Destination EVM address
   toUnits: string; // Amount in USDC units
   intent?: string; // e.g., "Transfer USDC"
   preferredChains?: number[]; // Preferred source chains
@@ -55,39 +53,6 @@ export const getUSDCAddress = (chainId: number): Address => {
     throw new Error(`USDC not supported on EVM chain ${chainId}`);
   }
   return address;
-};
-
-// Create unified Intent Pay configuration
-export const createIntentConfig = (params: {
-  appId: string;
-  fromChainId?: number; // Optional - users choose when they pay
-  toChainId?: number; // Optional for Stellar transfers
-  toAddress?: Address; // For EVM transfers
-  toStellarAddress?: string; // For Stellar transfers
-  amount: string; // Amount in USDC (e.g., "100.50")
-  memo?: {
-    type: "text" | "id" | "hash";
-    value: string;
-  }; // Optional memo for Stellar transfers
-  externalId?: string;
-}): IntentPayConfig => {
-  // Determine if this is a Stellar transfer
-  const isStellarTransfer = !!params.toStellarAddress;
-
-  return {
-    appId: params.appId,
-    toChain: isStellarTransfer ? BASE_USDC.chainId : params.toChainId!,
-    toToken: isStellarTransfer
-      ? BASE_USDC.token
-      : getUSDCAddress(params.toChainId!),
-    toAddress: params.toAddress,
-    toStellarAddress: params.toStellarAddress,
-    toUnits: params.amount,
-    intent: "Transfer USDC",
-    preferredChains: params.fromChainId ? [params.fromChainId] : undefined, // Only set if provided
-    memo: params.memo,
-    externalId: params.externalId,
-  };
 };
 
 // Supported chains for Intent Pay (payin supported chains only)

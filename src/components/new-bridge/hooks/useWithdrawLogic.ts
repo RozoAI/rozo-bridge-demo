@@ -1,10 +1,10 @@
 "use client";
 
-import { saveStellarHistory } from "@/components/stellar-bridge/utils/history";
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { useStellarTransfer } from "@/hooks/use-stellar-transfer";
 import { useToastQueue } from "@/hooks/use-toast-queue";
 import { useEffect, useRef } from "react";
+import { saveStellarHistory } from "../utils/history";
 
 interface UseWithdrawLogicProps {
   amount: string | undefined;
@@ -134,11 +134,8 @@ export function useWithdrawLogic({
     try {
       onLoadingChange(true);
       const result = await transfer({
-        bridge: true,
-        payload: {
-          amount: Number(amount).toFixed(2),
-          address: baseAddress,
-        },
+        amount: Number(amount).toFixed(2),
+        address: baseAddress,
       });
 
       if (result) {

@@ -1,13 +1,12 @@
 "use client";
 
-import { saveStellarHistory } from "@/components/stellar-bridge/utils/history";
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
-import { BASE_USDC, IntentPayConfig } from "@/lib/intentPay";
-import { PaymentCompletedEvent } from "@rozoai/intent-common";
+import { IntentPayConfig } from "@/lib/intentPay";
+import { PaymentCompletedEvent, rozoStellarUSDC } from "@rozoai/intent-common";
 import { useRozoPayUI } from "@rozoai/intent-pay";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { getAddress } from "viem";
+import { saveStellarHistory } from "../utils/history";
 
 interface UseDepositLogicProps {
   appId: string;
@@ -67,10 +66,9 @@ export function useDepositLogic({
       try {
         const config: IntentPayConfig = {
           appId: appId,
-          toChain: BASE_USDC.chainId,
-          toAddress: getAddress("0x0000000000000000000000000000000000000000"),
-          toToken: getAddress(BASE_USDC.token),
-          toStellarAddress: stellarAddress || destinationStellarAddress,
+          toChain: rozoStellarUSDC.chainId,
+          toAddress: destinationStellarAddress || stellarAddress,
+          toToken: rozoStellarUSDC.token,
           toUnits: amount,
           metadata: {
             intent: "Deposit",
