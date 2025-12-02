@@ -4,6 +4,7 @@ import { StellarPayNow } from "@/lib/stellar-pay";
 import {
   baseUSDC,
   createPayment,
+  FeeType,
   PaymentResponse,
   rozoStellarUSDC,
 } from "@rozoai/intent-common";
@@ -59,6 +60,7 @@ export const useStellarTransfer = (isAdmin: boolean = false) => {
           toUnits: payload.amount,
           preferredChain: rozoStellarUSDC.chainId,
           preferredTokenAddress: rozoStellarUSDC.token,
+          type: FeeType.ExactIn,
           metadata: {
             intent: "Withdraw",
             items: [
@@ -72,20 +74,14 @@ export const useStellarTransfer = (isAdmin: boolean = false) => {
 
         if (payment.id) {
           setPaymentId(payment.id);
-          const token =
-            "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN";
-
-          if (!token) {
-            throw new Error("Token not found");
-          }
-
           stellarPayParams = {
             account,
             publicKey,
             server,
             token: {
               key: "USDC",
-              address: token,
+              address:
+                "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
             },
             order: {
               address: payment.source.receiverAddress,
@@ -97,7 +93,7 @@ export const useStellarTransfer = (isAdmin: boolean = false) => {
           throw new Error("Payment creation failed");
         }
 
-        if (server) {
+        if (server && stellarPayParams) {
           try {
             setStep("sign-transaction");
             const transactionXdr = await StellarPayNow(stellarPayParams);
