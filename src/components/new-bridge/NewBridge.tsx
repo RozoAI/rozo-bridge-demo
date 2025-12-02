@@ -311,7 +311,7 @@ export function NewBridge() {
         )}
 
         {/* Amount Limit Warning */}
-        {stellarConnected && limitError && (
+        {limitError && (
           <div className="mt-4 sm:mt-6">
             <AmountLimitWarning
               limit={limitError.maxAllowed}
