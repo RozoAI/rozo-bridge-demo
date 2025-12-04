@@ -1,0 +1,48 @@
+"use client";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { HelpCircle } from "lucide-react";
+
+interface MemoInputProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export function MemoInput({ value, onChange }: MemoInputProps) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-1.5">
+        <Label
+          htmlFor="memo"
+          className="text-neutral-600 dark:text-neutral-400"
+        >
+          Memo
+        </Label>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <HelpCircle className="size-3.5 text-neutral-400 dark:text-neutral-500 cursor-help" />
+          </TooltipTrigger>
+          <TooltipContent side="right" className="max-w-xs">
+            <p>
+              Add an optional memo to your transfer. This can be useful for
+              identifying the transaction or including additional information.
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+      <Input
+        id="memo"
+        placeholder="Enter memo (optional)"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-12 bg-white border-neutral-300 text-neutral-900 placeholder:text-neutral-400 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:placeholder:text-neutral-500"
+      />
+    </div>
+  );
+}

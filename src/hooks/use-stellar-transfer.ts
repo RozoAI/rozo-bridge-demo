@@ -1,5 +1,6 @@
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { DEFAULT_INTENT_PAY_CONFIG } from "@/lib/intentPay";
+import { USDC_ASSET } from "@/lib/stellar";
 import { StellarPayNow } from "@/lib/stellar-pay";
 import {
   baseUSDC,
@@ -19,7 +20,7 @@ type TransferStep =
   | "success"
   | "error";
 
-type Payload = { amount: string; address: string };
+type Payload = { amount: string; address: string; memo?: string };
 
 export const useStellarTransfer = (
   isAdmin: boolean = false,
@@ -47,8 +48,6 @@ export const useStellarTransfer = (
       setStep(null);
       setPaymentId(null);
       if (account && publicKey && server) {
-        let stellarPayParams: any;
-
         // Bridge mode: Use API flow
         setStep("create-payment");
         const appId = isAdmin
@@ -57,13 +56,13 @@ export const useStellarTransfer = (
 
         const payment = await createPayment({
           appId,
+          feeType,
           toChain: baseUSDC.chainId,
           toToken: baseUSDC.token,
           toAddress: payload.address,
           toUnits: payload.amount,
           preferredChain: rozoStellarUSDC.chainId,
           preferredTokenAddress: rozoStellarUSDC.token,
-          type: feeType,
           metadata: {
             intent: "Withdraw",
             items: [
@@ -73,61 +72,59 @@ export const useStellarTransfer = (
               },
             ],
           },
+          ...(payload.memo ? { receiverMemo: payload.memo } : {}),
         });
 
-        if (payment.id) {
+        if (payment.id && payment.source.receiverAddress) {
           setPaymentId(payment.id);
-          stellarPayParams = {
-            account,
-            publicKey,
-            server,
-            token: {
-              key: "USDC",
-              address:
-                "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
-            },
-            order: {
-              address: payment.source.receiverAddress,
-              pay_amount: Number(payment.source.amount ?? 0),
-              salt: payment.source.receiverMemo,
-            },
-          };
-        } else {
-          throw new Error("Payment creation failed");
-        }
+          if (server) {
+            try {
+              setStep("sign-transaction");
+              const transactionXdr = await StellarPayNow({
+                account,
+                publicKey,
+                server,
+                token: {
+                  key: USDC_ASSET.code,
+                  address: USDC_ASSET.issuer,
+                },
+                order: {
+                  address: payment.source.receiverAddress,
+                  pay_amount: Number(payment.source.amount ?? 0),
+                  salt: payment.source.receiverMemo,
+                },
+              });
+              const signedXdr = await stellarKit.signTransaction(
+                transactionXdr
+              );
 
-        if (server && stellarPayParams) {
-          try {
-            setStep("sign-transaction");
-            const transactionXdr = await StellarPayNow(stellarPayParams);
-            const signedXdr = await stellarKit.signTransaction(transactionXdr);
+              const signedTx = TransactionBuilder.fromXDR(
+                signedXdr.signedTxXdr,
+                Networks.PUBLIC
+              );
 
-            const signedTx = TransactionBuilder.fromXDR(
-              signedXdr.signedTxXdr,
-              Networks.PUBLIC
-            );
+              setStep("submit-transaction");
+              const result = await server.submitTransaction(signedTx);
 
-            setStep("submit-transaction");
-            const result = await server.submitTransaction(signedTx);
-
-            if (result.hash && payment.id) {
-              setStep("success");
-              return {
-                hash: result.hash,
-                payment,
-              };
-            } else {
+              if (result.hash && payment.id) {
+                setStep("success");
+                return {
+                  hash: result.hash,
+                  payment,
+                };
+              } else {
+                setStep("error");
+                throw new Error("Transaction failed");
+              }
+            } catch (error) {
               setStep("error");
-              throw new Error("Transaction failed");
+              throw error;
             }
-          } catch (error) {
-            setStep("error");
-            throw error;
           }
+        } else {
+          setStep("error");
+          throw new Error("Transaction failed");
         }
-      } else {
-        setStep("error");
-        throw new Error("Transaction failed");
       }
     } catch (error) {
       setStep("error");

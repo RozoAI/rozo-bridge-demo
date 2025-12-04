@@ -19,6 +19,7 @@ import { DepositButton } from "./DepositButton";
 import { HistoryDialog } from "./HistoryDialog";
 import { useDepositLogic } from "./hooks/useDepositLogic";
 import { useWithdrawLogic } from "./hooks/useWithdrawLogic";
+import { MemoInput } from "./MemoInput";
 import { StellarBalanceCard } from "./StellarBalanceCard";
 import { TokenAmountInput } from "./TokenAmountInput";
 import { TrustlineWarning } from "./TrustlineWarning";
@@ -36,6 +37,7 @@ export function NewBridge() {
   const [balanceError, setBalanceError] = useState<string>("");
   const [baseAddress, setBaseAddress] = useState<string>("");
   const [addressError, setAddressError] = useState<string>("");
+  const [memo, setMemo] = useState<string>("");
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   // State to track history updates
   const [historyUpdateTrigger, setHistoryUpdateTrigger] = useState(0);
@@ -166,7 +168,9 @@ export function NewBridge() {
       !!addressError ||
       isWithdrawLoading ||
       isFeeLoading ||
-      !!feeErrorData
+      !!feeErrorData ||
+      !baseAddress ||
+      !!addressError
     );
   }, [
     balanceError,
@@ -174,6 +178,8 @@ export function NewBridge() {
     isWithdrawLoading,
     isFeeLoading,
     feeErrorData,
+    baseAddress,
+    addressError,
   ]);
 
   // Debounce amount input
@@ -214,6 +220,7 @@ export function NewBridge() {
   const { handleWithdraw } = useWithdrawLogic({
     amount: fromAmount,
     baseAddress,
+    memo,
     feeType,
     onLoadingChange: setIsWithdrawLoading,
     isAdmin,
@@ -234,6 +241,7 @@ export function NewBridge() {
     setBalanceError("");
     setAddressError("");
     setBaseAddress("");
+    setMemo("");
     // setFromAmount("");
     // setToAmount("");
     // setFeeType(FeeType.ExactIn);
@@ -343,13 +351,14 @@ export function NewBridge() {
 
         {/* Base Address Input - Only show when withdrawing (Stellar to Base) */}
         {isSwitched && (
-          <div className="my-4 sm:my-6">
+          <div className="my-4 sm:my-6 space-y-4">
             <BaseAddressInput
               value={baseAddress}
               onChange={setBaseAddress}
               error={addressError}
               onErrorChange={setAddressError}
             />
+            <MemoInput value={memo} onChange={setMemo} />
           </div>
         )}
 

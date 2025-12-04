@@ -10,6 +10,7 @@ import { saveStellarHistory } from "../utils/history";
 interface UseWithdrawLogicProps {
   amount: string | undefined;
   baseAddress: string;
+  memo?: string;
   onLoadingChange: (loading: boolean) => void;
   feeType: FeeType;
   isAdmin?: boolean;
@@ -18,6 +19,7 @@ interface UseWithdrawLogicProps {
 export function useWithdrawLogic({
   amount,
   baseAddress,
+  memo,
   onLoadingChange,
   feeType,
   isAdmin = false,
@@ -142,6 +144,7 @@ export function useWithdrawLogic({
       const result = await transfer({
         amount: Number(amount).toFixed(2),
         address: baseAddress,
+        ...(memo ? { memo } : {}),
       });
 
       if (result) {
