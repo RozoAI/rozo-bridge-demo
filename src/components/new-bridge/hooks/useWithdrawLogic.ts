@@ -9,6 +9,7 @@ import { saveStellarHistory } from "../utils/history";
 
 interface UseWithdrawLogicProps {
   amount: string | undefined;
+  feeAmount: string | undefined;
   baseAddress: string;
   memo?: string;
   onLoadingChange: (loading: boolean) => void;
@@ -18,6 +19,7 @@ interface UseWithdrawLogicProps {
 
 export function useWithdrawLogic({
   amount,
+  feeAmount,
   baseAddress,
   memo,
   onLoadingChange,
@@ -128,7 +130,7 @@ export function useWithdrawLogic({
   ]);
 
   const handleWithdraw = async () => {
-    if (!amount || amount === "") return;
+    if (!amount || amount === "" || !feeAmount || feeAmount === "") return;
 
     // Clear any existing toasts and reset queue
     clearQueue();
@@ -142,7 +144,8 @@ export function useWithdrawLogic({
     try {
       onLoadingChange(true);
       const result = await transfer({
-        amount: Number(amount).toFixed(2),
+        amount,
+        feeAmount,
         address: baseAddress,
         ...(memo ? { memo } : {}),
       });

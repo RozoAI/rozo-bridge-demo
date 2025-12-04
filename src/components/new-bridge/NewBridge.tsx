@@ -219,6 +219,7 @@ export function NewBridge() {
   // Use withdraw logic hook (when isSwitched = true)
   const { handleWithdraw } = useWithdrawLogic({
     amount: fromAmount,
+    feeAmount: feeData?.fee.toFixed(2) || "0",
     baseAddress,
     memo,
     feeType,
