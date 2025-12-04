@@ -2,7 +2,11 @@
 
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { IntentPayConfig } from "@/lib/intentPay";
-import { PaymentCompletedEvent, rozoStellarUSDC } from "@rozoai/intent-common";
+import {
+  FeeType,
+  PaymentCompletedEvent,
+  rozoStellarUSDC,
+} from "@rozoai/intent-common";
 import { useRozoPayUI } from "@rozoai/intent-pay";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -12,12 +16,14 @@ interface UseDepositLogicProps {
   appId: string;
   isAdmin: boolean;
   amount: string | undefined;
+  feeType: FeeType;
   destinationStellarAddress?: string;
 }
 
 export function useDepositLogic({
   appId,
   amount,
+  feeType,
   destinationStellarAddress,
   isAdmin = false,
 }: UseDepositLogicProps) {
@@ -66,6 +72,7 @@ export function useDepositLogic({
       try {
         const config: IntentPayConfig = {
           appId: appId,
+          feeType: feeType,
           toChain: rozoStellarUSDC.chainId,
           toAddress: destinationStellarAddress || stellarAddress,
           toToken: rozoStellarUSDC.token,

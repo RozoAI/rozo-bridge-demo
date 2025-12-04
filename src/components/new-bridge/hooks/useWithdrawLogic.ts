@@ -3,6 +3,7 @@
 import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { useStellarTransfer } from "@/hooks/use-stellar-transfer";
 import { useToastQueue } from "@/hooks/use-toast-queue";
+import { FeeType } from "@rozoai/intent-common";
 import { useEffect, useRef } from "react";
 import { saveStellarHistory } from "../utils/history";
 
@@ -10,6 +11,7 @@ interface UseWithdrawLogicProps {
   amount: string | undefined;
   baseAddress: string;
   onLoadingChange: (loading: boolean) => void;
+  feeType: FeeType;
   isAdmin?: boolean;
 }
 
@@ -17,11 +19,15 @@ export function useWithdrawLogic({
   amount,
   baseAddress,
   onLoadingChange,
+  feeType,
   isAdmin = false,
 }: UseWithdrawLogicProps) {
   const { stellarAddress, checkTrustline, checkXlmBalance } =
     useStellarWallet();
-  const { transfer, step, paymentId, setStep } = useStellarTransfer(isAdmin);
+  const { transfer, step, paymentId, setStep } = useStellarTransfer(
+    isAdmin,
+    feeType
+  );
   const {
     currentToastId,
     updateCurrentToast,

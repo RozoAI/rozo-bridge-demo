@@ -21,7 +21,10 @@ type TransferStep =
 
 type Payload = { amount: string; address: string };
 
-export const useStellarTransfer = (isAdmin: boolean = false) => {
+export const useStellarTransfer = (
+  isAdmin: boolean = false,
+  feeType: FeeType = FeeType.ExactIn
+) => {
   const { stellarAddress: publicKey, server, stellarKit } = useStellarWallet();
 
   const [step, setStep] = useState<TransferStep>(null);
@@ -60,7 +63,7 @@ export const useStellarTransfer = (isAdmin: boolean = false) => {
           toUnits: payload.amount,
           preferredChain: rozoStellarUSDC.chainId,
           preferredTokenAddress: rozoStellarUSDC.token,
-          type: FeeType.ExactIn,
+          type: feeType,
           metadata: {
             intent: "Withdraw",
             items: [

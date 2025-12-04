@@ -4,7 +4,8 @@ import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { GetFeeError, useGetFee } from "@/hooks/use-get-fee";
 import { formatNumber } from "@/lib/formatNumber";
 import { DEFAULT_INTENT_PAY_CONFIG } from "@/lib/intentPay";
-import { Clock } from "lucide-react";
+import { FeeType } from "@rozoai/intent-common";
+import { Clock, Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { StellarWalletConnect } from "../StellarWalletConnect";
@@ -22,19 +23,19 @@ import { StellarBalanceCard } from "./StellarBalanceCard";
 import { TokenAmountInput } from "./TokenAmountInput";
 import { TrustlineWarning } from "./TrustlineWarning";
 import { getStellarHistoryForWallet } from "./utils/history";
-import { WithdrawButton } from "./WithdrawButton";
 
 export function NewBridge() {
-  const feeType = "exactin";
-  const [amount, setAmount] = useState<string | undefined>("");
+  const [feeType, setFeeType] = useState<FeeType>(FeeType.ExactIn);
+  const [fromAmount, setFromAmount] = useState<string | undefined>("");
+  const [toAmount, setToAmount] = useState<string | undefined>("");
   const [debouncedAmount, setDebouncedAmount] = useState<string | undefined>(
     ""
   );
   const [isSwitched, setIsSwitched] = useState(false);
+  const [isWithdrawLoading, setIsWithdrawLoading] = useState(false);
   const [balanceError, setBalanceError] = useState<string>("");
   const [baseAddress, setBaseAddress] = useState<string>("");
   const [addressError, setAddressError] = useState<string>("");
-  const [withdrawLoading, setWithdrawLoading] = useState(false);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   // State to track history updates
   const [historyUpdateTrigger, setHistoryUpdateTrigger] = useState(0);
@@ -69,22 +70,6 @@ export function NewBridge() {
 
   // Extract fee error details
   const feeErrorData = feeError as GetFeeError | null;
-
-  // Debounce amount input
-  useEffect(() => {
-    // If amount is empty or zero, update immediately
-    if (!amount || amount === "" || parseFloat(amount) === 0) {
-      setDebouncedAmount(amount);
-      return;
-    }
-
-    // Otherwise, debounce the update
-    const timer = setTimeout(() => {
-      setDebouncedAmount(amount);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [amount]);
 
   // Check if there's any history for the current wallet
   const hasHistory = useMemo(() => {
@@ -122,39 +107,46 @@ export function NewBridge() {
     return null;
   }, [feeData, debouncedAmount]);
 
-  const toAmountWithFees = useMemo(() => {
+  const calculatedAmount = useMemo(() => {
+    const inputAmount = feeType === FeeType.ExactIn ? fromAmount : toAmount;
+
     // If no amount, clear the output
-    if (!amount || amount === "" || parseFloat(amount) === 0) {
+    if (!inputAmount || inputAmount === "" || parseFloat(inputAmount) === 0) {
       return "";
     }
 
     // If amount is different from debounced amount, don't show anything (user is still typing)
-    if (amount !== debouncedAmount) {
+    if (inputAmount !== debouncedAmount) {
       return "";
     }
 
     // Only show result if we have valid fee data that matches
     if (validFeeData) {
       return String(
-        feeType == "exactin" ? validFeeData.amountOut : validFeeData.amountIn
+        feeType === FeeType.ExactIn
+          ? validFeeData.amountOut
+          : validFeeData.amountIn
       );
     }
 
     // Still loading or no data yet
     return "";
-  }, [amount, debouncedAmount, validFeeData]);
+  }, [fromAmount, toAmount, debouncedAmount, validFeeData, feeType]);
 
   const toUnitsWithFees = useMemo(() => {
-    if (!toAmountWithFees || toAmountWithFees === "" || !validFeeData)
+    if (!calculatedAmount || calculatedAmount === "" || !validFeeData)
       return "";
     return String(
-      feeType == "exactin" ? validFeeData.amountIn : validFeeData.amountOut
+      feeType === FeeType.ExactIn
+        ? validFeeData.amountIn
+        : validFeeData.amountOut
     );
-  }, [toAmountWithFees, validFeeData]);
+  }, [calculatedAmount, validFeeData, feeType]);
 
   // Determine if amount exceeds limit based on fee error
   const limitError = useMemo(() => {
-    if (!amount || parseFloat(amount) === 0) return null;
+    const inputAmount = feeType === FeeType.ExactIn ? fromAmount : toAmount;
+    if (!inputAmount || parseFloat(inputAmount) === 0) return null;
 
     // Check if fee error is a limit error
     if (feeErrorData) {
@@ -166,7 +158,41 @@ export function NewBridge() {
     }
 
     return null;
-  }, [amount, feeErrorData]);
+  }, [fromAmount, toAmount, feeErrorData, feeType]);
+
+  const isWithdrawDisabled = useMemo(() => {
+    return (
+      !!balanceError ||
+      !!addressError ||
+      isWithdrawLoading ||
+      isFeeLoading ||
+      !!feeErrorData
+    );
+  }, [
+    balanceError,
+    addressError,
+    isWithdrawLoading,
+    isFeeLoading,
+    feeErrorData,
+  ]);
+
+  // Debounce amount input
+  useEffect(() => {
+    const inputAmount = feeType === FeeType.ExactIn ? fromAmount : toAmount;
+
+    // If amount is empty or zero, update immediately
+    if (!inputAmount || inputAmount === "" || parseFloat(inputAmount) === 0) {
+      setDebouncedAmount(inputAmount);
+      return;
+    }
+
+    // Otherwise, debounce the update
+    const timer = setTimeout(() => {
+      setDebouncedAmount(inputAmount);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [fromAmount, toAmount, feeType]);
 
   // Listen for history updates
   useEffect(() => {
@@ -186,9 +212,10 @@ export function NewBridge() {
 
   // Use withdraw logic hook (when isSwitched = true)
   const { handleWithdraw } = useWithdrawLogic({
-    amount: debouncedAmount,
+    amount: fromAmount,
     baseAddress,
-    onLoadingChange: setWithdrawLoading,
+    feeType,
+    onLoadingChange: setIsWithdrawLoading,
     isAdmin,
   });
 
@@ -196,7 +223,8 @@ export function NewBridge() {
   const { intentConfig, ableToPay, isPreparingConfig, handlePaymentCompleted } =
     useDepositLogic({
       appId,
-      amount: debouncedAmount,
+      amount: fromAmount,
+      feeType,
       isAdmin,
       destinationStellarAddress: stellarAddress,
     });
@@ -206,12 +234,15 @@ export function NewBridge() {
     setBalanceError("");
     setAddressError("");
     setBaseAddress("");
+    // setFromAmount("");
+    // setToAmount("");
+    // setFeeType(FeeType.ExactIn);
   };
 
   // Validate balance when amount changes and user is bridging from Stellar
   useEffect(() => {
-    if (isSwitched && stellarConnected && amount && amount !== "") {
-      const amountNum = parseFloat(amount);
+    if (isSwitched && stellarConnected && fromAmount && fromAmount !== "") {
+      const amountNum = parseFloat(fromAmount);
       const balanceNum = parseFloat(trustlineStatus.balance);
 
       if (!isNaN(amountNum) && !isNaN(balanceNum)) {
@@ -232,7 +263,20 @@ export function NewBridge() {
     } else {
       setBalanceError("");
     }
-  }, [amount, isSwitched, stellarConnected, trustlineStatus.balance]);
+  }, [fromAmount, isSwitched, stellarConnected, trustlineStatus.balance]);
+
+  // Sync the calculated amount to the opposite field
+  useEffect(() => {
+    if (calculatedAmount !== "") {
+      if (feeType === FeeType.ExactIn) {
+        // User filled "From", update "To"
+        setToAmount(calculatedAmount);
+      } else {
+        // User filled "To", update "From"
+        setFromAmount(calculatedAmount);
+      }
+    }
+  }, [calculatedAmount, feeType]);
 
   return (
     <div className="w-full max-w-xl mx-auto">
@@ -266,8 +310,11 @@ export function NewBridge() {
           <div className="flex-1">
             <TokenAmountInput
               label="From"
-              amount={amount}
-              setAmount={setAmount}
+              amount={fromAmount}
+              setAmount={(value) => {
+                setFromAmount(value);
+                setFeeType(FeeType.ExactIn);
+              }}
             />
             {balanceError && (
               <div className="text-xs text-red-500 dark:text-red-400 mt-1">
@@ -285,8 +332,11 @@ export function NewBridge() {
         <BridgeCard>
           <TokenAmountInput
             label="To"
-            amount={toAmountWithFees}
-            readonly={true}
+            amount={toAmount}
+            setAmount={(value) => {
+              setToAmount(value);
+              setFeeType(FeeType.ExactOut);
+            }}
           />
           <ChainBadge isSwitched={isSwitched} isFrom={false} />
         </BridgeCard>
@@ -320,44 +370,45 @@ export function NewBridge() {
           </div>
         )}
 
-        {amount && parseFloat(amount) > 0 && validFeeData && !limitError && (
-          <div className="flex items-center justify-between">
-            <div className="text-xs sm:text-sm">
-              <p className="text-neutral-500 dark:text-neutral-400">Fees:</p>
-              <b className="text-neutral-900 dark:text-neutral-50">{fees}</b>
+        {((fromAmount && parseFloat(fromAmount) > 0) ||
+          (toAmount && parseFloat(toAmount) > 0)) &&
+          validFeeData &&
+          !limitError && (
+            <div className="flex items-center justify-between">
+              <div className="text-xs sm:text-sm">
+                <p className="text-neutral-500 dark:text-neutral-400">Fees:</p>
+                <b className="text-neutral-900 dark:text-neutral-50">{fees}</b>
+              </div>
+              <div className="text-xs sm:text-sm text-right">
+                <p className="text-neutral-500 dark:text-neutral-400">
+                  Estimated time:
+                </p>
+                <b className="text-neutral-900 dark:text-neutral-50">
+                  {"<"}1 minute
+                </b>
+              </div>
             </div>
-            <div className="text-xs sm:text-sm text-right">
-              <p className="text-neutral-500 dark:text-neutral-400">
-                Estimated time:
-              </p>
-              <b className="text-neutral-900 dark:text-neutral-50">
-                {"<"}1 minute
-              </b>
-            </div>
-          </div>
-        )}
+          )}
 
         {/* Connect Wallet / Bridge Button */}
         <div className="mt-4 sm:mt-6">
           {!stellarConnected ? (
             <StellarWalletConnect className="w-full h-12 sm:h-14 text-base sm:text-lg" />
           ) : isSwitched ? (
-            // Withdraw Button (Stellar to Base)
-            <WithdrawButton
-              amount={amount}
-              toAmount={toUnitsWithFees}
-              baseAddress={baseAddress}
-              isSwitched={isSwitched}
-              balanceError={balanceError}
-              addressError={addressError}
-              loading={withdrawLoading}
-              isFeeLoading={isFeeLoading}
-              hasFeeError={!!feeErrorData}
-              onWithdraw={handleWithdraw}
-              onDeposit={() => {}}
-            />
+            // Withdraw Button
+            <Button
+              onClick={handleWithdraw}
+              disabled={isWithdrawDisabled}
+              size="lg"
+              className="w-full h-12 sm:h-14 text-base sm:text-lg rounded-2xl"
+            >
+              {(isWithdrawLoading || isFeeLoading) && (
+                <Loader2 className="size-5 animate-spin" />
+              )}
+              {isFeeLoading ? "Loading fee..." : "Bridge USDC to Base"}
+            </Button>
           ) : (
-            // Deposit Button (Base to Stellar)
+            // Deposit Button
             <DepositButton
               intentConfig={intentConfig}
               ableToPay={

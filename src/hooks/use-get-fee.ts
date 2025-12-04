@@ -1,9 +1,10 @@
+import { FeeType } from "@rozoai/intent-common";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 export interface GetFeeParams {
   amount: number;
-  type?: "exactin" | "exactout";
+  type?: FeeType;
   appId?: string;
   currency?: string;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useStellarWallet } from "@/contexts/StellarWalletContext";
 import { IntentPayConfig } from "@/lib/intentPay";
 import { PaymentCompletedEvent } from "@rozoai/intent-common";
 import { RozoPayButton } from "@rozoai/intent-pay";
@@ -23,6 +24,8 @@ export function DepositButton({
   hasFeeError = false,
   onPaymentCompleted,
 }: DepositButtonProps) {
+  const { checkTrustline } = useStellarWallet();
+
   // Show disabled button while preparing config, loading fee, or has fee error
   if (isPreparingConfig || isFeeLoading || hasFeeError || !intentConfig) {
     return (
@@ -53,7 +56,9 @@ export function DepositButton({
         toAddress={intentConfig.toAddress}
         toUnits={intentConfig.toUnits}
         metadata={intentConfig.metadata as never}
+        feeType={intentConfig.feeType}
         onPaymentCompleted={onPaymentCompleted}
+        onPayoutCompleted={checkTrustline}
         showProcessingPayout
       >
         {({ show }) => (
