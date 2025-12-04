@@ -5,9 +5,10 @@ import { GetFeeError, useGetFee } from "@/hooks/use-get-fee";
 import { formatNumber } from "@/lib/formatNumber";
 import { DEFAULT_INTENT_PAY_CONFIG } from "@/lib/intentPay";
 import { FeeType } from "@rozoai/intent-common";
-import { Clock, Loader2 } from "lucide-react";
+import { AlertTriangle, Clock, Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { StellarWalletConnect } from "../StellarWalletConnect";
 import { Button } from "../ui/button";
 import { AmountLimitWarning } from "./AmountLimitWarning";
@@ -19,9 +20,9 @@ import { DepositButton } from "./DepositButton";
 import { HistoryDialog } from "./HistoryDialog";
 import { useDepositLogic } from "./hooks/useDepositLogic";
 import { useWithdrawLogic } from "./hooks/useWithdrawLogic";
+import { MemoInput } from "./MemoInput";
 import { StellarBalanceCard } from "./StellarBalanceCard";
 import { TokenAmountInput } from "./TokenAmountInput";
-import { TrustlineWarning } from "./TrustlineWarning";
 import { getStellarHistoryForWallet } from "./utils/history";
 
 export function NewBridge() {
@@ -44,8 +45,25 @@ export function NewBridge() {
   const searchParams = useSearchParams();
   const isAdmin = searchParams.get("admin") === "rozo";
 
-  const { stellarConnected, stellarAddress, trustlineStatus } =
-    useStellarWallet();
+  const {
+    stellarConnected,
+    stellarAddress,
+    trustlineStatus,
+    xlmBalance,
+    createTrustline,
+  } = useStellarWallet();
+
+  const hideTrustlineWarning = useMemo(() => {
+    return (
+      !stellarConnected || trustlineStatus.checking || trustlineStatus.exists
+    );
+  }, [stellarConnected, trustlineStatus.checking, trustlineStatus.exists]);
+
+  const hasEnoughXLM = useMemo(
+    () => parseFloat(xlmBalance.balance) >= 1.5,
+    [xlmBalance.balance]
+  );
+
   // Determine appId based on isAdmin
   const appId = isAdmin
     ? "rozoBridgeStellarAdmin"
@@ -220,7 +238,6 @@ export function NewBridge() {
     amount: fromAmount,
     feeAmount: feeData?.fee.toFixed(2) || "0",
     baseAddress,
-    memo,
     feeType,
     onLoadingChange: setIsWithdrawLoading,
     isAdmin,
@@ -231,6 +248,7 @@ export function NewBridge() {
     useDepositLogic({
       appId,
       amount: fromAmount,
+      memo,
       feeType,
       isAdmin,
       destinationStellarAddress: stellarAddress,
@@ -245,6 +263,22 @@ export function NewBridge() {
     // setFromAmount("");
     // setToAmount("");
     // setFeeType(FeeType.ExactIn);
+  };
+
+  const handleCreateTrustline = async () => {
+    // Check XLM balance before creating trustline
+    const xlmBalanceNum = parseFloat(xlmBalance.balance);
+    if (xlmBalanceNum < 1.5) {
+      toast.error("Insufficient XLM balance", {
+        description:
+          "You need at least 1.5 XLM to create a USDC trustline. Please add more XLM to your wallet.",
+        duration: 5000,
+      });
+      return;
+    }
+
+    // If balance is sufficient, proceed with trustline creation
+    await createTrustline();
   };
 
   // Validate balance when amount changes and user is bridging from Stellar
@@ -366,14 +400,57 @@ export function NewBridge() {
               error={addressError}
               onErrorChange={setAddressError}
             />
-            {/* <MemoInput value={memo} onChange={setMemo} /> */}
           </div>
         )}
 
-        {/* Trustline Warning - Only show when depositing (Base to Stellar) */}
+        {/* Trustline Warning & Memo Input - Only show when depositing (Base to Stellar) */}
         {!isSwitched && (
-          <div className="mt-4 sm:mt-6">
-            <TrustlineWarning />
+          <div className="mt-4 sm:mt-6 space-y-4">
+            {!hideTrustlineWarning && hasEnoughXLM ? (
+              <div className="p-4 rounded-xl border border-red-500/20 bg-red-50 dark:bg-red-500/10">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                  <div className="space-y-3 flex-1">
+                    <div>
+                      <p className="font-medium text-red-900 dark:text-red-100 text-sm">
+                        USDC Trustline Required
+                      </p>
+                      <p className="text-xs text-red-700 dark:text-red-200/80 mt-1">
+                        Your Stellar wallet needs to establish a trustline for
+                        USDC to receive deposits. This is a one-time setup.
+                      </p>
+                    </div>
+                    <Button
+                      onClick={handleCreateTrustline}
+                      disabled={trustlineStatus.checking}
+                      size="sm"
+                      className="bg-red-600 hover:bg-red-700 text-white h-9"
+                    >
+                      {trustlineStatus.checking
+                        ? "Creating..."
+                        : "Create USDC Trustline"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : !hideTrustlineWarning && !hasEnoughXLM ? (
+              <div className="p-4 rounded-xl border border-orange-500/20 bg-orange-50 dark:bg-orange-500/10">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
+                  <div className="space-y-1">
+                    <p className="font-medium text-orange-900 dark:text-orange-100 text-sm">
+                      Insufficient XLM Balance
+                    </p>
+                    <p className="text-xs text-orange-700 dark:text-orange-200/80">
+                      You need at least 1.5 XLM to create a USDC trustline.
+                      Current balance: {xlmBalance.balance} XLM
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            {stellarConnected && <MemoInput value={memo} onChange={setMemo} />}
           </div>
         )}
 
@@ -391,7 +468,7 @@ export function NewBridge() {
           (toAmount && parseFloat(toAmount) > 0)) &&
           validFeeData &&
           !limitError && (
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mt-4 sm:mt-6">
               <div className="text-xs sm:text-sm">
                 <p className="text-neutral-500 dark:text-neutral-400">Fees:</p>
                 <b className="text-neutral-900 dark:text-neutral-50">{fees}</b>

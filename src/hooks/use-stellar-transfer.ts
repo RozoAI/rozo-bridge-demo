@@ -24,7 +24,6 @@ type Payload = {
   feeAmount: string;
   amount: string;
   address: string;
-  memo?: string;
 };
 
 export const useStellarTransfer = (
@@ -82,7 +81,6 @@ export const useStellarTransfer = (
               },
             ],
           },
-          ...(payload.memo ? { receiverMemo: payload.memo } : {}),
         });
 
         if (payment.id && payment.source.receiverAddress) {

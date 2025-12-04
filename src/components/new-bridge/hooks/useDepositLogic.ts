@@ -16,6 +16,7 @@ interface UseDepositLogicProps {
   appId: string;
   isAdmin: boolean;
   amount: string | undefined;
+  memo?: string;
   feeType: FeeType;
   destinationStellarAddress?: string;
 }
@@ -23,6 +24,7 @@ interface UseDepositLogicProps {
 export function useDepositLogic({
   appId,
   amount,
+  memo,
   feeType,
   destinationStellarAddress,
   isAdmin = false,
@@ -86,6 +88,7 @@ export function useDepositLogic({
               },
             ],
           },
+          ...(memo ? { receiverMemo: memo } : {}),
         };
 
         await resetPayment(config as any);
@@ -101,6 +104,7 @@ export function useDepositLogic({
     prepareConfig();
   }, [
     amount,
+    memo,
     stellarAddress,
     destinationStellarAddress,
     trustlineStatus.exists,

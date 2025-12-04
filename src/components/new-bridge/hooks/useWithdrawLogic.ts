@@ -11,7 +11,6 @@ interface UseWithdrawLogicProps {
   amount: string | undefined;
   feeAmount: string | undefined;
   baseAddress: string;
-  memo?: string;
   onLoadingChange: (loading: boolean) => void;
   feeType: FeeType;
   isAdmin?: boolean;
@@ -21,7 +20,6 @@ export function useWithdrawLogic({
   amount,
   feeAmount,
   baseAddress,
-  memo,
   onLoadingChange,
   feeType,
   isAdmin = false,
@@ -147,7 +145,6 @@ export function useWithdrawLogic({
         amount,
         feeAmount,
         address: baseAddress,
-        ...(memo ? { memo } : {}),
       });
 
       if (result) {

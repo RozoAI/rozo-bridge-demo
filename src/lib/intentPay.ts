@@ -32,6 +32,7 @@ export interface IntentPayConfig {
     type: "text" | "id" | "hash";
     value: string;
   }; // Optional memo for Stellar transfers
+  receiverMemo?: string; // Optional receiver memo for deposits
   metadata?: object;
 }
 
