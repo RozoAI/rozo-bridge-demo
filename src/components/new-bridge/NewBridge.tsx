@@ -19,7 +19,6 @@ import { DepositButton } from "./DepositButton";
 import { HistoryDialog } from "./HistoryDialog";
 import { useDepositLogic } from "./hooks/useDepositLogic";
 import { useWithdrawLogic } from "./hooks/useWithdrawLogic";
-import { MemoInput } from "./MemoInput";
 import { StellarBalanceCard } from "./StellarBalanceCard";
 import { TokenAmountInput } from "./TokenAmountInput";
 import { TrustlineWarning } from "./TrustlineWarning";
@@ -367,7 +366,7 @@ export function NewBridge() {
               error={addressError}
               onErrorChange={setAddressError}
             />
-            <MemoInput value={memo} onChange={setMemo} />
+            {/* <MemoInput value={memo} onChange={setMemo} /> */}
           </div>
         )}
 
