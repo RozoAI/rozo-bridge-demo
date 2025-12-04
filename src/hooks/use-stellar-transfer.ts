@@ -20,7 +20,12 @@ type TransferStep =
   | "success"
   | "error";
 
-type Payload = { amount: string; address: string; memo?: string };
+type Payload = {
+  feeAmount: string;
+  amount: string;
+  address: string;
+  memo?: string;
+};
 
 export const useStellarTransfer = (
   isAdmin: boolean = false,
@@ -54,13 +59,18 @@ export const useStellarTransfer = (
           ? "rozoBridgeStellarAdmin"
           : DEFAULT_INTENT_PAY_CONFIG.appId;
 
+        const payAmount =
+          feeType === FeeType.ExactIn
+            ? payload.amount
+            : (Number(payload.amount) - Number(payload.feeAmount)).toFixed(2);
+
         const payment = await createPayment({
           appId,
           feeType,
           toChain: baseUSDC.chainId,
           toToken: baseUSDC.token,
           toAddress: payload.address,
-          toUnits: payload.amount,
+          toUnits: payAmount,
           preferredChain: rozoStellarUSDC.chainId,
           preferredTokenAddress: rozoStellarUSDC.token,
           metadata: {
