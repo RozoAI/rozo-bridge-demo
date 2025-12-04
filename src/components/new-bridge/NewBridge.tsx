@@ -331,7 +331,11 @@ export function NewBridge() {
               </div>
             )}
           </div>
-          <ChainBadge isSwitched={isSwitched} isFrom={true} />
+          <ChainBadge
+            isSwitched={isSwitched}
+            isFrom={true}
+            className="absolute top-2 right-2"
+          />
         </BridgeCard>
 
         {/* Swap Button */}
@@ -347,7 +351,11 @@ export function NewBridge() {
               setFeeType(FeeType.ExactOut);
             }}
           />
-          <ChainBadge isSwitched={isSwitched} isFrom={false} />
+          <ChainBadge
+            isSwitched={isSwitched}
+            isFrom={false}
+            className="absolute top-2 right-2"
+          />
         </BridgeCard>
 
         {/* Base Address Input - Only show when withdrawing (Stellar to Base) */}

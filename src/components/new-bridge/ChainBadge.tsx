@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { TokenLogo } from "@rozoai/intent-common";
 import Image from "next/image";
 import ChainsStacked from "../chains-stacked";
@@ -7,9 +8,10 @@ import ChainsStacked from "../chains-stacked";
 interface ChainBadgeProps {
   isSwitched: boolean;
   isFrom: boolean;
+  className?: string;
 }
 
-export function ChainBadge({ isSwitched, isFrom }: ChainBadgeProps) {
+export function ChainBadge({ isSwitched, isFrom, className }: ChainBadgeProps) {
   // Determine which chains to show based on position and switch state
   const getExcludeChains = () => {
     if (!isSwitched) {
@@ -28,7 +30,12 @@ export function ChainBadge({ isSwitched, isFrom }: ChainBadgeProps) {
   };
 
   return (
-    <div className="flex items-center gap-1.5 sm:gap-2 bg-neutral-200/70 rounded-full px-2 sm:px-3 py-1.5 sm:py-2 border border-neutral-300/50 dark:bg-neutral-700/50 dark:border-neutral-600/30">
+    <div
+      className={cn(
+        "flex items-center gap-1.5 sm:gap-2 bg-neutral-200/70 rounded-full px-2 sm:px-3 py-1.5 sm:py-2 border border-neutral-300/50 dark:bg-neutral-700/50 dark:border-neutral-600/30",
+        className
+      )}
+    >
       <Image
         src={TokenLogo.USDC}
         alt="USDC"
