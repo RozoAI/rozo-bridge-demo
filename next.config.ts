@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
         destination: "/bridge",
         permanent: false,
       },
+      {
+        source: "/stellar",
+        destination: "/bridge",
+        permanent: false,
+      },
     ];
   },
   eslint: {
